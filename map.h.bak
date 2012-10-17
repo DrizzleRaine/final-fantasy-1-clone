@@ -1,0 +1,23 @@
+#ifndef MAP_H
+#define MAP_H
+
+class Map {
+	public:
+		Map();
+		~Map();
+
+		void UnInitialize();
+		void Initialize(int MWidth, int MHeight, int TSize);
+
+		int GetMapWidth();
+		int GetMapHeight();
+		int GetTileSize();
+
+		void SetValue(int X, int Y, int Value);
+		int GetValue(int X, int Y);
+	private:
+		int **walkability;
+		int MapWidth, MapHeight, TileSize;
+};
+
+#endif

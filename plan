@@ -1,0 +1,67 @@
+walk (requires two frames of animation)
+be blocked (but still turn in direction)
+get in battles (on world map and in dungeons)
+enter new map (doorways, towns)
+enter menus (main menu, merchant npcs)
+dialog windows (enter new map, talk to npc)
+have npcs (in towns, dungeons)
+affect hp/mp/status (npc can heal)
+some squares on world map dont get battles
+some squares on world map get more battles
+	- so each square should have its own battle %?
+	- e.g.	town path has 0% battles
+		forest 7% 5 goblins, 15% 3 goblins, 3% crazy horse
+		but not all forests have that, so each forest tile different
+character map image depends on lead character
+
+struct Tile {
+	bool Walkable;
+	unsigned int graphic; // corresponds to array of possible graphics DO BOUNDS CHECKING!
+	unsigned char possiblebattles; // how many different battles occur on this tile
+	unsigned int battle[possiblebattles]; // corresponds to array of possible battles DO BOUNDS CHECKING
+	unsigned char encounterrate; // if (rand % 255) < encounterrate) { BATTLE; }
+}
+
+or actually: use large textures
+struct Tile {
+	bool Walkable;
+	// figure out battle stuff later
+}
+Tile MapData[XTiles][YTiles];
+
+MAP DATA:
+0 = not walkable
+>1 = town/dungeon entrance (and is the id of where it leads, e.g. 1=worldmap, 2=cornelia, 3=cornelia item shop .. etc...)
+-1 = normal walkable tile, (no encounters)
+<-1 = enemy group (e.g. -2=grass around cornelia
+
+NPC DATA:
+ID
+int Moving // store SDL_GetTicks since last movement
+int MoveDelay // how quickly npc moves, change this to very low if player is trying to walk where npc is
+int StartX, StartY
+int CurrentX, CurrentY
+
+
+map class
+reads from file for current map
+	e.g. if in cornelia
+		will read tiles, npcs, doorways for cornelia map
+		load npc data from a seperate file (bool moving/what they say/action id)
+	there will need to be two passes of drawing
+		one before drawing character
+		one after so things can partially cover character
+on map change
+	delete textures, npcs etc.. for cornelia
+	load in new stuff
+on walk
+	check if walkable
+	set walking = SDL_GetTicks(); // this variable will also be for walking delay
+	change character sprite
+	load percent of tiles on edges based on time passed since walking
+	set walking = 0; // only allow movement when walking == 0;
+	change character sprite
+	if on doorway change map
+on npc talk
+	create new instance of dialog class
+	
