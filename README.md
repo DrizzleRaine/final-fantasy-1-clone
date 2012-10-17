@@ -1,1 +1,1 @@
-a currently incomplete clone of final fantasy one. still need to implement battles, menus and stores/houses. can use the wasd and arrow keys as controls.
+a currently incomplete clone of final fantasy one. currently implemented are the title screen, party creation, the world map around the beginning town, cornelia, and npcs. still need to implement battles, menus and stores/houses. can use the wasd and arrow keys as controls.
