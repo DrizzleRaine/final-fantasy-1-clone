@@ -1,37 +1,38 @@
 #ifndef DIALOG_H
 #define DIALOG_H
 
-#include "font.h"
-#include "textures.h"
+#include "gui.h"
 
 #include <string>
 #include <queue>
-#include <SDL/SDL.h>
 
-class DialogManager {
+class Dialog : public GUI {
 	public:
-		DialogManager();
-		~DialogManager();
+		Dialog();
+		~Dialog();
 
-		void Render();
-		bool Exists();
-		void CreateDialog(std::string T);
-		void DeleteDialog();
-		void TimedDialog(std::string T, unsigned int Duration);
-		void UpdateCoordinates(int NewWidth, int NewHeight);
+		// create a dialog (optionally with a time limit)
+		void push(std::string message, unsigned int duration = 0);
+
+		// remove dialog
+		void pop();
+
+		// does a dialog exist
+		bool exists();
+
+		// operations
+		void update();
+		void render(int windowWidth, int windowHeight);
 	private:
-		Font *TwentyPoint;
-		Textures *DTextures;
+		// messages to display
+		std::queue<std::string> messages;
 
-		bool Timing;
-		unsigned int Timer;
-		std::queue<std::string> Text;
-		void ConvertNewLines(std::string &T);
-		//std::string Text;
+		// when the dialog will be destroyed
+		// (if it was given a duration)
+		unsigned int expiration;
 
-		void BlueBackground(int X1, int X2, int Y1, int Y2);
-		void RenderWindow(int X1, int X2, int Y1, int Y2);
-		int WindowWidth, WindowHeight;
+		// convert the string \n to the newline char
+		void convertNewLines(std::string &msg);
 };
 
 #endif

@@ -7,15 +7,14 @@
 class Window {
 	public:
 		Window();
-		bool Resize(int Width, int Height);
-		bool ToggleFullscreen();
 
-		int GetWindowWidth() { return WindowWidth; }
-		int GetWindowHeight() { return WindowHeight; }
+		bool resize(int newWidth, int newHeight);
+
+		int getWidth() { return width; }
+		int getHeight() { return height; }
 	private:
-		bool Fullscreen;
-		const SDL_VideoInfo *VideoInfo;
-		int VideoFlags, WindowWidth, WindowHeight;
+		const SDL_VideoInfo *videoInfo;
+		int videoFlags, width, height;
 };
 
 #endif

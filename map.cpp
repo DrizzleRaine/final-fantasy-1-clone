@@ -1,312 +1,139 @@
 #include "map.h"
 
-Map::Map(Input *I, Character *C, PlayersParty *P) {
-	const char* TextureArray[] = {"img/map_char.tga"};
-	CharTexture = new Textures(1, TextureArray);
-	Dialog = new DialogManager;
+Map::Map() {
+	input = 0;
+	party = 0;
+	mapState = 0;
 
-	MInput = I;
-	MInput->SetRepeatDelay(1); // remove repeat delay for walking
-	Characters = C;
-	Party = P;
-	SpriteX = 1;
-	SpriteY = 1; // TODO: changes based on job of first char, can i just use Characters[0]->Job? maybe rearrange sprite sheet to make it work?
-
-	NPCs = 0;
-	NPCCount = 0;
-	MapTexture = 0;
-	Tiles = 0;
-
-	LoadMap();
-
-	Walking = 0; Reverse = 0;
-	WalkDelay = 250.0; // const
-	Party->XMovement = 0.0; Party->YMovement = 0.0;
+	next = 0;
+	prev = 0;
+	tiles = 0;
 }
 
 Map::~Map() {
-	for (int i = 0; i < XTiles; i++) {
-		delete[] Tiles[i];
-		Tiles[i] = 0;
+	if (tiles) {
+		int xTiles = mapWidth / tileSize;
+		for (int i = 0; i < xTiles; i++) {
+			delete[] tiles[i];
+			tiles[i] = 0;
+		}
+		delete[] tiles;
+		tiles = 0;
 	}
-	delete[] Tiles;
-	Tiles = 0;
 
-	delete Dialog;
-	Dialog = 0;
-
-	if (NPCCount) {
-		delete[] NPCs;
-		NPCs = 0;
-	}
-	delete MapTexture;
-	MapTexture = 0;
-
-	delete CharTexture;
-	CharTexture = 0;
+	// set repeat delay back to default
+	input->setRepeatDelay();
 }
 
-void Map::LoadMap() {
-	if (MapTexture) {
-		delete MapTexture;
-		MapTexture = 0;
+void Map::init(Party *p, Input *in, MapState *ms) {
+	// initialize shared resources
+	party = p;
+	input = in;
+	mapState = ms;
+
+	// update parties current map
+	party->setMap(mapID);
+	party->setMapName(mapName);
+
+	// generate textures
+	std::string textureNames[] = {"map_data/" + mapName + ".tga"};
+	textures.createTextures(COUNT, textureNames);
+
+	// map filename containing map data
+	std::string mapData = "map_data/" + mapName + ".map";
+
+	// load map and tile info
+	int direction;
+	float newX, newY;
+	std::ifstream mapfile;
+	mapfile.open(mapData.c_str());
+	mapfile >> mapWidth; mapfile >> mapHeight; mapfile >> tileSize;
+	mapfile >> newX; mapfile >> newY; mapfile >> direction;
+
+	// update parties position
+	party->setX(newX);
+	party->setY(newY);
+
+	// update parties direction
+	party->setDirection(direction);
+
+	// how many tiles wide and high the map is
+	int xTiles = mapWidth / tileSize;
+	int yTiles = mapHeight / tileSize;
+
+	// fill tiles** array with each tile's info from the file
+	tiles = new int *[xTiles];
+	for (int i = 0; i < xTiles; i++) {
+		tiles[i] = new int[yTiles];
 	}
-	if (Party->Map == 1) {
-		const char* TextureArray[] = {"map_data/world.tga"};
-		MapTexture = new Textures(1, TextureArray);
-		LoadTiles("map_data/WORLD.MAP");
-		if (NPCCount) {
-			delete[] NPCs;
-			NPCs = 0;
-			NPCCount = 0;
+	for (int y = 0; y < yTiles; y++) {
+		for (int x = 0; x < xTiles; x++) {
+			mapfile >> tiles[x][y];
 		}
-	} else if (Party->Map == 2) {
-		const char* TextureArray[] = {"map_data/cornelia.tga"};
-		MapTexture = new Textures(1, TextureArray);
-		LoadTiles("map_data/CORNELIA.MAP");
-		NPCCount = 8;
-		NPCs = new NPC[NPCCount];
-		for (int i = 0; i < NPCCount; i++) {
-			NPCs[i].Initialize(i + 1, Party, Dialog, Tiles, TileSize);
-			NPCs[i].UpdateCoordinates(WindowWidth, WindowHeight);
-		}
-		Dialog->TimedDialog("Cornelia", 2000);
-	} else {
-		printf("ERROR: Could not load map %i\n", Party->Map);
+	}
+	mapfile.close();
+
+	// initialize to regular walking speed
+	party->setStepDelay(250.0);
+
+	// remove repeat delay for walking
+	input->setRepeatDelay(1);
+
+	// unique map initializeation
+	init();
+}
+
+void Map::updateMap() {
+	if (input->getStart()) {
+		input->resetStart();
+
+		// enter party menu from any
+		// map when start button pressed
+		mapState->enterMenu();
 		return;
 	}
+	update();
 }
 
-void Map::LoadTiles(const char *FileName) {
-	if (Tiles) {
-		for (int i = 0; i < XTiles; i++) {
-			delete[] Tiles[i];
-			Tiles[i] = 0;
-		}
-		delete[] Tiles;
-		Tiles = 0;
-	}
-	
-	std::ifstream In;
-	In.open(FileName);
-	In >> MapWidth; In >> MapHeight;
-	In >> Party->XPos; In >> Party->YPos; In >> SpriteX;
-	In >> TileSize; In >> XTiles; In >> YTiles;
+void Map::renderMap(int width, int height) {
+	// update window dimensions
+	windowWidth = width;
+	windowHeight = height;
 
-	Tiles = new int *[XTiles];
-	for (int i = 0; i < XTiles; i++) {
-		Tiles[i] = new int[YTiles];	
-	}
-	for (int y = 0; y < YTiles; y++) {
-		for (int x = 0; x < XTiles; x++) {
-			In >> Tiles[x][y];
-		}
-	}
-	In.close();
+	// render the map
+	// player sees 15x10 tiles
+	GLfloat texCoords[4];
+	texCoords[2] = (party->getX(tileSize) + (tileSize * 7.5)) / mapWidth;
+	texCoords[3] = (party->getY(tileSize) + (tileSize * 5.0)) / mapHeight;
+	texCoords[0] = (party->getX(tileSize) - (tileSize * 7.5)) / mapWidth;
+	texCoords[1] = (party->getY(tileSize) - (tileSize * 5.0)) / mapHeight;
+	glBindTexture(GL_TEXTURE_2D, textures.getTexture(MAP));
+	glBegin(GL_QUADS);
+		glTexCoord2f(texCoords[0], texCoords[1]);
+		glVertex2f(-windowWidth, windowHeight);
+		glTexCoord2f(texCoords[0], texCoords[3]);
+		glVertex2f(-windowWidth, -windowHeight);
+		glTexCoord2f(texCoords[2], texCoords[3]);
+		glVertex2f(windowWidth, -windowHeight);
+		glTexCoord2f(texCoords[2], texCoords[1]);
+		glVertex2f(windowWidth, windowHeight);
+	glEnd();
+
+	// render scene
+	render();
+
+	// render the lead character on top of the map
+	party->renderParty(windowWidth, windowHeight);
 }
 
-int Map::Process() {
-	// TODO: instead of setting Direction and Walking call Party->Move(Direction)
-	if (MInput->UpPressed() && !Walking) {
-		Direction = North;
-		if (!BlockedTile(Party->XPos / TileSize, Party->YPos / TileSize - 1)) {
-			Walking = SDL_GetTicks();
-		}
-	}
-	if (MInput->DownPressed() && !Walking) {
-		Direction = South;
-		if (!BlockedTile(Party->XPos / TileSize, Party->YPos / TileSize + 1)) {
-			Walking = SDL_GetTicks();
-		}
-	}
-	if (MInput->RightPressed() && !Walking) {
-		Direction = East;
-		if (!BlockedTile(Party->XPos / TileSize + 1, Party->YPos / TileSize)) {
-			Walking = SDL_GetTicks();
-		}
-	}
-	if (MInput->LeftPressed() && !Walking) { 
-		Direction = West;
-		if (!BlockedTile(Party->XPos / TileSize - 1, Party->YPos / TileSize)) {
-			Walking = SDL_GetTicks();
-		}
-	}
-
-	if (MInput->Keys[68] && NPCCount) {
-		MInput->Keys[68] = 0;
-		MInput->SetRepeatDelay(); // set repeat delay for npc action to default
-		int PartyXTile = Party->XPos / TileSize;
-		int PartyYTile = Party->YPos / TileSize;
-		if (Direction == North) {
-			NPCAction(PartyXTile, PartyYTile - 1);
-		} else if (Direction == East) {
-			NPCAction(PartyXTile + 1, PartyYTile);
-		} else if (Direction == South) {
-			NPCAction(PartyXTile, PartyYTile + 1);
-		} else if (Direction == West) {
-			NPCAction(PartyXTile - 1, PartyYTile);
-		}
-		MInput->SetRepeatDelay(1); // remove repeat delay for walking
-	}
-	return 1;
-}
-
-bool Map::BlockedTile(int XPos, int YPos) {
-	if (!Tiles[XPos][YPos]) {
-		return 1;
-	}
-	for (int i = 0; i < NPCCount; i++) {
-		if (NPCs[i].Exists(XPos, YPos)) {
-			return 1;
-		}
-	}
-	return 0;
-}
-
-void Map::NPCAction(int XPos, int YPos) {
-	for (int i = 0; i < NPCCount; i++) {
-		if (NPCs[i].Exists(XPos, YPos)) {
-			NPCs[i].Action(static_cast<int>(Direction));
-			return;
-		}
-	}
-}
-
-bool Map::ProcessMovement() {
-	Reverse = 0;
-	int CurrentDelay = SDL_GetTicks() - Walking;
-	if (Direction == North) {
-		SpriteX = 5;
-		if (CurrentDelay < WalkDelay && Walking) {
-			if (CurrentDelay < WalkDelay / 2) {
-				SpriteX++;
-			}
-			Party->YMovement = -(CurrentDelay / WalkDelay) * TileSize;
-		} else if (Walking) { 
-			Walking = 0;
-			Party->YMovement = 0.0;
-			Party->YPos -= TileSize;
-		}
-	} else if (Direction == East) { // reverse west sprite
-		SpriteX = 3;
-		if (CurrentDelay < WalkDelay && Walking) {
-			if (CurrentDelay < WalkDelay / 2) {
-				SpriteX++;
-			}
-			Party->XMovement = (CurrentDelay / WalkDelay) * TileSize;
-		} else if (Walking) {
-			Walking = 0;
-			Party->XMovement = 0.0;
-			Party->XPos += TileSize;
-		}
-		Reverse = 1;
-	} else if (Direction == South) {
-		SpriteX = 1;
-		if (CurrentDelay < WalkDelay && Walking) {
-			if (CurrentDelay < WalkDelay / 2) {
-				SpriteX++;
-			}
-			Party->YMovement = (CurrentDelay / WalkDelay) * TileSize;
-		} else if (Walking) {
-			Walking = 0;
-			Party->YMovement = 0.0;
-			Party->YPos += TileSize;
-		}
-	} else if (Direction == West) {
-		SpriteX = 3;
-		if (CurrentDelay < WalkDelay && Walking) {
-			if (CurrentDelay < WalkDelay / 2) {
-				SpriteX++;
-			}
-			Party->XMovement = -(CurrentDelay / WalkDelay) * TileSize;
-		} else if (Walking) {
-			Walking = 0;
-			Party->XMovement = 0.0;
-			Party->XPos -= TileSize;
-		}
-	}
-	if (!Walking && Tiles[Party->XPos / TileSize][Party->YPos / TileSize] > 0) {
-		Party->Map = Tiles[Party->XPos / TileSize][Party->YPos / TileSize];
+bool Map::blockedTile(int x, int y) {
+	if (!tiles) {
+		// tiles is uninitialized
 		return 0;
 	}
-	return 1;
-}
 
-void Map::RenderScene() {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glLoadIdentity();
-	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_ALPHA_TEST);
-
-	DrawMap();
-	for (int i = 0; i < NPCCount; i++) {
-		NPCs[i].Update();
-		NPCs[i].Render();
+	if (!tiles[x][y]) {
+		return 1;
 	}
-	Dialog->Render();
-	DrawCharacter();
-
-	glDisable(GL_ALPHA_TEST);
-	glDisable(GL_TEXTURE_2D);
-	SDL_GL_SwapBuffers();
-}
-
-void Map::DrawMap() {
-	// player sees 15x10 tile
-	GLfloat TexCoords[4];
-	TexCoords[2] = (Party->XPos + (TileSize * 7.5) + Party->XMovement) / MapWidth;
-	TexCoords[3] = (Party->YPos + (TileSize * 5.0) + Party->YMovement) / MapHeight;
-	TexCoords[0] = (Party->XPos - (TileSize * 7.5) + Party->XMovement) / MapWidth;
-	TexCoords[1] = (Party->YPos - (TileSize * 5.0) + Party->YMovement) / MapHeight;
-	glBindTexture(GL_TEXTURE_2D, MapTexture->GLTextures[0]);
-	glBegin(GL_QUADS);
-		glTexCoord2f(TexCoords[0], TexCoords[1]);
-		glVertex2f(-WindowWidth, WindowHeight);
-		glTexCoord2f(TexCoords[0], TexCoords[3]);
-		glVertex2f(-WindowWidth, -WindowHeight);
-		glTexCoord2f(TexCoords[2], TexCoords[3]);
-		glVertex2f(WindowWidth, -WindowHeight);
-		glTexCoord2f(TexCoords[2], TexCoords[1]);
-		glVertex2f(WindowWidth, WindowHeight);
-	glEnd();
-}
-
-void Map::DrawCharacter() {
-	float SheetWidth = 2860.0;
-	float SheetHeight = 1560.0;
-	GLfloat TexCoords[4];
-	TexCoords[2] = ((SpriteX * 130.0) / SheetWidth);
-	TexCoords[3] = ((SpriteY * 130.0) / SheetHeight);
-	TexCoords[0] = (((SpriteX - 1) * 130.0) / SheetWidth);
-	TexCoords[1] = (((SpriteY - 1) * 130.0) / SheetHeight);
-	if (Reverse) {
-		GLfloat Temp;
-		Temp = TexCoords[0];
-		TexCoords[0] = TexCoords[2];
-		TexCoords[2] = Temp;
-	}
-	if (Party->Map == 1) { // on world map, player is a little higher
-		glTranslatef(0.0f, 20.0f, 0.0f); // move up a bit for some reason
-	}
-	glBindTexture(GL_TEXTURE_2D, CharTexture->GLTextures[0]);
-	glBegin(GL_QUADS);
-		glTexCoord2f(TexCoords[0], TexCoords[1]);
-		glVertex2f(-65, 65); // 130 width just looks right
-		glTexCoord2f(TexCoords[0], TexCoords[3]);
-		glVertex2f(-65, -65);
-		glTexCoord2f(TexCoords[2], TexCoords[3]);
-		glVertex2f(65, -65);
-		glTexCoord2f(TexCoords[2], TexCoords[1]);
-		glVertex2f(65, 65);
-	glEnd();
-}
-
-void Map::UpdateCoordinates(int NewWidth, int NewHeight) {
-	WindowWidth = NewWidth;
-	WindowHeight = NewHeight;
-	for (int i = 0; i < NPCCount; i++) {
-		NPCs[i].UpdateCoordinates(NewWidth, NewHeight);
-	}
-	Dialog->UpdateCoordinates(NewWidth, NewHeight);
+	return 0;
 }

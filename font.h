@@ -28,18 +28,31 @@
 
 class Font {
 	public:
-		Font(const char *fontName, int pointSize);
+		Font();
 		~Font();
 
-		void initFont();
+		// initialize/cleanup font
+		void initFont(const char *fontName, int size);
+		void cleanupFont();
+
+		// get line height
 		int getLineSkip();
-		int getHeight();
-		void textSize(char *text, SDL_Rect *r);
+
+		// get a rectangle around *text
+		void textSize(const char *text, SDL_Rect *r);
+
+		// draw a string of text at (x, y)
 		float drawText(int x, int y, const char *fmt, ...);
+
+		// change the text color
+		void setColor(float r, float g, float b);
 	private:
-		static const int minGlyph = ' ';
-		static const int maxGlyph = 126;
-		static int initCounter;
+		// keep track of TTF initialization
+		static int fontsInitialized;
+
+		// possible glyphs
+		static const int MINGLYPH = ' ';
+		static const int MAXGLYPH = 126;
 
 		typedef struct {
 			int minx, maxx;
@@ -51,18 +64,21 @@ class Font {
 			GLfloat texMaxX, texMaxY;
 		} glyph;
 
-		const char *fontName;
-		float fgRed, fgGreen, fgBlue;
-		int height, pointSize, lineSkip;
-		int ascent, descent;
-
 		TTF_Font *ttfFont;
 		SDL_Color foreground;
-		glyph glyphs[maxGlyph + 1];
+		glyph glyphs[MAXGLYPH + 1];
 
-		int power_of_two(int input);
+		// size of font, line height
+		int pointSize, lineSkip;
+
+		// load a character glyph
 		void loadChar(char c);
-		GLuint SDL_GL_LoadTexture(SDL_Surface *surface, GLfloat *texcoord);
+
+		// load character texture and texture coordinates
+		GLuint loadTexture(SDL_Surface *surface, GLfloat *texcoord);
+
+		// helper function for texture creation
+		int power_of_two(int input);
 };
 
 #endif

@@ -1,198 +1,92 @@
 #include "dialog.h"
 
-DialogManager::DialogManager() {
-	const char* TextureArray[] = {"img/menu_nw_corner.tga", "img/menu_nw_edge.tga", "img/menu_ne_corner.tga", "img/menu_se_edge.tga", "img/menu_se_corner.tga", "img/menu_sw_corner.tga"};
-	DTextures = new Textures(6, TextureArray);;
-	TwentyPoint = new Font("fonts/VarelaRound-Regular.ttf", 24);
-	Timing = 0;
+Dialog::Dialog() {
 }
 
-DialogManager::~DialogManager() {
-	delete DTextures;
-	DTextures = 0;
-	
-	delete TwentyPoint;
-	TwentyPoint = 0;
+Dialog::~Dialog() {
 }
 
-void DialogManager::ConvertNewLines(std::string &T) {
-	// strings read from files seem to read \n as two seperate chars
-	// rather than interpret them as a newline, fix it
-	size_t NewLine = T.find("\\n");
-	while (NewLine != std::string::npos) {
-		T.replace(NewLine, 2, "\n");
-		NewLine = T.find("\\n");
+void Dialog::push(std::string message, unsigned int duration) {
+	// \n\n is what i use for new dialog delimeter
+	size_t doubleNewLine = message.find("\\n\\n");
+
+	// push each dialog in to message queue
+	while (doubleNewLine != std::string::npos) {
+		// get everything until the double new line
+		std::string msg = message.substr(0, doubleNewLine);
+
+		// remove everything, including the delimeter from original
+		message = message.substr(doubleNewLine + 4);
+
+		// convert \n to newline
+		convertNewLines(msg);
+
+		// push the message
+		messages.push(msg);
+
+		// find the next
+		doubleNewLine = message.find("\\n\\n");
+	}
+	convertNewLines(message);	// convert \n to newline
+	messages.push(message);		// push the final (or only) dialog
+
+	if (duration) {	// dialog with time limit
+		expiration = SDL_GetTicks() + duration;
+	} else {		// dialog without time limit
+		expiration = 0;
 	}
 }
 
-void DialogManager::CreateDialog(std::string T) {
-	size_t DoubleNewLine = T.find("\\n\\n"); // \n\n is delimeter for new dialog
-	while (DoubleNewLine != std::string::npos) { // push all dialogs seperately
-		std::string NewText = T.substr(0, DoubleNewLine);
-		T = T.substr(DoubleNewLine + 4);
-		ConvertNewLines(NewText);
-		Text.push(NewText);
-		DoubleNewLine = T.find("\\n\\n");
-	}
-	ConvertNewLines(T);
-	Text.push(T); // push final (or only) dialog
-	Timing = 0;
+void Dialog::pop() {
+	messages.pop();
 }
 
-void DialogManager::DeleteDialog() {
-	Text.pop();
+bool Dialog::exists() {
+	return messages.size() > 0;
 }
 
-bool DialogManager::Exists() {
-	return Text.size();
-}
-
-void DialogManager::TimedDialog(std::string T, unsigned int Duration) {
-	Text.push(T);
-	Timing = 1;
-	Timer = SDL_GetTicks() + Duration;
-}
-
-
-void DialogManager::Render() {
-	if (Timing && SDL_GetTicks() > Timer) {
-		Timing = 0;
-		Text.pop();
+void Dialog::update() {
+	if (messages.empty()) {
+		return;
 	}
 
-	if (Timing && Text.size()) { // assuming ths is town name dialog
-		RenderWindow(-WindowWidth + 20, WindowWidth - 20, WindowHeight - 50, WindowHeight - 200);
-		TwentyPoint->drawText(-110, WindowHeight - 160, Text.front().c_str()); // need a good way to center text
-	} else if (Text.size()) {
-		RenderWindow(-WindowWidth + 20, WindowWidth - 20, WindowHeight, WindowHeight - 275);
-		TwentyPoint->drawText(-WindowWidth + 70, WindowHeight - 100, Text.front().c_str());
+	if (expiration && expiration < SDL_GetTicks()) {
+		messages.pop();
 	}
 }
 
-void DialogManager::BlueBackground(int X1, int X2, int Y1, int Y2) {
-	glDisable(GL_ALPHA_TEST);
-	glDisable(GL_TEXTURE_2D);
+void Dialog::render(int windowWidth, int windowHeight) {
+	if (messages.empty()) {
+		return;
+	}
 
-	X1 += 14;
-	X2 -= 14;
-	Y1 -= 14;
-	Y2 += 14;
-	glBegin(GL_QUADS);
-		glColor3f(0.2f, 0.2f, 0.8f); // lighter blue
-		glVertex3f(X1, Y2, 0.0f);
-		glVertex3f(X2, Y2, 0.0f);
-		glColor3f(0.0f, 0.0f, 0.4f); // darker blue
-		glVertex3f(X2, Y1, 0.0f);
-		glVertex3f(X1, Y1, 0.0f);
-	glEnd();
+	if (expiration) {	// timed windows are thinner
+		window(-windowWidth + 20, windowWidth - 20, 
+				windowHeight - 50, windowHeight - 200);
 
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_ALPHA_TEST);
-	glColor3f(1.0f, 1.0f, 1.0f);
+		// find the width of the next message to center it
+		SDL_Rect r = {0, 0, 0, 0};
+		twenty.textSize(messages.front().c_str(), &r);
+		const int CENTERED = -(r.w / 2);
+
+		// draw the next message centered
+		twenty.drawText(CENTERED, windowHeight - 155, messages.front().c_str());
+	} else {			// npc dialog windows are larger
+		window(-windowWidth + 20, windowWidth - 20, 
+				windowHeight, windowHeight - 275);
+
+		// draw the next message left aligned
+		twenty.drawText(-windowWidth + 70, windowHeight - 100, 
+				messages.front().c_str());
+	}
 }
 
-void DialogManager::RenderWindow(int X1, int X2, int Y1, int Y2) {
-	// (X1, Y1) = top left corner
-	// (X2, Y2) = bottom right corner
-	BlueBackground(X1, X2, Y1, Y2);
-
-	glColor3f(1.0f, 1.0f, 1.0f);
-	glBindTexture(GL_TEXTURE_2D, DTextures->GLTextures[0]); // nw corner
-	glBegin(GL_QUADS);
-		glTexCoord2f(0, 0);
-		glVertex3f(X1, Y1, 0.0f);
-		glTexCoord2f(0, 1);
-		glVertex3f(X1, Y1 - 26, 0.0f);
-		glTexCoord2f(1, 1);
-		glVertex3f(X1 + 26, Y1 - 26, 0.0f);
-		glTexCoord2f(1, 0);
-		glVertex3f(X1 + 26, Y1, 0.0f);
-	glEnd();
-
-	glBindTexture(GL_TEXTURE_2D, DTextures->GLTextures[1]); // n edge
-	glBegin(GL_QUADS);
-		glTexCoord2f(0, 0);
-		glVertex3f(X1 + 25, Y1, 0.0f);
-		glTexCoord2f(0, 1);
-		glVertex3f(X1 + 25, Y1 - 20, 0.0f);
-		glTexCoord2f(1, 1);
-		glVertex3f(X2 - 25, Y1 - 20, 0.0f);
-		glTexCoord2f(1, 0);
-		glVertex3f(X2 - 25, Y1, 0.0f);
-	glEnd();
-
-	glBegin(GL_QUADS); // draw w edge while correct texture already bound
-		glTexCoord2f(0, 0);
-		glVertex3f(X1, Y1 - 25, 0.0f);
-		glTexCoord2f(1, 0);
-		glVertex3f(X1, Y2 + 25, 0.0f);
-		glTexCoord2f(1, 1);
-		glVertex3f(X1 + 20, Y2 + 25, 0.0f);
-		glTexCoord2f(0, 1);
-		glVertex3f(X1 + 20, Y1 - 25, 0.0f);
-	glEnd();
-
-	glBindTexture(GL_TEXTURE_2D, DTextures->GLTextures[2]); // ne corner
-	glBegin(GL_QUADS);
-		glTexCoord2f(0, 0);
-		glVertex3f(X2 - 26, Y1, 0.0f);
-		glTexCoord2f(0, 1);
-		glVertex3f(X2 - 26, Y1 - 26, 0.0f);
-		glTexCoord2f(1, 1);
-		glVertex3f(X2, Y1 - 26, 0.0f);
-		glTexCoord2f(1, 0);
-		glVertex3f(X2, Y1, 0.0f);
-	glEnd();
-
-	glBindTexture(GL_TEXTURE_2D, DTextures->GLTextures[3]); // e edge
-	glBegin(GL_QUADS);
-		glTexCoord2f(0, 0);
-		glVertex3f(X2 - 25, Y1 - 25, 0.0f);
-		glTexCoord2f(1, 0);
-		glVertex3f(X2 - 25, Y2 + 25, 0.0f);
-		glTexCoord2f(1, 1);
-		glVertex3f(X2, Y2 + 25, 0.0f);
-		glTexCoord2f(0, 1);
-		glVertex3f(X2, Y1 - 25, 0.0f);
-	glEnd();
-
-	glBegin(GL_QUADS); // draw s edge while correct texture already bound
-		glTexCoord2f(0, 0);
-		glVertex3f(X1 + 25, Y2 + 25, 0.0f);
-		glTexCoord2f(0, 1);
-		glVertex3f(X1 + 25, Y2, 0.0f);
-		glTexCoord2f(1, 1);
-		glVertex3f(X2 - 25, Y2, 0.0f);
-		glTexCoord2f(1, 0);
-		glVertex3f(X2 - 25, Y2 + 25, 0.0f);
-	glEnd();
-
-	glBindTexture(GL_TEXTURE_2D, DTextures->GLTextures[4]); // se corner
-	glBegin(GL_QUADS);
-		glTexCoord2f(0, 0);
-		glVertex3f(X2 - 26, Y2 + 26, 0.0f);
-		glTexCoord2f(0, 1);
-		glVertex3f(X2 - 26, Y2, 0.0f);
-		glTexCoord2f(1, 1);
-		glVertex3f(X2, Y2, 0.0f);
-		glTexCoord2f(1, 0);
-		glVertex3f(X2, Y2 + 26, 0.0f);
-	glEnd();
-
-	glBindTexture(GL_TEXTURE_2D, DTextures->GLTextures[5]); // sw corner
-	glBegin(GL_QUADS);
-		glTexCoord2f(0, 0);
-		glVertex3f(X1, Y2 + 26, 0.0f);
-		glTexCoord2f(0, 1);
-		glVertex3f(X1, Y2, 0.0f);
-		glTexCoord2f(1, 1);
-		glVertex3f(X1 + 26, Y2, 0.0f);
-		glTexCoord2f(1, 0);
-		glVertex3f(X1 + 26, Y2 + 26, 0.0f);
-	glEnd();
-}
-
-void DialogManager::UpdateCoordinates(int NewWidth, int NewHeight) {
-	WindowWidth = NewWidth;
-	WindowHeight = NewHeight;
+void Dialog::convertNewLines(std::string &msg) {
+	// strings read from files read \n as two seperate chars
+	// rather than as the newline character
+	size_t newline = msg.find("\\n");
+	while (newline != std::string::npos) {
+		msg.replace(newline, 2, "\n");	// convert \n to newline
+		newline = msg.find("\\n");		// find the next
+	}
 }

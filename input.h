@@ -4,45 +4,49 @@
 #include <SDL/SDL.h>
 
 class Input {
+	// this input class has a lot of room for improvement
+	// but it works for now
 	public:
 		Input();
-		bool PollInput(SDL_Event &Event);
-		void ResetInput();
-		void ResetTab();
-		void ResetBackspace();
-		void ResetEnter();
-		void ResetKeys();
-		void SetRepeatDelay(int Delay = SDL_DEFAULT_REPEAT_DELAY);
-		void UpdateCoordinates(int NewWidth, int NewHeight);
-		void GetMousePos(int MPos[2]) { MPos[0] = MousePos[0]; MPos[1] = MousePos[1]; }
-		void GetLeftMouseDown(int Click[2]) { Click[0] = LeftMouseDown[0]; Click[1] = LeftMouseDown[1]; }
-		void GetLeftMouseUp(int Click[2]) { Click[0] = LeftMouseUp[0]; Click[1] = LeftMouseUp[1]; }
-		void GetRightMouseDown(int Click[2]) { Click[0] = RightMouseDown[0]; Click[1] = RightMouseDown[1]; }
+		bool pollInput(SDL_Event &event);
 
-		bool TabPressed() { return Tab; }
-		bool BackspacePressed() { return Backspace; }
-		bool EnterPressed() { return Enter; }
+		// set delay between repeat while holding key down
+		void setRepeatDelay(int delay = SDL_DEFAULT_REPEAT_DELAY);
 
-		bool UpPressed() { return Up; }
-		bool DownPressed() { return Down; }
-		bool LeftPressed() { return Left; }
-		bool RightPressed() { return Right; }
+		// reset input
+		void resetAll();
 
-		bool Keys[96];
+		// key accessors
+		bool getConfirm() { return *confirm; }
+		bool getCancel() { return *cancel; }
+		bool getStart() { return *start; }
+		bool getSelect() { return *select; }
+		bool getLButton() { return *lButton; }
+		bool getRButton() { return *rButton; }
+
+		// individual reset
+		void resetConfirm() { *confirm = 0; }
+		void resetCancel() { *cancel = 0; }
+		void resetStart() { *start = 0; }
+		void resetSelect() { *select = 0;}
+		void resetLButton() { *lButton = 0; }
+		void resetRButton() { *rButton = 0; }
+
+		// directional keys
+		bool upPressed() { return up; }
+		bool downPressed() { return down; }
+		bool leftPressed() { return left; }
+		bool rightPressed() { return right; }
+
+		// check if any key was pressed
+		bool anyKey();
 	private:
-		enum Positions {XPos, YPos};
-		int WindowWidth, WindowHeight;
-		int LeftMouseDown[2]; // pos left mouse button pressed at
-		int LeftMouseUp[2];	// pos left mouse button released at
-		int RightMouseDown[2]; // pos right mouse button pressed at
-		int DoubleClickPos[2]; // pos left mouse button double clicked at
-		unsigned int LeftClickTime; // to detect double click		
-		int MousePos[2]; // mouse position
-		bool Tab, Backspace, Enter; // tab, backspace, enter pressed
-		bool Up, Down, Left, Right; // arrow keys
-		unsigned int TabTicks;
-		void HandleModifiedKeys(char ch);
-		void HandleNumPad(Uint8 *KeyState);
+		// configuration for game control
+		bool *confirm, *cancel, *start, *select, *lButton, *rButton;
+
+		bool keys[96];				// character keys
+		bool up, down, left, right; // arrow keys
+		bool tab, backspace, enter; // tab, backspace, enter keys
 };
 
 #endif

@@ -1,58 +1,69 @@
 #ifndef MAP_H
 #define MAP_H
 
-#include "input.h"
-#include "textures.h"
-
-#include "npc.h"
-#include "party.h"
-#include "character.h"
-#include "dialog.h"
-
 #include <fstream>
-#include <SDL/SDL.h>
-#include <SDL/SDL_opengl.h>
+
+#include "mapstate.h"
+class MapState;
 
 class Map {
 	public:
-		Map(Input *I, Character *C, PlayersParty *P);
-		~Map();
-		void LoadMap();
-		void LoadTiles(const char *FileName);
+		Map();
+		virtual ~Map();
 
-		int Process();
-		bool ProcessMovement();
-		void RenderScene();
-		void UpdateCoordinates(int NewWidth, int NewHeight);
+		// initialize shared resources
+		void init(Party *p, Input *in, MapState *ms);
+
+		// linked list node operations
+		Map *getNext() { return next; }
+		Map *getPrev() { return prev; }
+		void setNext(Map *map) { next = map; }
+		void setPrev(Map *map) { prev = map; }
+
+		// handle map operations
+		void updateMap();
+		void renderMap(int width, int height);
+	protected:
+		// each map has its own input
+		Input *input;
+
+		// every map inherits access to the party
+		Party *party;
+
+		// texture ids and count
+		enum TexInfo {MAP, COUNT};
+		Textures textures;
+
+		// maps can push/pop/change map stack
+		MapState *mapState;
+
+		// current width and height of window
+		int windowWidth, windowHeight;	
+
+		// id of the map
+		int mapID;
+
+		// name of the map
+		std::string mapName;
+
+		// array of info about map tiles
+		int **tiles;
+		
+		// map dimensions, size of each tile
+		int mapWidth, mapHeight, tileSize;
+
+		// each map needs to check for blocked tiles
+		bool blockedTile(int x, int y);
 	private:
-		Input *MInput;
-		Textures *CharTexture;
-		Textures *MapTexture;
-		DialogManager *Dialog;
+		// any necessary unique map initialization
+		virtual void init()=0;
 
-		Character *Characters;
-		PlayersParty *Party;
-		int NPCCount;
-		NPC *NPCs;
-		void NPCAction(int XPos, int YPos);
+		// menu operations
+		virtual void update() = 0;
+		virtual void render() = 0;
 
-		// TODO i should probably process moving in party.h
-		enum Directions {North, East, South, West};
-		Directions Direction; // which way character is facing/moving
-		unsigned int Walking;
-
-		int **Tiles; // 0 = blocked, >0 = ID of map to change to
-					 // -1 = no battles, <-1 = enemy group
-		int TileSize, XTiles, YTiles, MapWidth, MapHeight;
-		bool BlockedTile(int XPos, int YPos);
-		int WindowWidth, WindowHeight;
-
-		bool Reverse;
-		float WalkDelay;
-		int SpriteX, SpriteY;
-
-		void DrawMap();
-		void DrawCharacter();
+		// next and prev maps
+		Map *next, *prev;
 };
 
 #endif

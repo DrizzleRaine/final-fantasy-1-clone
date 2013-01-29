@@ -1,260 +1,373 @@
 #include "npc.h"
 
 NPC::NPC() {
+	party = 0;
+	dialog = 0;
+	npcs = 0;
+
+	npcCount = 0;
 }
 
 NPC::~NPC() {
-	delete NPCTexture;
-	NPCTexture = 0;
-
-	delete[] Text;
-	Text = 0;
+	if (npcs) {
+		delete[] npcs;
+		npcs = 0;
+	}
 }
 
-void NPC::Initialize(int ID, PlayersParty *P, DialogManager *D, int **TileData, int TSize) {
-	char ImageFile[256];
-	int TempDirection;
-	Text = new char[256];
-	std::ifstream In;
-	if (ID == 1) { // this needs to be handled better
-		In.open("npc_data/CORNELIA_WELCOME.NPC");
-	} else if (ID == 2) {
-		In.open("npc_data/RESCUE_SARAH.NPC");
-	} else if (ID == 3) {
-		In.open("npc_data/CORNELIA_DANCER.NPC");
-	} else if (ID == 4) {
-		In.open("npc_data/GUARD_PROPHECY.NPC");
-	} else if (ID == 5) {
-		In.open("npc_data/GUARD_RESTORE.NPC");
-	} else if (ID == 6) {
-		In.open("npc_data/CORNELIA_OLDWOMAN.NPC");
-	} else if (ID == 7) {
-		In.open("npc_data/CORNELIA_PRAVOKAMAN.NPC");
-	} else if (ID == 8) {
-		In.open("npc_data/CORNELIA_OLDMAN.NPC");
+void NPC::init(std::string mapName, int tSize, Party *p, Dialog *d) {
+	party = p;
+	dialog = d;
+	tileSize = tSize;
+
+	// open the npc file for this map
+	std::string npcFile = "npc_data/" + mapName + ".npc";
+	std::ifstream in;
+	in.open(npcFile.c_str());
+
+	// get number of npcs
+	in >> npcCount;
+
+	// generate array of npc data	
+	npcs = new NPCData[npcCount];
+
+	// array of texture file names
+	// there will be <= npcCount textures read in
+	std::string textureNames[npcCount];
+
+	// how many textures already found
+	int textureCount = 0;
+
+	in.ignore(256, '\n');		// go to the next line
+	// fill the array from the file
+	for (int i = 0; i < npcCount; i++) {
+		// read in this npcs texture file
+		std::string curTex = "";
+		getline(in, curTex, '\n');
+
+		// process the texture file name
+		if (curTex == "") {			// empty texture name means
+			npcs[i].textureID = -1;	// no texture for this npc
+		} else {					// else check for duplicate textures
+			bool textureExists = 0; 
+			for (int j = 0; j < textureCount; j++) {
+				if (curTex == textureNames[j]) {
+					// this npc is using the same texture as another npc
+					textureExists = 1;
+					npcs[i].textureID = j;
+					break;
+				}
+			}
+			if (!textureExists) {
+				// no npc so far with this texture, add it
+				npcs[i].textureID = textureCount;
+				textureNames[textureCount] = curTex;
+				textureCount++;
+			}
+		}
+
+		// read the rest of the npc file
+		in >> npcs[i].sheetWidth;
+		in >> npcs[i].sheetHeight;
+		in >> npcs[i].moves;
+		in >> npcs[i].animates;
+		in >> npcs[i].stepDelay;
+		in >> npcs[i].x;
+		in >> npcs[i].y;
+		in >> npcs[i].direction;
+		in.ignore(256, '\n');	// go to the next line
+		getline(in, npcs[i].message, '\n');
+
+		// initialize npc variables
+		npcs[i].step = SDL_GetTicks();
+		npcs[i].animation = SDL_GetTicks();
+		npcs[i].doubleSpeed = 0;
+		npcs[i].newDirection = 0;
+		npcs[i].blocked = 0;
+		npcs[i].xStepDistance = 0.0;
+		npcs[i].yStepDistance = 0.0;
 	}
-	In.getline(ImageFile, 256);
-	In >> Moves; In >> AnimationDelay; In >> MoveDelay;
-	In >> CurrentX; In >> CurrentY; In >> TempDirection;
-	In >> SheetWidth; In >> SheetHeight;
-	In.ignore(256, '\n'); // go to the next line
-	In.getline(Text, 256);
-	In.close();
+	in.close();
 
-	const char *TextureArray[] = {ImageFile};
-	NPCTexture = new Textures(1, TextureArray);
-
-	Party = P;
-	Dialog = D;
-	Tiles = TileData;
-	TileSize = TSize;
-
-	Moving = SDL_GetTicks();
-	Animation = SDL_GetTicks();
-	Reverse = 0; SpriteY = 1;
-	if (TempDirection == 0) {
-		Direction = North;
-		SpriteX = 5;
-	} else if (TempDirection == 1) {
-		Direction = East;
-		SpriteX = 3;
-		Reverse = 1;
-	} else if (TempDirection == 2) {
-		Direction = South;
-		SpriteX = 1;
-	} else {
-		Direction = West;
-		SpriteX = 3;
-	}
-	NewDirectionChosen = 0;
-	XMovement = 0.0; YMovement = 0.0;
+	// create textureCount textures, no duplicates
+	printf("%i\n", textureCount);
+	textures.createTextures(textureCount, textureNames);
 }
 
-void NPC::Render() {
-	float XDistance = CurrentX + XMovement - Party->XMovement - Party->XPos;
-	float YDistance = CurrentY + YMovement - Party->YMovement - Party->YPos;
-	float WindowXPos = XDistance / TileSize * WindowTileWidth;
-	float WindowYPos = YDistance / TileSize * WindowTileHeight;
-
-	GLfloat TexCoords[4];
-	TexCoords[2] = ((SpriteX * 100.0) / SheetWidth);
-	TexCoords[3] = ((SpriteY * 100.0) / SheetHeight);
-	TexCoords[0] = (((SpriteX - 1) * 100.0) / SheetWidth);
-	TexCoords[1] = (((SpriteY - 1) * 100.0) / SheetHeight);
-	if (Reverse) {
-		GLfloat Temp;
-		Temp = TexCoords[0];
-		TexCoords[0] = TexCoords[2];
-		TexCoords[2] = Temp;
+void NPC::interact(int x, int y) {
+	int found = exists(x, y);
+	if (found < 0) {
+		return;	// no npc to interact with
 	}
-	glTranslatef(WindowXPos, -WindowYPos, 0.0f);
-	glBindTexture(GL_TEXTURE_2D, NPCTexture->GLTextures[0]);
-	glBegin(GL_QUADS);
-		glTexCoord2f(TexCoords[0], TexCoords[1]);
-		glVertex2f(-50, 50);
-		glTexCoord2f(TexCoords[0], TexCoords[3]);
-		glVertex2f(-50, -50);
-		glTexCoord2f(TexCoords[2], TexCoords[3]);
-		glVertex2f(50, -50);
-		glTexCoord2f(TexCoords[2], TexCoords[1]);
-		glVertex2f(50, 50);
-	glEnd();
-	glLoadIdentity();
 
-	Dialog->Render();
-}
+	// the npc being interacted with
+	NPCData *npc = &npcs[found];
 
-void NPC::Update() {
-	if (!Moving) {
+	if (npc->moves && npc->newDirection && 
+			(SDL_GetTicks() - npc->step) > npc->stepDelay && !npc->blocked) {
+		return;	// cant interact while npc is moving
+	}
+
+	// if a dialog exists
+	if (dialog->exists()) {
+		dialog->pop();						// pop it
+		if (!dialog->exists()) {			// if it was the last dialog
+			party->unpause();				// unpause the party
+			npc->step = SDL_GetTicks();		// start walking again
+			npc->animation = SDL_GetTicks();// and animating
+		}
 		return;
 	}
-	Reverse = 0;
-	unsigned int CurrentADelay = SDL_GetTicks() - Animation;
-	if (Direction == North) {
-		SpriteX = 5;
-		if (CurrentADelay < AnimationDelay / 2) {
-			SpriteX++;
-		} else if (CurrentADelay >= AnimationDelay) {
-			Animation = SDL_GetTicks();
-		}
-	} else if (Direction == East) {
-		SpriteX = 3;
-		if (CurrentADelay < AnimationDelay / 2) {
-			SpriteX++;
-		} else if (CurrentADelay >= AnimationDelay) {
-			Animation = SDL_GetTicks();
-		}
-		Reverse = 1;
-	} else if (Direction == South) {
-		SpriteX = 1;
-		if (CurrentADelay < AnimationDelay / 2) {
-			SpriteX++;
-		} else if (CurrentADelay >= AnimationDelay) {
-			Animation = SDL_GetTicks();
-		}
-	} else if (Direction == West) {
-		SpriteX = 3;
-		if (CurrentADelay < AnimationDelay / 2) {
-			SpriteX++;
-		} else if (CurrentADelay >= AnimationDelay) {
-			Animation = SDL_GetTicks();
-		}
+
+	// stop walking
+	npc->step = 0;
+	npc->animation = 0;
+
+	// face the party
+	if (party->getDirection() == Party::NORTH) {		// party north
+		npc->direction = Party::SOUTH;					// npc south
+	} else if (party->getDirection() == Party::EAST) {	// party east
+		npc->direction = Party::WEST;					// npc west, etc..
+	} else if (party->getDirection() == Party::SOUTH) {
+		npc->direction = Party::NORTH;
+	} else if (party->getDirection() == Party::WEST) {
+		npc->direction = Party::EAST;
 	}
-	if (!Moves) {
-		return;
-	}
-	unsigned int CurrentDelay = SDL_GetTicks() - Moving;
-	if (!NewDirectionChosen && CurrentDelay > MoveDelay) {
-		Direction = static_cast<Directions>(rand() % 4);
-		int XTilePos = CurrentX / TileSize;
-		int YTilePos = CurrentY / TileSize;
-		if (Direction == North) {
-			Blocked = PositionBlocked(XTilePos, YTilePos - 1);
-		} else if (Direction == East) {
-			Blocked = PositionBlocked(XTilePos + 1, YTilePos);
-		} else if (Direction == South) {
-			Blocked = PositionBlocked(XTilePos, YTilePos + 1);
-		} else if (Direction == West) {
-			Blocked = PositionBlocked(XTilePos - 1, YTilePos);
-		}
-		NewDirectionChosen = 1;
-	} else if (NewDirectionChosen && CurrentDelay > MoveDelay * 2) {
-		NewDirectionChosen = 0;
-		if (Direction == North && !Blocked) {
-			YMovement = 0.0;
-			CurrentY -= TileSize;
-		} else if (Direction == East && !Blocked) {
-			XMovement = 0.0;
-			CurrentX += TileSize;
-		} else if (Direction == South && !Blocked) {
-			YMovement = 0.0;
-			CurrentY += TileSize;
-		} else if (Direction == West && !Blocked) {
-			XMovement = 0.0;
-			CurrentX -= TileSize;
-		}
-		Blocked = 0;
-		Moving = SDL_GetTicks();
-	} else if (NewDirectionChosen && CurrentDelay > MoveDelay && !Blocked) {
-		float MovementPercent = (CurrentDelay - MoveDelay) / static_cast<float>(MoveDelay);
-		if (Direction == North) {
-			YMovement = -MovementPercent * TileSize;
-		} else if (Direction == East) {
-			XMovement = MovementPercent * TileSize;
-		} else if (Direction == South) {
-			YMovement = MovementPercent * TileSize;
-		} else {
-			XMovement = -MovementPercent * TileSize;
-		}
-	}
-	return;
+
+	// pause the party during dialog
+	party->pause();
+
+	// push npc dialog
+	dialog->push(npc->message);
 }
 
-bool NPC::PositionBlocked(int PosX, int PosY) {
-	int PartyXTile = Party->XPos / TileSize;
-	int PartyYTile = Party->YPos / TileSize;
-	if (!Tiles[PosX][PosY] || (PartyXTile == PosX && PartyYTile == PosY)) {
-		return 1;
+int NPC::exists(int x, int y) {
+	return exists(x, y, -1);
+}
+
+int NPC::exists(int x, int y, int exception) {
+	for (int i = 0; i < npcCount; i++) {
+		if (i == exception) {
+			continue;	// skip this npc
+		}
+
+		int curX = npcs[i].x / tileSize;
+		int curY = npcs[i].y / tileSize;
+
+		if (curX == x && curY == y) {
+			return i;	// npc exists at (x, y)
+		}
+
+		// is the npc moving or ignore movement?
+		if (!npcs[i].moves || !npcs[i].newDirection || npcs[i].blocked) {
+			continue;
+		}
+
+		// exists at tile npc is moving to also
+		if (npcs[i].direction == Party::NORTH) {
+			curY--;
+		} else if (npcs[i].direction == Party::EAST) {
+			curX++;
+		} else if (npcs[i].direction == Party::SOUTH) {
+			curY++;
+		} else if (npcs[i].direction == Party::WEST) {
+			curX--;
+		}
+
+		if (curX == x && curY == y) {
+			return i;	// npc is moving to (x, y)
+		}
+	}
+	return -1;
+}
+
+void NPC::doubleSpeed(int npcID) {
+	if (!npcs[npcID].doubleSpeed && !npcs[npcID].newDirection) {
+		npcs[npcID].stepDelay /= 2;			// increase speed
+		npcs[npcID].step = SDL_GetTicks();	// reset ticks (prevent jumpy movement)
+		npcs[npcID].doubleSpeed = 1;		// set flag
+	}
+}
+
+void NPC::defaultSpeed() {
+	for (int i = 0; i < npcCount; i++) {
+		if (npcs[i].doubleSpeed && !npcs[i].newDirection) {
+			npcs[i].stepDelay *= 2;			// default speed
+			npcs[i].doubleSpeed = 0;		// reset flag
+		}
+	}
+}
+
+void NPC::update(int **tiles) {
+	for (int i = 0; i < npcCount; i++) {
+		if (!npcs[i].moves || !npcs[i].step) {	// this npc doesnt/isnt moving
+			continue;							// go to the next npc
+		}
+
+		// steps:
+		// 1) stand still for stepDelay ticks
+		// 2) pick a direction
+		// 3) walk in that direction for stepDelay ticks
+		//    or if blocked, face that direction for stepDelay ticks
+		// 4) reset
+
+		// time since npc began last step
+		unsigned int stepElapsed = SDL_GetTicks() - npcs[i].step;
+		if (!npcs[i].newDirection && stepElapsed > npcs[i].stepDelay) {
+			// after standing still for stepDelay, pick a direction
+			npcs[i].direction = (rand() % Party::DIRECTIONS);
+			npcs[i].newDirection = 1;
+
+			// check if chosen direction is blocked
+			int curX = npcs[i].x / tileSize;
+			int curY = npcs[i].y / tileSize;
+			if (npcs[i].direction == Party::NORTH) {
+				npcs[i].blocked = tileBlocked(tiles, i, curX, curY - 1);
+			} else if (npcs[i].direction == Party::EAST) {
+				npcs[i].blocked = tileBlocked(tiles, i, curX + 1, curY);
+			} else if (npcs[i].direction == Party::SOUTH) {
+				npcs[i].blocked = tileBlocked(tiles, i, curX, curY + 1);
+			} else if (npcs[i].direction == Party::WEST) {
+				npcs[i].blocked = tileBlocked(tiles, i, curX - 1, curY);
+			}
+		} else if (npcs[i].newDirection && stepElapsed > npcs[i].stepDelay * 2) {
+			// finish step in newDirection
+			npcs[i].xStepDistance = 0.0;
+			npcs[i].yStepDistance = 0.0;
+
+			if (!npcs[i].blocked) {
+				// if npc wasn't blocked, move them to new position
+				if (npcs[i].direction == Party::NORTH) {
+					npcs[i].y -= tileSize;
+				} else if (npcs[i].direction == Party::EAST) {
+					npcs[i].x += tileSize;
+				} else if (npcs[i].direction == Party::SOUTH) {
+					npcs[i].y += tileSize;
+				} else if (npcs[i].direction == Party::WEST) {
+					npcs[i].x -= tileSize;
+				}
+			}
+
+			// reset
+			npcs[i].blocked = 0;
+			npcs[i].newDirection = 0;
+			npcs[i].step = SDL_GetTicks();		// start next step
+		} else if (npcs[i].newDirection && stepElapsed > npcs[i].stepDelay 
+				&& !npcs[i].blocked) {
+			// smoothly move in newDirection
+			float stepDist = (stepElapsed - npcs[i].stepDelay) / npcs[i].stepDelay;
+			if (npcs[i].direction == Party::NORTH) {
+				npcs[i].yStepDistance = -stepDist * tileSize;
+			} else if (npcs[i].direction == Party::EAST) {
+				npcs[i].xStepDistance = stepDist * tileSize;
+			} else if (npcs[i].direction == Party::SOUTH) {
+				npcs[i].yStepDistance = stepDist * tileSize;
+			} else if (npcs[i].direction == Party::WEST) {
+				npcs[i].xStepDistance = -stepDist * tileSize;
+			}
+		}
+	}
+}
+
+void NPC::render(int windowWidth, int windowHeight) {
+	for (int i = 0; i < npcCount; i++) {
+		if (npcs[i].textureID < 0) {	// this npc has no sprite
+			continue;					// go to the next npc
+		}
+
+		// distance from party (center of screen)
+		float xDist = (npcs[i].x + npcs[i].xStepDistance) - party->getX(tileSize);
+		float yDist = (npcs[i].y + npcs[i].yStepDistance) - party->getY(tileSize);
+
+		// multiplied by (window size / tileSize / # tiles)
+		xDist *= windowWidth / tileSize / 7.5;
+		yDist *= windowHeight / tileSize / 5.0;
+
+		// sprite coordinates
+		int spriteX, spriteY = 1;
+		if (npcs[i].direction == Party::NORTH) {
+			spriteX = 5;
+		} else if (npcs[i].direction == Party::EAST 
+				|| npcs[i].direction == Party::WEST) {
+			// east will just reverse the west sprite
+			spriteX = 3;
+		} else {	// default to south
+			spriteX = 1;
+		}
+
+		// animate npcs
+		if (npcs[i].animates && npcs[i].animation) {
+			// animation cycle is half a step cycle
+			unsigned int animationDelay = npcs[i].stepDelay / 2;
+			unsigned int animateElapsed = SDL_GetTicks() - npcs[i].animation;
+			if (animateElapsed < animationDelay / 2) {
+				// still in first half of animation
+				spriteX++;	// next sprite
+			} else if (animateElapsed >= animationDelay) {
+				// one animation cycle complete, start next
+				npcs[i].animation = SDL_GetTicks();
+			}
+		}
+
+		// sprite sheet coordinates
+		GLfloat texCoords[4];
+		texCoords[2] = ((spriteX * 100.0) / npcs[i].sheetWidth);
+		texCoords[3] = ((spriteY * 100.0) / npcs[i].sheetHeight);
+		texCoords[0] = (((spriteX - 1) * 100.0) / npcs[i].sheetWidth);
+		texCoords[1] = (((spriteY - 1) * 100.0) / npcs[i].sheetHeight);
+
+		// for east, reverse west sprite
+		if (npcs[i].direction == Party::EAST) {
+			GLfloat temp = texCoords[0];
+			texCoords[0] = texCoords[2];
+			texCoords[2] = temp;
+		}
+
+		// move to npc location
+		glTranslatef(xDist, -yDist, 0.0f);
+
+		// draw the npc
+		glBindTexture(GL_TEXTURE_2D, textures.getTexture(npcs[i].textureID));
+		glBegin(GL_QUADS);
+			glTexCoord2f(texCoords[0], texCoords[1]);
+			glVertex2f(-50, 50);
+			glTexCoord2f(texCoords[0], texCoords[3]);
+			glVertex2f(-50, -50);
+			glTexCoord2f(texCoords[2], texCoords[3]);
+			glVertex2f(50, -50);
+			glTexCoord2f(texCoords[2], texCoords[1]);
+			glVertex2f(50, 50);
+		glEnd();
+
+		// return to party location
+		glLoadIdentity();
+	}
+}
+
+bool NPC::tileBlocked(int **tiles, int npc, int x, int y) {
+	int partyX = party->getX() / tileSize;
+	int partyY = party->getY() / tileSize;
+	
+	// is the tile currently occupied
+	if (!tiles[x][y] || (partyX == x && partyY == y) || exists(x, y, npc) >= 0) {
+		return 1;	// (x, y) tile blocked, or party/npc exists
+	}
+
+	// check if party is moving to (x, y)
+	if (party->stepping()) {
+		if (party->getDirection() == Party::NORTH) {
+			partyY--;
+		} else if (party->getDirection() == Party::EAST) {
+			partyX++;
+		} else if (party->getDirection() == Party::SOUTH) {
+			partyY++;
+		} else if (party->getDirection() == Party::WEST) {
+			partyX--;
+		}
+
+		if (partyX == x && partyY == y) {
+			return 1;	// party is moving to (x, y)
+		}
 	}
 	return 0;
-}
-
-void NPC::Action(int CDir) {
-	if (Moving && NewDirectionChosen && (SDL_GetTicks() - Moving) > MoveDelay && !Blocked) {
-		return; // cant talk to npc until they are done moving
-	}
-	if (Dialog->Exists()) {
-		Dialog->DeleteDialog();
-		if (!Dialog->Exists()) {
-			Moving = SDL_GetTicks(); // begin moving again
-			Animation = SDL_GetTicks();
-		}
-		return;
-	}
-	Moving = 0; // stop npc from moving
-	Reverse = 0;
-	if (CDir == North) { // character is facing north
-		SpriteX = 1; // npc should face south
-	} else if (CDir == East) {
-		SpriteX = 3; // npc should face west, etc..
-	} else if (CDir == South) {
-		SpriteX = 5;
-	} else if (CDir == West) {
-		SpriteX = 3;
-		Reverse = 1;
-	}
-	Dialog->CreateDialog(Text);
-}
-
-bool NPC::Exists(int X, int Y) {
-	int CX = CurrentX / TileSize;
-	int CY = CurrentY / TileSize;
-	if (CX == X && CY == Y) {
-		return 1; // npc exists at X,Y
-	}
-	if (!Moving || !NewDirectionChosen || Blocked) {
-		return 0; // not moving, just standing
-	} // else block tile they are moving into also
-	int TempX = CX, TempY = CY;
-	if (Direction == North) {
-		TempY--;
-	} else if (Direction == East) {
-		TempX++;
-	} else if (Direction == South) {
-		TempY++;
-	} else {
-		TempX--;
-	}
-	if (TempX == X && TempY == Y) {
-		return 1; // npc is moving to X,Y
-	}
-	return 0;
-}
-
-void NPC::UpdateCoordinates(int NewWidth, int NewHeight) {
-	WindowWidth = NewWidth;
-	WindowHeight = NewHeight;
-	WindowTileWidth = NewWidth / 7.5;
-	WindowTileHeight = NewHeight / 5.0;
-	Dialog->UpdateCoordinates(NewWidth, NewHeight);
 }

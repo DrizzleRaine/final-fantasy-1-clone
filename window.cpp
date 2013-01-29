@@ -1,47 +1,52 @@
 #include "window.h"
 
 Window::Window() {
-	Fullscreen = false;
-	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
-		printf("Unable to initialize SDL: %s\n", SDL_GetError());
-	}
-	VideoInfo = SDL_GetVideoInfo();
-	if (!VideoInfo) {
-		printf("Could not retrieve video information: %s\n", SDL_GetError());
-		Resize(640, 480);
+	videoInfo = SDL_GetVideoInfo();
+	if (!videoInfo) {
+		// not fatal, but will assume very low resolution settings
+		printf("Warning: Could not retrieve video information: %s\n", SDL_GetError());
+		resize(640, 480);
 	} else {
-		int SceneWidth = 720;
-		int SceneHeight = 480;
-		if (VideoInfo->current_w < SceneWidth) {
-			// untested, if screen x res < SceneWidth, set window width = screen x res
-			float Ratio = VideoInfo->current_w / SceneWidth;
-			SceneHeight = SceneHeight * Ratio;
-			Resize(VideoInfo->current_w, SceneHeight);
-		} else if (VideoInfo->current_h < SceneHeight) {
-			// untested, if screen y res < SceneHeight, set window height = screen y res
-			float Ratio = VideoInfo->current_h / SceneHeight;
-			SceneWidth = SceneWidth * Ratio;
-			Resize(SceneWidth, VideoInfo->current_h);
-		} else { // screen res is >= SceneWidthxSceneHeight so set that to be window size
-			Resize(SceneWidth, SceneHeight);
+		int sceneWidth = 720, sceneHeight = 480;	// the default resolution
+		if (videoInfo->current_w < sceneWidth) {
+			// untested
+			// desired: if screen x res < sceneWidth
+			// 			set window width = screen x res
+			float ratio = videoInfo->current_w / sceneWidth;
+			sceneHeight = sceneHeight * ratio;
+			resize(videoInfo->current_w, sceneHeight);
+		} else if (videoInfo->current_h < sceneHeight) {
+			// untested
+			// desired: if screen y res < sceneHeight
+			// 			set window height = screen y res
+			float ratio = videoInfo->current_h / sceneHeight;
+			sceneWidth = sceneWidth * ratio;
+			resize(sceneWidth, videoInfo->current_h);
+		} else { 
+			// screen res is >= SceneWidth x SceneHeight 
+			// so set that to be window size
+			resize(sceneWidth, sceneHeight);
 		}
-		//Resize(VideoInfo->current_w, VideoInfo->current_h);
 	}
 	SDL_WM_SetCaption("One", 0);
 }
 
-bool Window::Resize(int Width, int Height) {
-	if (Height == 0) {
-		Height = 1;
+bool Window::resize(int newWidth, int newHeight) {
+	// make sure no 0 lengths
+	if (newHeight == 0) {
+		newHeight = 1;
 	}
-	WindowWidth = Width;
-	WindowHeight = Height;
+	if (newWidth == 0) {
+		newWidth = 1;
+	}
 
-	if (Fullscreen) {
-		VideoFlags = SDL_OPENGL | SDL_FULLSCREEN;
-	} else {
-		VideoFlags = SDL_OPENGL | SDL_RESIZABLE;
-	}
+	// update size
+	width = newWidth;
+	height = newHeight;
+
+	// set flags
+	videoFlags = SDL_OPENGL | SDL_RESIZABLE;	// for testing
+	//videoFlags = SDL_OPENGL;
 
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
@@ -49,31 +54,29 @@ bool Window::Resize(int Width, int Height) {
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-	if (VideoInfo) {
-		if (!SDL_SetVideoMode(Width, Height, VideoInfo->vfmt->BitsPerPixel, VideoFlags)) {
+	// and resize the window
+	if (videoInfo) {
+		if (!SDL_SetVideoMode(width, height, videoInfo->vfmt->BitsPerPixel, videoFlags)) {
 			printf("Unable to set video mode: %s\n", SDL_GetError());
 			return false;
 		}
 	} else {
-		if (!SDL_SetVideoMode(Width, Height, 32, VideoFlags)) {
+		if (!SDL_SetVideoMode(width, height, 32, videoFlags)) {
 			printf("Unable to set video mode: %s\n", SDL_GetError());
 			return false;
 		}
 	}
 
-	glViewport(0, 0, Width, Height);
+	// set up the viewport
+	glViewport(0, 0, width, height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho (-Width, Width, -Height, Height, -1.0f, 1.0f);
+
+	// using a coordinate system with 0 in the center
+	// each quadrants size is width x height
+	glOrtho (-width, width, -height, height, -1.0f, 1.0f);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	return true;
-}
 
-bool Window::ToggleFullscreen() {
-	Fullscreen = !Fullscreen;
-	if (!Resize(WindowWidth, WindowHeight)) {
-		return false;
-	}
 	return true;
 }

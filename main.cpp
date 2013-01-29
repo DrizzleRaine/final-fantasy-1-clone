@@ -1,30 +1,17 @@
-#include "window.h"
 #include "game.h"
+#include <SDL/SDL.h>
 
 int main() {
-	Window GameWindow;
-	Game GameManager;
-
-	GameManager.UpdateCoordinates(GameWindow.GetWindowWidth(), GameWindow.GetWindowHeight());
-
-	int Playing = 1;
-	while (Playing) {
-		SDL_Event Event;
-		while (SDL_PollEvent(&Event)) {
-			switch (Event.type) {
-				case SDL_QUIT:
-					Playing = 0;
-					break;
-				case SDL_VIDEORESIZE:
-					GameWindow.Resize(Event.resize.w, Event.resize.h);
-					GameManager.UpdateCoordinates(Event.resize.w, Event.resize.h);
-					break;
-			}
-			GameManager.Process(Event);
-		}
-		GameManager.Update();
-		SDL_Delay(1); // dont need that much cpu time (yet)
+	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
+		printf("Unable to initialize SDL: %s\n", SDL_GetError());
+		return 1;
 	}
 
+	Game game;
+	game.init();
+	game.play();
+	game.cleanup();
+
 	SDL_Quit();
+	return 0;
 }

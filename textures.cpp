@@ -1,63 +1,89 @@
 #include "textures.h"
 
-Textures::Textures(int NumberOfTextures, const char *TextureNames[]) {
-	glEnable(GL_TEXTURE_2D);
-	TextureCount = NumberOfTextures;
-
-	GLTextures = new GLuint[TextureCount];
-	glGenTextures(TextureCount, GLTextures);
-	for (int i = 0; i < TextureCount; i++) {
-		CreateTexture(i, TextureNames[i]);
-	}
+Textures::Textures() {
+	textures = 0;
 }
 
 Textures::~Textures() {
-	DeleteTextures();
+	deleteTextures();
 }
 
-bool Textures::DeleteTextures() {
-	if (GLTextures) {
-		glDeleteTextures(TextureCount, GLTextures);
-		delete[] GLTextures;
-		GLTextures = 0;
-		return 1;
+void Textures::createTextures(int count, std::string *textureNames) {
+	glEnable(GL_TEXTURE_2D);
+	textureCount = count;
+
+	// generate an array of texture names
+	textures = new GLuint[textureCount];
+	glGenTextures(textureCount, textures);
+
+	// load textures and fill array
+	for (int i = 0; i < textureCount; i++) {
+		createTexture(i, textureNames[i].c_str());
 	}
-	return 0;
 }
 
-int Textures::CreateTexture(int TextureNumber, const char* FileName) {
-	GLenum TextureFormat;
-	GLint Components;
+void Textures::deleteTextures() {
+	if (textures) {
+		// cleanup textures array
+		glDeleteTextures(textureCount, textures);
+		delete[] textures;
+		textures = 0;
+	}
+}
 
-	if (SDL_Surface* Surface = IMG_Load(FileName)) {
-		if (Surface->format->BytesPerPixel == 4) {
-			TextureFormat = GL_BGRA_EXT;	
-			Components = GL_RGBA8;
-		} else if (Surface->format->BytesPerPixel == 3) {
-			TextureFormat = GL_BGR_EXT;
-			Components = GL_RGB8;
-		} else if (Surface->format->BytesPerPixel == 1) {
-			TextureFormat = GL_LUMINANCE;
-			Components = GL_LUMINANCE;
+int Textures::createTexture(int textureID, const char* filename) {
+	GLenum textureFormat;
+	GLint components;
+
+	// load the image
+	if (SDL_Surface* surface = IMG_Load(filename)) {
+		// get image format
+		if (surface->format->BytesPerPixel == 4) {
+			textureFormat = GL_BGRA_EXT;	
+			components = GL_RGBA8;
+		} else if (surface->format->BytesPerPixel == 3) {
+			textureFormat = GL_BGR_EXT;
+			components = GL_RGB8;
+		} else if (surface->format->BytesPerPixel == 1) {
+			textureFormat = GL_LUMINANCE;
+			components = GL_LUMINANCE;
 		} else {
-			printf("Error: Unsupported format\n");
-			SDL_FreeSurface(Surface);
+			printf("Error: Unsupported image format\n");
+			SDL_FreeSurface(surface);
 			return 0;
 		}
-	
-		glBindTexture(GL_TEXTURE_2D, GLTextures[TextureNumber]);
+
+		// bind the texture	
+		glBindTexture(GL_TEXTURE_2D, textures[textureID]);
+
+		// when textures need to be shrunk
+		// use weighted averages of nearby elements
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+		// when textures need to be enlarged
+		// use weighted averages of nearby elements
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+		// generate pre-shrunk versions of the image
 		glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
 
-		GLfloat HighestAni;
-		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &HighestAni);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, HighestAni);
+		// if anisotropic filtering extension is supported
+		if (strstr((char*) glGetString(GL_EXTENSIONS), "GL_EXT_texture_filter_anisotropic")) {
+			// get the maximum anisotropy
+			GLfloat highestAni;
+			glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &highestAni);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, Components, Surface->w, Surface->h, 0, TextureFormat, GL_UNSIGNED_BYTE, Surface->pixels);
-		SDL_FreeSurface(Surface);
+			// anisotropic filtering blends sample points together
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, highestAni);
+		}
+
+		// define texture image
+		glTexImage2D(GL_TEXTURE_2D, 0, components, surface->w, surface->h, 0, textureFormat, GL_UNSIGNED_BYTE, surface->pixels);
+
+		// free the surface
+		SDL_FreeSurface(surface);
 		return 1;
 	}
-	printf("SDL Image Load Error %s\n", SDL_GetError());
+	printf("SDL Image Load Error: %s\n", SDL_GetError());
 	return 0;
 }
