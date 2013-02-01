@@ -186,6 +186,20 @@ void Party::render(Character::Jobs job, int x, int y) {
 	characters[active].render(job, x, y);
 }
 
+void Party::swapCharacters(int c1, int c2) {
+	if ((c1 >= FIRST && c1 < SIZE) && (c2 >= FIRST && c2 < SIZE)) {
+		Character temp(characters[c1]);
+		characters[c1] = characters[c2];
+		characters[c2] = temp;
+
+		if (getActive() == c1) {
+			setActive(c2);
+		} else if (getActive() == c2) {
+			setActive(c1);
+		}
+	}
+}
+
 void Party::setName(std::string newName) {
 	characters[active].setName(newName);
 }

@@ -1,6 +1,7 @@
 #include "textures.h"
 
 Textures::Textures() {
+	textureNames = 0;
 	textures = 0;
 }
 
@@ -8,9 +9,43 @@ Textures::~Textures() {
 	deleteTextures();
 }
 
+Textures::Textures(const Textures &cSource) {
+	makeCopy(cSource);
+}
+
+Textures &Textures::operator=(const Textures &rhs) {
+	// check for self-assignment
+	if (this == &rhs) {
+		return *this;
+	}
+
+	// delete any allocated memory before overwriting
+	deleteTextures();
+
+	// perform assignment
+	makeCopy(rhs);
+
+	// return existing object for chaining
+	return *this;
+}
+
+void Textures::makeCopy(const Textures &source) {
+	textureCount = source.textureCount;
+	if (source.textureNames) {
+		textureNames = new std::string[textureCount];
+		for (int i = 0; i < textureCount; i++) {
+			textureNames[i] = source.textureNames[i];
+		}
+		if (source.textures) {
+			createTextures(textureCount, textureNames);
+		}
+	}
+}
+
 void Textures::createTextures(int count, std::string *textureNames) {
 	glEnable(GL_TEXTURE_2D);
 	textureCount = count;
+	this->textureNames = new std::string[textureCount];
 
 	// generate an array of texture names
 	textures = new GLuint[textureCount];
@@ -18,11 +53,17 @@ void Textures::createTextures(int count, std::string *textureNames) {
 
 	// load textures and fill array
 	for (int i = 0; i < textureCount; i++) {
+		this->textureNames[i] = textureNames[i];
 		createTexture(i, textureNames[i].c_str());
 	}
 }
 
 void Textures::deleteTextures() {
+	if (textureNames) {
+		// cleanup texture names array
+		delete[] textureNames;
+		textureNames = 0;
+	}
 	if (textures) {
 		// cleanup textures array
 		glDeleteTextures(textureCount, textures);

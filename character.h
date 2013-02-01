@@ -8,6 +8,10 @@ class Character {
 		Character();
 		~Character();
 
+		// copy ctor and assignment operator
+		Character(const Character &cSource);
+		Character &operator=(const Character &rhs);
+
 		// character jobs
 		enum Jobs {WARRIOR, THIEF, WHITE, BLACK, MONK, RED, JOBSCOUNT};
 
@@ -52,6 +56,9 @@ class Character {
 
 		// string in format num/denom
 		std::string getFraction(Stats num, Stats denom);
+
+		// make a copy of this characacter object
+		void makeCopy(const Character &source);
 };
 
 #endif

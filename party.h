@@ -58,6 +58,9 @@ class Party {
 		void render(Characters c, int x, int y);		// character c at (x, y)
 		void render(Character::Jobs job, int x, int y);	// given job at (x, y)
 
+		// swap character c1 and c2 positions
+		void swapCharacters(int c1, int c2);
+
 		// change the name of the active character to newName
 		void setName(std::string newName);
 

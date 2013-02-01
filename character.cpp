@@ -10,6 +10,36 @@ Character::Character() {
 Character::~Character() {
 }
 
+Character::Character(const Character &cSource) {
+	makeCopy(cSource);
+}
+
+Character &Character::operator=(const Character &rhs) {
+	// check for self-assignemnt
+	if (this == &rhs) {
+		return *this;
+	}
+
+	// perform assignment operation
+	makeCopy(rhs);
+
+	// return the existing object
+	return *this;
+}
+
+void Character::makeCopy(const Character &source) {
+	name = source.name;
+	job = source.job;
+
+	for (int i = 0; i < STATSCOUNT; i++) {
+		attributes[i] = source.attributes[i];
+	}
+
+	// no need to copy textures yet, 
+	// for now every character uses same textures
+	// textures = source.textures;
+}
+
 void Character::initStats() {
 	attributes[LEVEL] = 1;
 	if (job == WARRIOR) {

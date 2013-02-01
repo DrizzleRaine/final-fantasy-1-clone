@@ -1,29 +1,70 @@
 #include "partymenu.h"
 
-PartyMenu::PartyMenu() : subCursor(1) {
+PartyMenu::PartyMenu() : subCursor(1), subCursor2(1) {
+	currentOption = NONE;
 }
 
 PartyMenu::~PartyMenu() {
 }
 
 void PartyMenu::update() {
+	const int CURSEL = cursor.getSelection();
+	int newCurSel = CURSEL;
+
+	// exit menu or cancel option
 	if (input->getCancel()) {
-		menuState->exitMenus();
-		return;
+		if (currentOption == NONE) {
+			menuState->exitMenus();
+			return;
+		} else if (currentOption == FORMATIONSECOND) {
+			// re-select first character to swap
+			newCurSel = subCursor.getSelection();
+			subCursor.setSelection(subCursor2.getSelection());
+			currentOption = FORMATION;
+		} else {	// back to menu options
+			newCurSel = currentOption;
+			currentOption = NONE;
+		}
 	}
 
-	int newCurSel = cursor.getSelection();
-	if (input->downPressed()) {			// move cursor down
+	// menu option selected
+	if (input->getConfirm()) {
+		if (currentOption == FORMATIONSECOND) {
+			// second character to swap selected, swap members
+			party->swapCharacters(subCursor.getSelection(), CURSEL);
+			newCurSel = FORMATION;				// restore cursor
+			currentOption = NONE;				// return to menu options
+		} else if (currentOption == FORMATION) {
+			currentOption = FORMATIONSECOND;	// first character to swap selected
+			subCursor2.setSelection(FORMATION);	// points at formation option
+			subCursor.setSelection(CURSEL);		// points at first swap character
+		} else if (CURSEL == FORMATION) {
+			currentOption = FORMATION;			// formation option selected
+			subCursor.setSelection(CURSEL);		// update cursors
+			newCurSel = Party::FIRST;
+		}
+	}
+
+	// cursor movement
+	if (input->downPressed()) {
 		newCurSel++;
-	} else if (input->upPressed()) {	// move cursor up
+	} else if (input->upPressed()) {
 		newCurSel--;
 	}
 
 	// check for wrap wround
-	if (newCurSel > 6) {
-		newCurSel = 0;
-	} else if (newCurSel < 0) {
-		newCurSel = 6;
+	if (currentOption == NONE) {
+		if (newCurSel > SAVE) {
+			newCurSel = ITEMS;
+		} else if (newCurSel < ITEMS) {
+			newCurSel = SAVE;
+		}
+	} else {	// pointing at characters
+		if (newCurSel > Party::FOURTH) {
+			newCurSel = Party::FIRST;
+		} else if (newCurSel < Party::FIRST) {
+			newCurSel = Party::FOURTH;
+		}
 	}
 
 	// update cursor selection
@@ -135,7 +176,33 @@ void PartyMenu::subText() {
 
 void PartyMenu::cursorRender(const int SPRITEX, const float *SPRITEY) {
 	int lineHeight = twenty.getLineSkip();
+	int menuOptionsX = windowWidth - 455;
+	int menuOptionsY = windowHeight - 10;
 
-	int curY = windowHeight - 10 - lineHeight * cursor.getSelection();
-	cursor.render(windowWidth - 455, curY);
+	int curY;
+	if (currentOption == FORMATIONSECOND) {
+		// subCursor2 is pointing at formation option
+		curY = menuOptionsY - lineHeight * subCursor2.getSelection();
+		subCursor2.render(menuOptionsX, curY);
+
+		// subCursor is pointing at first character to swap
+		curY = SPRITEY[subCursor.getSelection()];
+		subCursor.render(SPRITEX - 20, curY);
+
+		// cursor is pointing at second character to swap
+		curY = SPRITEY[cursor.getSelection()] - 20;
+		cursor.render(SPRITEX - 20, curY);
+	} else if (currentOption == NONE) {
+		// pointing at menu optino
+		curY = menuOptionsY - lineHeight * cursor.getSelection();
+		cursor.render(menuOptionsX, curY);
+	} else {
+		// subCursor is pointing at current menu option
+		curY = menuOptionsY - lineHeight * subCursor.getSelection();
+		subCursor.render(menuOptionsX, curY);
+
+		// cursor is pointing at character to select/swap
+		curY = SPRITEY[cursor.getSelection()];
+		cursor.render(SPRITEX - 20, curY);
+	}
 }
