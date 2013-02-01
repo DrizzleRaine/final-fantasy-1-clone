@@ -51,15 +51,15 @@ void NewMenu::update() {
 			}						
 			
 			// else 'no' was selected
-			cursor.setSelection(subCursor.getSelection());	// restore cursor
-			startConfirm = 0;								// end confirmation
-		} else {											// option selected
+			newCurSel = subCursor.getSelection();	// restore cursor
+			startConfirm = 0;						// end confirmation
+		} else {									// option selected
 			// set the character to be modified
 			party->setActive(CURSEL / 2);
-			if (CURSEL % 2) {								// name was clicked on
+			if (CURSEL % 2) {						// name was clicked on
 				menuState->pushMenu(new NameMenu(party->getName()));// switch menus
-			} else {										// a job was clicked on
-				menuState->pushMenu(new JobMenu());			// switch menus
+			} else {								// a job was clicked on
+				menuState->pushMenu(new JobMenu());	// switch menus
 			}
 			return;
 		}
@@ -79,9 +79,9 @@ void NewMenu::update() {
 			}
 		}
 		if (!startConfirm) {					// no error, confirm settings
-			subCursor.setSelection(CURSEL);
-			newCurSel = 0;
-			startConfirm = 1;
+			subCursor.setSelection(CURSEL);		// remember cursor position
+			newCurSel = 0;						// set cursor to default
+			startConfirm = 1;					// start game confirm menu
 		}
 	}
 
