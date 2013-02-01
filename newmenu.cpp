@@ -27,11 +27,13 @@ void NewMenu::update() {
 		// if user hits a key while error displayed
 		// cancel the error, it has been acknowledged
 		startError = 0;
+		input->resetAll();
 		return;
 	}
 
 	// check action keys
 	if (input->getCancel()) {						// cancel button
+		input->resetCancel();						// handled
 		if (startConfirm) {							// if in confirmation menu
 			newCurSel = subCursor.getSelection();	// restore cursor
 			startConfirm = 0;						// cancel confirmation
@@ -40,6 +42,7 @@ void NewMenu::update() {
 			return;
 		}
 	} else if (input->getConfirm()) {				// confirm button
+		input->resetConfirm();
 		if (startConfirm) {							// if in confirmation menu
 			if (CURSEL == 0) {						// 'yes' selected
 				party->initialize();				// initialize the party
@@ -55,11 +58,10 @@ void NewMenu::update() {
 			party->setActive(CURSEL / 2);
 			if (CURSEL % 2) {								// name was clicked on
 				menuState->pushMenu(new NameMenu(party->getName()));// switch menus
-				return;
 			} else {										// a job was clicked on
 				menuState->pushMenu(new JobMenu());			// switch menus
-				return;
 			}
+			return;
 		}
 	} else if (input->getSelect() && !startConfirm) {
 		// set the character to be modified
@@ -68,6 +70,7 @@ void NewMenu::update() {
 		// assign the character a pseudo random name
 		party->setName(randomNames[CURSEL / 2][rand() % 10]);
 	} else if (input->getStart()) {				// attempt to start the game
+		input->resetStart();
 		for (int i = Party::FIRST; i < Party::SIZE; i++) {
 			if (party->emptyName(static_cast<Party::Characters>(i))) {
 				// if a character has not been givin a name
@@ -118,6 +121,9 @@ void NewMenu::update() {
 
 	// update cursor selection
 	cursor.setSelection(newCurSel);
+
+	// input handled
+	input->resetAll();
 }
 
 void NewMenu::render() {

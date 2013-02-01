@@ -21,6 +21,9 @@ class StateManager {
 		void process(SDL_Event &event);
 		void update();
 		void render(int width, int height);
+
+		// start the game
+		void startGame();
 	private:
 		// players party, shared across states
 		Party party;

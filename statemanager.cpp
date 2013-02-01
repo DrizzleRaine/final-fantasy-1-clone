@@ -1,4 +1,5 @@
 #include "statemanager.h"
+#include "world.h"
 
 StateManager::StateManager() {
 	head = 0;
@@ -55,4 +56,13 @@ void StateManager::update() {
 
 void StateManager::render(int width, int height) {
 	tail->renderState(width, height);
+}
+
+void StateManager::startGame() {
+	popAll();	// pop all current states
+
+	// put party on world map
+	MapState *ms = new MapState();
+	pushState(ms);
+	ms->pushMap(new World());
 }

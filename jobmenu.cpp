@@ -13,9 +13,12 @@ void JobMenu::update() {
 
 	// check action keys
 	if (input->getCancel()) {				// cancel button
+		input->resetCancel();				// handled
 		menuState->popMenu();				// change back to new menu
 		return;
 	} else if (input->getConfirm()) {		// confirm button
+		input->resetConfirm();				// handled
+
 		// change the active characters job to the selected job
 		if (CURSEL < 2) {
 			party->setJob(CURSEL);
@@ -67,6 +70,9 @@ void JobMenu::update() {
 			cursor.setSelection(CURSEL + 2);
 		}
 	}
+
+	// input handled
+	input->resetAll();
 }
 
 void JobMenu::render() {

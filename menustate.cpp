@@ -1,5 +1,4 @@
 #include "menustate.h"
-#include "world.h"
 
 MenuState::MenuState() {
 	head = 0;
@@ -43,29 +42,18 @@ void MenuState::changeMenu(Menu *menu) {
 }
 
 void MenuState::exitMenus(bool startGame) {
-	while (tail) {
-		popMenu();	// exit menus
+	if (startGame) {
+		// start the game!
+		stateManager->startGame();
+		return;	// done with menu state
 	}
 
 	// exit menu state
 	stateManager->popState();
-
-	if (startGame) {
-		// exit title screen
-		stateManager->popState();
-
-		// push map state and world map
-		MapState *ms = new MapState();
-		stateManager->pushState(ms);
-		ms->pushMap(new World());
-	}
 }
 
 void MenuState::update() {
 	tail->updateMenu();
-
-	// input handled
-	input.resetAll();
 }
 
 void MenuState::render() {

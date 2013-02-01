@@ -18,6 +18,7 @@ void NameMenu::update() {
 
 	// check action keys
 	if (input->getCancel()) {				// cancel button
+		input->resetCancel();				// handled
 		if (!newName.length()) {			// no letters to backspace
 			party->setName("??????");		// set name back to all ?
 			menuState->popMenu();			// and return to new menu
@@ -48,6 +49,8 @@ void NameMenu::update() {
 			newName.push_back(selected);
 		}
 	} else if (input->getStart()) {			// start button
+		input->resetStart();
+
 		// first check if newName is empty
 		bool empty = 1;
 		unsigned int newNameLength = newName.length();
@@ -92,6 +95,9 @@ void NameMenu::update() {
 			cursor.setSelection(CURSEL - 60);
 		}
 	}
+
+	// input handled
+	input->resetAll();
 }
 
 void NameMenu::render() {

@@ -13,6 +13,7 @@ void PartyMenu::update() {
 
 	// exit menu or cancel option
 	if (input->getCancel()) {
+		input->resetCancel();
 		if (currentOption == NONE) {
 			menuState->exitMenus();
 			return;
@@ -69,6 +70,9 @@ void PartyMenu::update() {
 
 	// update cursor selection
 	cursor.setSelection(newCurSel);
+
+	// input handled
+	input->resetAll();
 }
 
 void PartyMenu::render() {
