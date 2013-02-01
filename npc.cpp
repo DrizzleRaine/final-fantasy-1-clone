@@ -90,7 +90,6 @@ void NPC::init(std::string mapName, int tSize, Party *p, Dialog *d) {
 	in.close();
 
 	// create textureCount textures, no duplicates
-	printf("%i\n", textureCount);
 	textures.createTextures(textureCount, textureNames);
 }
 
