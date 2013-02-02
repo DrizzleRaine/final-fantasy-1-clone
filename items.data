@@ -1,0 +1,55 @@
+18
+Potion
+Restores 50 HP.
+1 50 0
+Hi-Potion
+Restores 150 HP.
+1 150 0
+Phoenix Down
+Revives one KO'd ally.
+3 1
+Antidote
+Cures poison.
+3 2
+Eye Drops
+Cures darkness.
+3 3
+Echo Grass
+Cures silence.
+3 4
+Gold Needle
+Cures stone.
+3 5
+Sleeping Bag
+Partially restores party's HP.
+2 100 0
+Cottage
+Restores all of the party's HP and MP.
+2 999 999
+Elixir
+Restores all of one party member's HP and MP.
+1 999 999
+Knife
+A small knife.
+4 5 10 0 0
+Rapier
+A sword with a slender blade.
+4 9 5 0 0
+Nunchaku
+Wooden nunchaku.
+5 6 0 0 0
+Hammer
+A hammer made for battle.
+6 9 0 0 0
+Staff
+A wooden staff.
+7 6 0 0 0
+Clothes
+Ordinary clothing.
+9 0 0 1 -2
+Leather Armor
+Armor made of hardened leather.
+9 0 0 4 -8
+Chain Mail
+Mail of interwoven chain links.
+10 0 0 15 -15
