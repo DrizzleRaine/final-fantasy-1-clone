@@ -4,9 +4,6 @@
 #include <string>
 #include <fstream>
 
-// what i should do is inherit from this class
-// with a bunch of sub classes for each type of item
-
 class Items {
 	public:
 		Items();
@@ -15,25 +12,31 @@ class Items {
 		std::string getName(int id);
 		std::string getDescription(int id);
 	private:
-		// item types
-		enum Types {NONE, HEAL_SINGLE, HEAL_PARTY, HEAL_STATUS, SWORD, FIST, 
-			HAMMER, STAFF, SHIELD, LIGHT_ARM, HEAVY_ARM, HELMET, GLOVE};
+		// item categories
+		enum Categories {KEY, HEAL, CURE, EQUIPMENT};
 
 		struct Item {
-			std::string name;
-			std::string description;
+			// item types
+			enum Types {KEY, HEAL_SINGLE, HEAL_PARTY, CURE_STATUS, SWORD, FIST, 
+				HAMMER, STAFF, SHIELD, LIGHT_ARM, HEAVY_ARM, HELMET, GLOVE};
+
+			// item category and type
+			Categories category;
 			Types type;
 
-			// todo specific types of items have different fields
-			// should be reprsented by different classes
-			// right now there are up to 4 values
-			// for HEAL_SINGLE/HEAL_PARTY: HP and MP values
-			// for HEAL_STATUS: which status it heals
-			// for weapons and armor: atk, acc, def, eva
+			// name and description
+			std::string name;
+			std::string description;
+
+			// items have a max of 4 values
 			int values[4];
 		};
 
-		Item items[256];
+		// array of items in the game
+		Item *items;
+
+		// how many different items the game has
+		int itemCount;
 
 		// id bounds check
 		bool inBounds(int id);

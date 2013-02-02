@@ -1,7 +1,7 @@
 #include "itemmenu.h"
 
 ItemMenu::ItemMenu() : subCursor(1), subCursorSwap(1) {
-	currentOption = NONE;
+	currentOption = USE;
 	itemSelected = -1;
 	scrolled = 0;
 }
@@ -42,7 +42,7 @@ void ItemMenu::update() {
 			}
 			itemSelected = -1;						// use/swap completed
 		} else if (currentOption == USE) {
-			itemSelected = CURSEL + scrolled;	// 1st item to swap selected
+			itemSelected = CURSEL + scrolled;		// 1st item to swap selected
 			subCursorSwap.setSelection(USE);		// points at use option
 			subCursor.setSelection(CURSEL);			// points at 1st swap item
 		} else if (CURSEL == USE) {
