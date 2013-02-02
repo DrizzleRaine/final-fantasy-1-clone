@@ -239,11 +239,21 @@ bool Party::emptyName(Characters c) {
 }
 
 void Party::initialize() {
-	gil = 0;
 	ticksPlayed = 0;
 	ticksUpdate = SDL_GetTicks();
 	for (int i = FIRST; i < SIZE; i++) {
 		characters[static_cast<Characters>(i)].initStats();
+	}
+	gil = 0;
+	for (int i = 0; i < INVENTORY_SIZE; i++) {
+		items[i] = 0;
+		itemCount[i] = 0;
+	}
+
+	// temporary to test item menu
+	for (int i = 0; i < 10; i++) {
+		items[i] = i;
+		itemCount[i] = i;
 	}
 }
 
@@ -266,6 +276,36 @@ std::string Party::getMPFraction(Characters c) {
 		return characters[c].getMPFraction();
 	}
 	return "";
+}
+
+void Party::addItem(int id) {
+	if (!itemCount[id]) {
+		// party does not have any of this item
+		for (int i = 0; i < INVENTORY_SIZE; i++) {
+			if (!items[i]) {
+				// new item goes in first empty slot
+				items[i] = id;
+			}
+		}
+	}
+	itemCount[id]++;
+}
+
+void Party::swapItems(int pos1, int pos2) {
+	int temp = items[pos1];
+	items[pos1] = items[pos2];
+	items[pos2] = temp;
+}
+
+void Party::sortItems() {
+	// sort items by ID
+	for (int i = 0, j = 0; i < INVENTORY_SIZE; i++) {
+		items[i] = 0;		// clear inventory
+		if (itemCount[i]) {	// party has this item
+			items[j] = i;	// put it in current slot
+			j++;			// increment current slot
+		}
+	}
 }
 
 std::string Party::getTime() {

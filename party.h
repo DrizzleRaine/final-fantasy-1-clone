@@ -94,6 +94,14 @@ class Party {
 		unsigned int getGil() { return gil; }
 		void addGil(int g) { gil += g; }
 
+		// party inventory
+		static const int INVENTORY_SIZE = 256;
+		int getItem(int pos) { return items[pos]; }
+		int getItemCount(int id) { return itemCount[id]; }
+		void addItem(int id);
+		void swapItems(int pos1, int pos2);
+		void sortItems();
+
 		// get string representing game time, HH:MM
 		std::string getTime();
 	private:
@@ -131,6 +139,13 @@ class Party {
 
 		// partys gil
 		unsigned int gil;
+
+		// party inventory
+		int items[INVENTORY_SIZE];
+
+		// item counts in seperate array
+		// to quickly check if party has a specific item
+		int itemCount[INVENTORY_SIZE];
 
 		// ticks played, ticks at last update
 		unsigned int ticksPlayed, ticksUpdate;

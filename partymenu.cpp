@@ -1,7 +1,9 @@
 #include "partymenu.h"
+#include "itemmenu.h"
 
-PartyMenu::PartyMenu() : subCursor(1), subCursor2(1) {
+PartyMenu::PartyMenu() : subCursor(1), subCursorSwap(1) {
 	currentOption = NONE;
+	swappingCharacters = 0;
 }
 
 PartyMenu::~PartyMenu() {
@@ -17,32 +19,37 @@ void PartyMenu::update() {
 		if (currentOption == NONE) {
 			menuState->exitMenus();
 			return;
-		} else if (currentOption == FORMATIONSECOND) {
+		} else if (swappingCharacters) {
 			// re-select first character to swap
 			newCurSel = subCursor.getSelection();
-			subCursor.setSelection(subCursor2.getSelection());
-			currentOption = FORMATION;
-		} else {	// back to menu options
-			newCurSel = currentOption;
-			currentOption = NONE;
+			subCursor.setSelection(subCursorSwap.getSelection());
+			swappingCharacters = 0;					// swap canceled
+		} else {
+			newCurSel = currentOption;				// restore cursor
+			currentOption = NONE;					// return to menu options
 		}
 	}
 
-	// menu option selected
+	// option or character selected
 	if (input->getConfirm()) {
-		if (currentOption == FORMATIONSECOND) {
+		input->resetConfirm();
+		if (swappingCharacters) {
 			// second character to swap selected, swap members
 			party->swapCharacters(subCursor.getSelection(), CURSEL);
-			newCurSel = FORMATION;				// restore cursor
-			currentOption = NONE;				// return to menu options
+			swappingCharacters = 0;					// swap completed
+			newCurSel = currentOption;				// restore cursor
+			currentOption = NONE;					// return to menu options
 		} else if (currentOption == FORMATION) {
-			currentOption = FORMATIONSECOND;	// first character to swap selected
-			subCursor2.setSelection(FORMATION);	// points at formation option
-			subCursor.setSelection(CURSEL);		// points at first swap character
+			swappingCharacters = 1;					// 1st char to swap selected
+			subCursorSwap.setSelection(FORMATION);	// points at formation option
+			subCursor.setSelection(CURSEL);			// points at 1st swap character
 		} else if (CURSEL == FORMATION) {
-			currentOption = FORMATION;			// formation option selected
-			subCursor.setSelection(CURSEL);		// update cursors
+			currentOption = FORMATION;				// formation option selected
+			subCursor.setSelection(CURSEL);			// update cursors
 			newCurSel = Party::FIRST;
+		} else if (CURSEL == ITEMS) {
+			menuState->pushMenu(new ItemMenu());
+			return;
 		}
 	}
 
@@ -101,8 +108,7 @@ void PartyMenu::render() {
 		Party::Characters c = static_cast<Party::Characters>(i);
 
 		// character name and sprite
-		int lineHeight = twenty.getLineSkip();
-		twenty.drawText(SPRITEX - 35, SPRITEY[i] + lineHeight * 0.75, 
+		twenty.drawText(SPRITEX - 35, SPRITEY[i] + twenty.getLineSkip() * 0.75, 
 				party->getName(c).c_str());
 		party->render(c, SPRITEX, SPRITEY[i] + 50);
 
@@ -136,13 +142,13 @@ void PartyMenu::render() {
 void PartyMenu::subBorders() {
 	const int LEFTX = windowWidth - 550;
 	border(LEFTX, windowWidth, windowHeight, -windowHeight + 500);
-	border(LEFTX, windowWidth, -windowHeight + 500, -windowHeight + 325);
-	border(LEFTX, windowWidth, -windowHeight + 325, -windowHeight + 125);
-	border(LEFTX - 100, windowWidth, -windowHeight + 125, -windowHeight);
+	border(LEFTX, windowWidth, -windowHeight + 500, -windowHeight + 324);
+	border(LEFTX, windowWidth, -windowHeight + 324, -windowHeight + 124);
+	border(LEFTX - 100, windowWidth, -windowHeight + 124, -windowHeight);
 }
 
 void PartyMenu::subText() {
-	int lineHeight = twenty.getLineSkip();
+	const int LINEHEIGHT = twenty.getLineSkip();
 
 	// draw menu options
 	int leftX = windowWidth - 450;
@@ -152,7 +158,7 @@ void PartyMenu::subText() {
 	// gil and time played labels
 	leftX = windowWidth - 510;
 	twenty.drawText(leftX, -windowHeight + 410, "Gil");
-	twenty.drawText(leftX, -windowHeight + 410 - lineHeight, "Time");
+	twenty.drawText(leftX, -windowHeight + 410 - LINEHEIGHT, "Time");
 
 	// get current gil and time strings
 	std::string gil = std::to_string(party->getGil());
@@ -168,7 +174,7 @@ void PartyMenu::subText() {
 
 	// draw the play time right aligned
 	twenty.textSize(time.c_str(), &r);
-	twenty.drawText(rightEdge - r.w, -windowHeight + 410 - lineHeight, 
+	twenty.drawText(rightEdge - r.w, -windowHeight + 410 - LINEHEIGHT, 
 			party->getTime().c_str());
 
 	// draw map name centered
@@ -179,15 +185,18 @@ void PartyMenu::subText() {
 }
 
 void PartyMenu::cursorRender(const int SPRITEX, const float *SPRITEY) {
-	int lineHeight = twenty.getLineSkip();
-	int menuOptionsX = windowWidth - 455;
-	int menuOptionsY = windowHeight - 10;
+	// locations to base cursor drawings
+	const int OPTIONSX = windowWidth - 455;
+	const int OPTIONSY = windowHeight - 10;
+	
+	// how far to move when cursor goes to new line
+	const int LINEHEIGHT = twenty.getLineSkip();
 
 	int curY;
-	if (currentOption == FORMATIONSECOND) {
-		// subCursor2 is pointing at formation option
-		curY = menuOptionsY - lineHeight * subCursor2.getSelection();
-		subCursor2.render(menuOptionsX, curY);
+	if (swappingCharacters) {
+		// subCursorSwap is pointing at formation option
+		curY = OPTIONSY - LINEHEIGHT * subCursorSwap.getSelection();
+		subCursorSwap.render(OPTIONSX, curY);
 
 		// subCursor is pointing at first character to swap
 		curY = SPRITEY[subCursor.getSelection()];
@@ -198,12 +207,12 @@ void PartyMenu::cursorRender(const int SPRITEX, const float *SPRITEY) {
 		cursor.render(SPRITEX - 20, curY);
 	} else if (currentOption == NONE) {
 		// pointing at menu optino
-		curY = menuOptionsY - lineHeight * cursor.getSelection();
-		cursor.render(menuOptionsX, curY);
+		curY = OPTIONSY - LINEHEIGHT * cursor.getSelection();
+		cursor.render(OPTIONSX, curY);
 	} else {
 		// subCursor is pointing at current menu option
-		curY = menuOptionsY - lineHeight * subCursor.getSelection();
-		subCursor.render(menuOptionsX, curY);
+		curY = OPTIONSY - LINEHEIGHT * subCursor.getSelection();
+		subCursor.render(OPTIONSX, curY);
 
 		// cursor is pointing at character to select/swap
 		curY = SPRITEY[cursor.getSelection()];

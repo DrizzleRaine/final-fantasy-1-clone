@@ -233,7 +233,7 @@ void JobMenu::cursorRender(const int SPRITEX, const float *SPRITEY) {
 		// bottom row
 		if (CURSEL % 2) {	// right column
 			cursor.render(windowWidth - 400, windowHeight - 460);
-		} else {		// left column
+		} else {			// left column
 			cursor.render(-100, windowHeight - 460);
 		}
 	}

@@ -15,11 +15,14 @@ class PartyMenu : public Menu {
 		// blinking sub cursor
 		Cursor subCursor;
 
-		// second needed for formation changes
-		Cursor subCursor2;
+		// character position swaps
+		Cursor subCursorSwap;
+
+		// two characters being swapped
+		bool swappingCharacters;
 
 		// the menu options available in party menu
-		enum Options {NONE = -2, FORMATIONSECOND = -1, ITEMS = 0, 
+		enum Options {NONE = -1, ITEMS = 0, 
 			MAGIC, EQUIPMENT, STATUS, FORMATION, CONFIG, SAVE, COUNT};
 	
 		// the currently active menu option	
