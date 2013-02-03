@@ -110,6 +110,8 @@ void Town::update() {
 	// check if current tile is a map change tile
 	int currentTile = tiles[xPos][yPos];
 	if (currentTile > 0) {
+		// return to regular walk speed
+		party->setStepDelay(250.0);
 		if (currentTile > mapID) {
 			// entering sub map (house, store, etc...)
 			mapState->pushMap(new Town(currentTile));
