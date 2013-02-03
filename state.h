@@ -25,6 +25,10 @@ class State {
 		void processState(SDL_Event &event);
 		void updateState();
 		void renderState(int width, int height);
+
+		// pause/unpause state
+		void pauseState();
+		void unpauseState();
 	protected:
 		// each state has its own input
 		Input input;
@@ -44,6 +48,10 @@ class State {
 		// state opertions
 		virtual void update() = 0;
 		virtual void render() = 0;
+
+		// pause/unpause state
+		virtual void pause() = 0;
+		virtual void unpause() = 0;
 };
 
 #endif

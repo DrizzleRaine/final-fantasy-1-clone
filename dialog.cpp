@@ -81,6 +81,18 @@ void Dialog::render(int windowWidth, int windowHeight) {
 	}
 }
 
+void Dialog::pause() {
+	if (expiration) {
+		pausedExpiration = expiration - SDL_GetTicks();
+	}
+}
+
+void Dialog::unpause() {
+	if (expiration) {
+		expiration = pausedExpiration + SDL_GetTicks();
+	}
+}
+
 void Dialog::convertNewLines(std::string &msg) {
 	// strings read from files read \n as two seperate chars
 	// rather than as the newline character

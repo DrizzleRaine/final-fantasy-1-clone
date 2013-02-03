@@ -343,12 +343,26 @@ void NPC::render(int windowWidth, int windowHeight) {
 	}
 }
 
+void NPC::pause() {
+	for (int i = 0; i < npcCount; i++) {
+		npcs[i].stepPause = SDL_GetTicks() - npcs[i].step;
+		npcs[i].animationPause = SDL_GetTicks() - npcs[i].animation;
+	}
+}
+
+void NPC::unpause() {
+	for (int i = 0 ; i < npcCount; i++) {
+		npcs[i].step = SDL_GetTicks() - npcs[i].stepPause;
+		npcs[i].animation = SDL_GetTicks() - npcs[i].animationPause;
+	}
+}
+
 bool NPC::tileBlocked(int **tiles, int npc, int x, int y) {
 	int partyX = party->getX() / tileSize;
 	int partyY = party->getY() / tileSize;
 	
 	// is the tile currently occupied
-	if (!tiles[x][y] || (partyX == x && partyY == y) || exists(x, y, npc) >= 0) {
+	if (tiles[x][y] >= 0 || (partyX == x && partyY == y) || exists(x, y, npc) >= 0) {
 		return 1;	// (x, y) tile blocked, or party/npc exists
 	}
 

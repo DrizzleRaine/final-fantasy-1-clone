@@ -23,6 +23,10 @@ class Dialog : public GUI {
 		// operations
 		void update();
 		void render(int windowWidth, int windowHeight);
+
+		// pause/unpause expiring dialogs
+		void pause();
+		void unpause();
 	private:
 		// messages to display
 		std::queue<std::string> messages;
@@ -30,6 +34,9 @@ class Dialog : public GUI {
 		// when the dialog will be destroyed
 		// (if it was given a duration)
 		unsigned int expiration;
+
+		// pause time until expiration
+		unsigned int pausedExpiration;
 
 		// convert the string \n to the newline char
 		void convertNewLines(std::string &msg);

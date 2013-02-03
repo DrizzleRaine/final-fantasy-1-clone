@@ -13,6 +13,7 @@ StateManager::~StateManager() {
 void StateManager::pushState(State *state) {
 	// push and initialize the new state
 	if (tail) {
+		tail->pauseState();
 		tail->setNext(state);
 	}
 	state->setPrev(tail);
@@ -25,6 +26,9 @@ void StateManager::popState() {
 	if (tail) {
 		State *toPop = tail;
 		tail = tail->getPrev();
+		if (tail) {
+			tail->unpauseState();
+		}
 
 		delete toPop;
 		toPop = 0;

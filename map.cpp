@@ -44,15 +44,14 @@ void Map::init(Party *p, Input *in, MapState *ms) {
 
 	// load map and tile info
 	int direction;
-	float newX, newY;
 	std::ifstream mapfile;
 	mapfile.open(mapData.c_str());
 	mapfile >> mapWidth; mapfile >> mapHeight; mapfile >> tileSize;
-	mapfile >> newX; mapfile >> newY; mapfile >> direction;
+	mapfile >> currentX; mapfile >> currentY; mapfile >> direction;
 
 	// update parties position
-	party->setX(newX);
-	party->setY(newY);
+	party->setX(currentX);
+	party->setY(currentY);
 
 	// update parties direction
 	party->setDirection(direction);
@@ -124,6 +123,17 @@ void Map::renderMap(int width, int height) {
 
 	// render the lead character on top of the map
 	party->renderParty(windowWidth, windowHeight);
+}
+
+void Map::pauseMap() {
+	pause();
+}
+
+void Map::unpauseMap() {
+	// restore party position
+	party->setX(currentX);
+	party->setY(currentY);
+	unpause();
 }
 
 bool Map::blockedTile(int x, int y) {

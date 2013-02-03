@@ -24,6 +24,10 @@ class MenuState : public State {
 		void update();
 		void render();
 
+		// pause/unpause menu
+		void pause();
+		void unpause();
+
 		// head and tail of linked list of menus
 		// the linked list is treated like a stack
 		Menu *head, *tail;

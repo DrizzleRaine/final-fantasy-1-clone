@@ -85,3 +85,9 @@ void TitleState::render() {
 		cursor.render(MENUX, MENUY + NEWLINE);
 	}
 }
+
+void TitleState::pause() {
+}
+
+void TitleState::unpause() {
+}

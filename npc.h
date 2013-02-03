@@ -28,6 +28,10 @@ class NPC {
 		// npc operations
 		void update(int **tiles);
 		void render(int windowWidth, int windowHeight);
+	
+		// pause/unpause npc steps/animation	
+		void pause();
+		void unpause();
 	private:
 		// npcs have access to the party
 		Party *party;
@@ -53,6 +57,9 @@ class NPC {
 
 			// ticks since last step/animation
 			unsigned int step, animation;
+
+			// elapsed ticks when npc was paused
+			unsigned int stepPause, animationPause;
 
 			// delay between steps/animation
 			float stepDelay;

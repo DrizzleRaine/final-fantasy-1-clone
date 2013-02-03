@@ -49,3 +49,11 @@ void State::renderState(int width, int height) {
 	// swap buffers
 	SDL_GL_SwapBuffers();
 }
+
+void State::pauseState() {
+	pause();
+}
+
+void State::unpauseState() {
+	unpause();
+}

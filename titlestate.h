@@ -18,6 +18,10 @@ class TitleState : public State {
 		void update();
 		void render();
 
+		// pause/unpause
+		void pause();
+		void unpause();
+
 		// texture ids and texture count
 		enum TexInfo {LOGO, COUNT};
 		Textures textures;

@@ -14,9 +14,6 @@ Party::Party() {
 	stepDelay = 250.0;
 	paused = 0;
 
-	worldX = 0;
-	worldY = 0;
-
 	std::string textureNames[] = {"img/map_char.tga"};
 	textures.createTextures(TEXTURECOUNT, textureNames);
 
@@ -74,20 +71,6 @@ float Party::getY(int tileSize) {
 		stopStep(tileSize);
 	}
 	return (y + yStepDistance);
-}
-
-void Party::restoreWorldPos() {
-	// if pos on world map has been stored
-	if (worldX != 0 || worldY != 0) {
-		// restore pos on world map
-		x = worldX;
-		y = worldY;
-	}
-}
-
-void Party::storeWorldPos() {
-	worldX = x;
-	worldY = y;
 }
 
 void Party::stopStep(int tileSize) {

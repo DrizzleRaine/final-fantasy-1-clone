@@ -23,6 +23,10 @@ class Map {
 		// handle map operations
 		void updateMap();
 		void renderMap(int width, int height);
+
+		// pause/unpause map
+		void pauseMap();
+		void unpauseMap();
 	protected:
 		// each map has its own input
 		Input *input;
@@ -39,6 +43,9 @@ class Map {
 
 		// current width and height of window
 		int windowWidth, windowHeight;	
+
+		// parties current position on this map
+		int currentX, currentY;
 
 		// id of the map
 		int mapID;
@@ -61,6 +68,9 @@ class Map {
 		// menu operations
 		virtual void update() = 0;
 		virtual void render() = 0;
+
+		virtual void pause() = 0;
+		virtual void unpause() = 0;
 
 		// next and prev maps
 		Map *next, *prev;

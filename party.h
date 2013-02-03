@@ -34,10 +34,6 @@ class Party {
 		float getX(int tileSize);
 		float getY(int tileSize);
 
-		// party returns to world map where they left
-		void storeWorldPos();
-		void restoreWorldPos();
-
 		// direction the party is facing
 		void setDirection(int dir);
 		Directions getDirection() { return direction; }
@@ -118,9 +114,6 @@ class Party {
 		// map party is on at (x, y)
 		int map, x, y;
 		std::string mapName;
-
-		// party's location on world map
-		int worldX, worldY;
 
 		// which direction party is facing
 		Directions direction;

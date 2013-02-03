@@ -16,6 +16,7 @@ MapState::~MapState() {
 void MapState::pushMap(Map *map) {
 	// push and initialize the new map
 	if (tail) {
+		tail->pauseMap();
 		tail->setNext(map);
 	}
 	map->setPrev(tail);
@@ -28,6 +29,9 @@ void MapState::popMap() {
 	if (tail) {
 		Map *toPop = tail;
 		tail = tail->getPrev();
+		if (tail) {
+			tail->unpauseMap();
+		}
 
 		delete toPop;
 		toPop = 0;
@@ -54,4 +58,16 @@ void MapState::update() {
 
 void MapState::render() {
 	tail->renderMap(windowWidth, windowHeight);
+}
+
+void MapState::pause() {
+	if (tail) {
+		tail->pauseMap();
+	}
+}
+
+void MapState::unpause() {
+	if (tail) {
+		tail->unpauseMap();
+	}
 }

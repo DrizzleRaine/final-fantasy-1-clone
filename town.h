@@ -17,6 +17,10 @@ class Town : public Map {
 		void update();
 		void render();
 
+		// pause/unpause
+		void pause();
+		void unpause();
+
 		// NPCs
 		NPC npcs;
 

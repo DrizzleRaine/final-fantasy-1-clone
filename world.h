@@ -14,6 +14,10 @@ class World : public Map {
 		// operations
 		void update();
 		void render();
+
+		// pause/unpause
+		void pause();
+		void unpause();
 };
 
 #endif

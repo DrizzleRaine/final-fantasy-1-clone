@@ -10,7 +10,6 @@ World::~World() {
 }
 
 void World::init() {
-	party->restoreWorldPos();
 }
 
 void World::update() {
@@ -42,13 +41,20 @@ void World::update() {
 
 	// check if current tile is a map change tile
 	int currentTile = tiles[xPos][yPos];
-	if (currentTile > 0) {		// if map change tile
-		mapState->changeMap(new Town(currentTile + 1));
-		return;					// change maps
-	} else { 					// else if not a map change tile
-		party->storeWorldPos();	// store party pos on world map
+	if (currentTile > 0) {			// if map change tile
+		mapState->pushMap(new Town(currentTile));
+		return;						// change maps
+	} else { 						// else if not a map change tile
+		currentX = party->getX();	// store current position
+		currentY = party->getY();
 	}
 }
 
 void World::render() {
+}
+
+void World::pause() {
+}
+
+void World::unpause() {
 }

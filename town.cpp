@@ -26,10 +26,10 @@ void Town::init() {
 void Town::update() {
 	int xPos = party->getX() / tileSize;
 	int yPos = party->getY() / tileSize;
-	if (!party->stepping()) {					// if not already taking a step
-		bool dirSet = 0;	// was party direction set
-		bool blocked = 0;	// is party blocked by tile
-		int npcBlock = -1;	// is npc blocking the party
+	if (!party->stepping()) {	// if not already taking a step
+		bool dirSet = 0;		// was party direction set
+		bool blocked = 0;		// is party blocked by tile
+		int npcBlock = -1;		// is npc blocking the party
 
 		// if direction pressed, and party isnt paused in dialog, step
 		if (input->upPressed() && !party->isPaused()) {
@@ -110,8 +110,17 @@ void Town::update() {
 	// check if current tile is a map change tile
 	int currentTile = tiles[xPos][yPos];
 	if (currentTile > 0) {
-		mapState->changeMap(new World());
+		if (currentTile > mapID) {
+			// entering sub map (house, store, etc...)
+			mapState->pushMap(new Town(currentTile));
+		} else {
+			// exiting sub map (back out to town, world map, etc...)
+			mapState->popMap();
+		}
 		return;	// done with this map
+	} else {
+		currentX = party->getX();
+		currentY = party->getY();
 	}
 
 	// update npcs
@@ -127,4 +136,14 @@ void Town::render() {
 
 	// render dialogs
 	dialog.render(windowWidth, windowHeight);
+}
+
+void Town::pause() {
+	npcs.pause();
+	dialog.pause();
+}
+
+void Town::unpause() {
+	npcs.unpause();
+	dialog.unpause();
 }

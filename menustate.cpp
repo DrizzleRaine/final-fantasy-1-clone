@@ -59,3 +59,9 @@ void MenuState::update() {
 void MenuState::render() {
 	tail->renderMenu(windowWidth, windowHeight);
 }
+
+void MenuState::pause() {
+}
+
+void MenuState::unpause() {
+}
