@@ -133,6 +133,10 @@ void Map::unpauseMap() {
 	// restore party position
 	party->setX(currentX);
 	party->setY(currentY);
+
+	// restore map name
+	party->setMapName(mapName);
+
 	unpause();
 }
 
