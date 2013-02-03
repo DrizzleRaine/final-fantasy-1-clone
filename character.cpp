@@ -5,6 +5,38 @@ Character::Character() {
 
 	std::string textureNames[] = {"img/warrior_menu.tga", "img/thief_menu.tga", "img/white_menu.tga", "img/black_menu.tga", "img/monk_menu.tga", "img/red_menu.tga"};
 	textures.createTextures(JOBSCOUNT, textureNames);
+
+
+	// initialize the possible random names
+	std::string names[JOBSCOUNT][10] = {
+		// warrior names
+		{"Argus", "Arus", "Banon", "Baron", "Desh",
+		"Doma", "Giott", "Leo", "Sasuun", "Zeza"},
+
+		// thief names
+		{"Baku", "Biggs", "Blank", "Daryl", "Gerad",
+		"Kelga", "Puck", "Sarisa", "Tuss", "Wedge"},
+
+		// white mage names
+		{"Elia", "Kuku", "Jenica", "Luca", "Mikoto", 
+		"Noah", "Ruby", "Sara", "Sarina", "Sherko"},
+
+		// black mage names
+		{"Delila", "Gilles", "Gungho", "Homac", "Kokkol",
+		"Koko", "Nina", "Stella", "Topapa", "Zok"},
+		
+		// monk names
+		{"Arvis", "Cinna", "Drogan", "Duncan", "Gorn",
+		"Maduin", "Marcus", "Owain", "Owzer", "Walz"},
+
+		// red mage names
+		{"Duane", "Elayne", "Gill", "KluYa", "Kory",
+		"Lalibo", "Lola", "Mid", "Tot", "Yura"}};
+	for (int i = 0; i < JOBSCOUNT; i++) {
+		for (int j = 0; j < 10; j++) {
+			randomNames[i][j] = names[i][j];
+		}
+	}
 }
 
 Character::~Character() {
@@ -84,6 +116,10 @@ void Character::setName(std::string newName) {
 
 std::string Character::getName() {
 	return name;
+}
+
+void Character::setRandomName() {
+	name = randomNames[job][rand() % 10];
 }
 
 void Character::setJob(Jobs newJob) {

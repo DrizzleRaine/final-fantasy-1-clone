@@ -187,6 +187,10 @@ void Party::setName(std::string newName) {
 	characters[active].setName(newName);
 }
 
+void Party::randomName() {
+	characters[active].setRandomName();
+}
+
 std::string Party::getName() {
 	return characters[active].getName();
 }

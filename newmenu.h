@@ -17,9 +17,6 @@ class NewMenu : public Menu {
 		// blinking sub cursor
 		Cursor subCursor;
 
-		// 10 random names available for each character
-		std::string randomNames[Party::SIZE][10];
-
 		// display start game confirmation
 		bool startConfirm;
 

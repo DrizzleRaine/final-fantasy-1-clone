@@ -28,6 +28,7 @@ class Character {
 		// character name
 		void setName(std::string newName);
 		std::string getName();
+		void setRandomName();
 
 		// character job
 		void setJob(Jobs newJob);
@@ -47,6 +48,9 @@ class Character {
 		// character name and job
 		std::string name;
 		Jobs job;
+
+		// 10 random names available for each job
+		std::string randomNames[JOBSCOUNT][10];
 
 		// character textures
 		Textures textures;

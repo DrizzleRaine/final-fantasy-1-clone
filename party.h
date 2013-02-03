@@ -59,6 +59,7 @@ class Party {
 
 		// change the name of the active character to newName
 		void setName(std::string newName);
+		void randomName();
 
 		// get characters name
 		std::string getName();							// active character's name

@@ -1,17 +1,6 @@
 #include "newmenu.h"
 
 NewMenu::NewMenu() : subCursor(1) {
-	// initialize the possible random names
-	std::string names[Party::SIZE][10] = {{"Doma", "Leo", "Giott", "Baron", "Banon", "Argus", "Desh", "Sasuun", "Arus", "Zeza"},
-								{"Wedge", "Blank", "Kelga", "Daryl", "Tuss", "Sarisa", "Biggs", "Gerad", "Baku", "Puck"},
-								{"Ruby", "Elia", "Luca", "Mikoto", "Sherko", "Kuku", "Noah", "Jenica", "Sarina", "Sara"},
-								{"Stella", "Kokkol", "Homac", "Koko", "Zok", "Topapa", "Nina", "Delila", "Gungho", "Gilles"}};
-	for (int i = 0; i < Party::SIZE; i++) {
-		for (int j = 0; j < 10; j++) {
-			randomNames[i][j] = names[i][j];
-		}
-	}
-
 	startConfirm = 0;
 	startError = 0;
 }
@@ -68,7 +57,8 @@ void NewMenu::update() {
 		party->setActive(CURSEL / 2);
 
 		// assign the character a pseudo random name
-		party->setName(randomNames[CURSEL / 2][rand() % 10]);
+		//party->setName(randomNames[CURSEL / 2][rand() % 10]);
+		party->randomName();
 	} else if (input->getStart()) {				// attempt to start the game
 		input->resetStart();
 		for (int i = Party::FIRST; i < Party::SIZE; i++) {

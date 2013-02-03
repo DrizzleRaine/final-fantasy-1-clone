@@ -86,7 +86,6 @@ void Town::update() {
 
 		if (input->getConfirm()) {			// attempt to interact
 			input->resetConfirm();			// reset confirm button
-			input->setRepeatDelay();		// set to default for interactions
 			
 			// get tile in front of party
 			int frontX = party->getX() / tileSize;
@@ -102,6 +101,7 @@ void Town::update() {
 			}
 
 			// interact with npc in front of party (if there is one)
+			input->setRepeatDelay();		// set to default for interactions
 			npcs.interact(frontX, frontY);
 			input->setRepeatDelay(1);		// remove delay for walking
 		}
