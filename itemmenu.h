@@ -37,8 +37,8 @@ class ItemMenu : public Menu {
 		// render borders around the submenus
 		void subBorders();
 
-		// text for the submenus
-		void subText();
+		// render all the text
+		void renderText();
 
 		// render the cursor(s)
 		void cursorRender();

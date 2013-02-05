@@ -116,8 +116,8 @@ void ItemMenu::render() {
 	// borders around submenus
 	subBorders();
 
-	// text in submenus
-	subText();
+	// render the text
+	renderText();
 
 	// render the cursor(s)
 	cursorRender();
@@ -131,7 +131,7 @@ void ItemMenu::subBorders() {
 	border(-windowWidth, windowWidth, windowHeight - 764, -windowHeight);
 }
 
-void ItemMenu::subText() {
+void ItemMenu::renderText() {
 	const int LINEHEIGHT = twenty.getLineSkip();
 
 	// menu options
