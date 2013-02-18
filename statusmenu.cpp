@@ -108,13 +108,17 @@ void StatusMenu::overview() {
 	// values, right aligned
 	rightEdge = -100;
 
+	std::string value;
+
 	// magic level
-	twenty.textSize("0", &r);
-	twenty.drawText(rightEdge - r.w, TOPEDGE - LINEHEIGHT * 2, "0");
+	value = std::to_string(party->getAttribute(character, Character::MAGLEVEL));
+	twenty.textSize(value.c_str(), &r);
+	twenty.drawText(rightEdge - r.w, TOPEDGE - LINEHEIGHT * 2, value.c_str());
 
 	// current exp
-	twenty.textSize("0", &r);
-	twenty.drawText(rightEdge - r.w, TOPEDGE - LINEHEIGHT * 4, "0");
+	value = std::to_string(party->getAttribute(character, Character::EXP));
+	twenty.textSize(value.c_str(), &r);
+	twenty.drawText(rightEdge - r.w, TOPEDGE - LINEHEIGHT * 4, value.c_str());
 
 	// exp to next level
 	twenty.textSize("0", &r);
@@ -126,7 +130,10 @@ void StatusMenu::equip() {
 	const int TOPEDGE = windowHeight - 320 - LINEHEIGHT * 7;
 	const int LEFTEDGE = -windowWidth + 80;
 
+	// equipment slot labels
 	std::string slots[] = {"WPN", "SHD", "HLM", "ARM", "GLV"};
+
+	// display each label and current equipment for this character
 	for (int i = 0; i < 5; i++) {
 		twenty.drawText(LEFTEDGE, TOPEDGE - (LINEHEIGHT - 12) * i, 
 				slots[i].c_str());
@@ -142,20 +149,30 @@ void StatusMenu::stats() {
 	SDL_Rect r = {0, 0, 0, 0};
 	const int RIGHTEDGE = windowWidth - 130;
 
-	// general outline for stats display
-	std::string stats[] = {"STR", "AGL", "INT", "STA", "LCK", "", "ATK", "ACC", "DEF", "EVA"};
-	for (int i = 0; i < 10; i++) {
+	// stat labels
+	std::string stats[] = {"STR", "AGL", "INT", "STA", "LCK", 
+							"\nATK", "\nACC", "\nDEF", "\nEVA"};
+
+	// display each label and stat value for this character
+	for (int i = 0; i < 9; i++) {
+		// draw current stat label
 		twenty.drawText(LEFTEDGE, TOPEDGE - 65 * i, stats[i].c_str());
 
-		if (i != 5) {
+		std::string value;
+		if (i > 4) {
+			// skip a line after 5th
+			value = '\n';
+			twenty.drawText(LEFTEDGE + 200, TOPEDGE - 65 * i, "\n...");
+		} else {
 			twenty.drawText(LEFTEDGE + 200, TOPEDGE - 65 * i, "...");
-
-			// dummy placeholder values
-			std::string value = std::to_string((i + 1) * 13 / 3 % 20 + 1);
-
-			// stat values
-			twenty.textSize(value.c_str(), &r);
-			twenty.drawText(RIGHTEDGE - r.w, TOPEDGE - 65 * i, value.c_str());
 		}
+
+		// retrieve characters stat value
+		Character::Stats stat = static_cast<Character::Stats>(Character::STR + i);
+		value = value + std::to_string(party->getAttribute(character, stat));
+
+		// display the value
+		twenty.textSize(value.c_str(), &r);
+		twenty.drawText(RIGHTEDGE - r.w, TOPEDGE - 65 * i, value.c_str());
 	}
 }

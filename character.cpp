@@ -74,22 +74,61 @@ void Character::makeCopy(const Character &source) {
 
 void Character::initStats() {
 	attributes[LEVEL] = 1;
-	if (job == WARRIOR) {
-		attributes[HPMAX] = 35;
-	} else if (job == WHITE || job == MONK) {
-		attributes[HPMAX] = 33;
-	} else if (job == THIEF || job == RED) {
-		attributes[HPMAX] = 30;
-	} else {
-		attributes[HPMAX] = 25;
-	}
-	if (job < WHITE || job == MONK) {
-		attributes[MPMAX] = 0;
-	} else {
-		attributes[MPMAX] = 10;
+	attributes[EXP] = 0;
+	switch (job) {
+		case WARRIOR: {
+			attributes[MAGLEVEL] = 0;
+
+			// initial warrior stats (hpmax, mpmax, str, agl, ..., def, eva)
+			int attrValues[] = {35, 0, 10, 8, 1, 15, 8, 5, 18, 0, 61};
+			fillAttrs(attrValues);
+			break;
+		} case THIEF: {
+			attributes[MAGLEVEL] = 0;
+
+			// initial thief stats (hpmax, mpmax, str, agl, ..., def, eva)
+			int attrValues[] = {30, 0, 5, 15, 1, 5, 15, 2, 30, 0, 73};
+			fillAttrs(attrValues);
+			break;
+		} case WHITE: {
+			attributes[MAGLEVEL] = 1;
+
+			// initial white mage stats (hpmax, mpmax, str, agl, ..., def, eva)
+			int attrValues[] = {33, 10, 5, 5, 15, 8, 5, 2, 10, 0, 58};
+			fillAttrs(attrValues);
+			break;
+		} case BLACK: {
+			attributes[MAGLEVEL] = 1;
+
+			// initial black mage stats (hpmax, mpmax, str, agl, ..., def, eva)
+			int attrValues[] = {25, 10, 3, 5, 20, 2, 10, 1, 13, 0, 58};
+			fillAttrs(attrValues);
+			break;
+		} case MONK: {
+			attributes[MAGLEVEL] = 0;
+
+			// initial monk stats (hpmax, mpmax, str, agl, ..., def, eva)
+			int attrValues[] = {33, 0, 12, 5, 1, 10, 5, 14, 13, 5, 55};
+			fillAttrs(attrValues);
+			break;
+		} case RED: {
+			attributes[MAGLEVEL] = 1;
+
+			// initial red mage stats (hpmax, mpmax, str, agl, ..., def, eva)
+			int attrValues[] = {30, 10, 5, 10, 10, 5, 5, 2, 22, 0, 63};
+			fillAttrs(attrValues);
+			break;
+		} default:
+			break;
 	}
 	attributes[HP] = attributes[HPMAX];
 	attributes[MP] = attributes[MPMAX];
+}
+
+void Character::fillAttrs(int *initAttrs) {
+	for (int i = HPMAX; i < STATSCOUNT; i++) {
+		attributes[i] = initAttrs[i - HPMAX];
+	}
 }
 
 void Character::render(int x, int y) {

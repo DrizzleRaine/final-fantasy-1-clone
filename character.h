@@ -16,7 +16,8 @@ class Character {
 		enum Jobs {WARRIOR, THIEF, WHITE, BLACK, MONK, RED, JOBSCOUNT};
 
 		// character stats
-		enum Stats {LEVEL, HP, HPMAX, MP, MPMAX, STATSCOUNT};
+		enum Stats {LEVEL, EXP, MAGLEVEL, HP, MP, HPMAX, MPMAX, 
+			STR, AGL, INT, STA, LCK, ATK, ACC, DEF, EVA, STATSCOUNT};
 
 		// render at (x, y)
 		void render(int x, int y);
@@ -57,6 +58,10 @@ class Character {
 
 		// character attributes
 		int attributes[STATSCOUNT];
+
+		// helper function to fill in attributes array
+		// so it can be initialized easier
+		void fillAttrs(int initAttrs[]);
 
 		// string in format num/denom
 		std::string getFraction(Stats num, Stats denom);
