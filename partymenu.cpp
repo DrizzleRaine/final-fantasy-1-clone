@@ -1,5 +1,6 @@
 #include "partymenu.h"
 #include "itemmenu.h"
+#include "magicmenu.h"
 #include "statusmenu.h"
 
 PartyMenu::PartyMenu() : subCursor(1), subCursorSwap(1) {
@@ -44,9 +45,14 @@ void PartyMenu::update() {
 			swappingCharacters = 1;					// 1st char to swap selected
 			subCursorSwap.setSelection(FORMATION);	// points at formation option
 			subCursor.setSelection(CURSEL);			// points at 1st swap character
-		} else if (currentOption == STATUS) {
-			newCurSel = currentOption;
+		} else if (currentOption == MAGIC) {
 			currentOption = NONE;
+			cursor.setSelection(ITEMS);				// reset cursor before switching
+			menuState->pushMenu(new MagicMenu(CURSEL));
+			return;
+		} else if (currentOption == STATUS) {
+			currentOption = NONE;
+			cursor.setSelection(ITEMS);				// reset cursor before switching
 			menuState->pushMenu(new StatusMenu(CURSEL));
 			return;
 		} else if (CURSEL == FORMATION) {
@@ -56,6 +62,10 @@ void PartyMenu::update() {
 		} else if (CURSEL == ITEMS) {
 			menuState->pushMenu(new ItemMenu());
 			return;
+		} else if (CURSEL == MAGIC) {
+			currentOption = MAGIC;
+			subCursor.setSelection(CURSEL);
+			newCurSel = Party::FIRST;
 		} else if (CURSEL == STATUS) {
 			currentOption = STATUS;
 			subCursor.setSelection(CURSEL);
