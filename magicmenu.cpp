@@ -32,7 +32,11 @@ void MagicMenu::update() {
 			subCursor.setSelection(CURSEL);	// points at selected option
 			newCurSel = 0;					// start at first magic spell position
 		} else {
-			printf("USE SPELL\n");
+			if (subCursor.getSelection() == DISCARD) {
+				printf("DISCARD SPELL\n");
+			} else {
+				printf("USE SPELL\n");
+			}
 		}
 	}
 
@@ -64,13 +68,20 @@ void MagicMenu::update() {
 		}
 	} else {
 		if (input->downPressed()) {
-			newCurSel += 2;
+			newCurSel += 3;
 		} else if (input->upPressed()) {
-			newCurSel -= 2;
+			newCurSel -= 3;
 		} else if (input->rightPressed()) {
 			newCurSel++;
 		} else if (input->leftPressed()) {
 			newCurSel--;
+		}
+
+		// check for warp around on spell list
+		if (newCurSel > 23) {
+			newCurSel = newCurSel % 3;
+		} else if (newCurSel < 0) {
+			newCurSel += 24;
 		}
 	}
 
@@ -131,6 +142,10 @@ void MagicMenu::renderText() {
 
 		std::string lvl = "Lv. " + std::to_string(i);
 		twenty.drawText(-windowWidth + 50, windowHeight - 455 - (LINEHEIGHT - 8) * (i - 1), lvl.c_str());
+
+		twenty.drawText(-windowWidth + 280, windowHeight - 455 - (LINEHEIGHT - 8) * (i - 1), "Protect");
+		twenty.drawText(-40, windowHeight - 455 - (LINEHEIGHT - 8) * (i - 1), "Protect");
+		twenty.drawText(360, windowHeight - 455 - (LINEHEIGHT - 8) * (i - 1), "Protect");
 	}
 	//twenty.setColor(1.0, 1.0, 1.0);	// white
 }
@@ -155,9 +170,10 @@ void MagicMenu::charInfo() {
 
 void MagicMenu::cursorRender() {
 	// locations to base cursor drawings
-	const int ROW1Y = windowHeight - 140;
-	const int COL1X = -windowWidth + 100;
-	const int COL2X = 50;
+	const int ROW1Y = windowHeight - 385;
+	const int COL1X = -windowWidth + 280;
+	const int COL2X = -40;
+	const int COL3X = 360;
 
 	// how far to move when cursor goes to new line
 	const int LINEHEIGHT = twenty.getLineSkip();
@@ -179,10 +195,12 @@ void MagicMenu::cursorRender() {
 
 		// cursor is pointing at item to use/swap
 		int curSel = cursor.getSelection();
-		if (curSel % 2) {	// right column
-			cursor.render(COL2X, ROW1Y - ((curSel / 2) * LINEHEIGHT));
+		if (curSel % 3 == 2) {
+			cursor.render(COL3X, ROW1Y - ((curSel / 3) * (LINEHEIGHT - 8)));
+		} else if (curSel % 3) {	// right column
+			cursor.render(COL2X, ROW1Y - ((curSel / 3) * (LINEHEIGHT - 8)));
 		} else {			// left column
-			cursor.render(COL1X, ROW1Y - ((curSel / 2) * LINEHEIGHT));
+			cursor.render(COL1X, ROW1Y - ((curSel / 3) * (LINEHEIGHT - 8)));
 		}
 	}
 }
