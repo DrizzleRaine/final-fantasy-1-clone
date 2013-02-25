@@ -151,21 +151,36 @@ void MagicMenu::renderText() {
 }
 
 void MagicMenu::charInfo() {
+	const int TOPEDGE = windowHeight - 215;
 	const int LINEHEIGHT = twenty.getLineSkip();
 
 	// draw character sprite
 	party->render(character, -windowWidth + 100, windowHeight - 165);
 
 	// character name, level, and job
-	twenty.drawText(-windowWidth + 300, windowHeight - 215, 
-			party->getName(character).c_str());
-	twenty.drawText(-windowWidth + 600, windowHeight - 215, ("Lv. " +
-			std::to_string(party->getAttribute(character, Character::LEVEL))).c_str());
+	twenty.drawText(-windowWidth + 300, TOPEDGE, 
+		party->getName(character).c_str());
+	twenty.drawText(-windowWidth + 600, TOPEDGE, ("Lv. " +
+		std::to_string(party->getAttribute(character, Character::LEVEL))).c_str());
 	twenty.drawText(-windowWidth + 800, windowHeight - 215, 
-			party->getJob(character).c_str());
+		party->getJob(character).c_str());
 
 	// hp/mp
-	twenty.drawText(-windowWidth + 300, windowHeight - 215 - LINEHEIGHT, "HP\nMP");
+	twenty.drawText(-windowWidth + 300, TOPEDGE - LINEHEIGHT, "HP\nMP");
+	std::string hpFraction = party->getHPFraction(character);
+	std::string mpFraction = party->getMPFraction(character);
+
+	// right align hp/mp fractions
+	int rightEdge = -windowWidth + 710;
+	SDL_Rect r = {0, 0, 0, 0};
+
+	// hp fraction
+	twenty.textSize(hpFraction.c_str(), &r);
+	twenty.drawText(rightEdge - r.w, TOPEDGE - LINEHEIGHT, hpFraction.c_str());
+
+	// mp fraction
+	twenty.textSize(mpFraction.c_str(), &r);
+	twenty.drawText(rightEdge - r.w, TOPEDGE - LINEHEIGHT * 2, mpFraction.c_str());
 }
 
 void MagicMenu::cursorRender() {
