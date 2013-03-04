@@ -1,6 +1,7 @@
 #ifndef MAGICMENU_H
 #define MAGICMENU_H
 
+#include "spells.h"
 #include "menu.h"
 
 class MagicMenu : public Menu {
@@ -12,8 +13,13 @@ class MagicMenu : public Menu {
 		void update();
 		void render();
 
+		Spells spells;
+
 		// current character
 		Party::Characters character;
+
+		// current spell id pointed at by cursor
+		int curSpellID;
 
 		// blinking sub cursor
 		Cursor subCursor;

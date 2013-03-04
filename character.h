@@ -45,6 +45,9 @@ class Character {
 		// get character hp/mp fraction
 		std::string getHPFraction();
 		std::string getMPFraction();
+
+		// get spell id at given level and slot
+		int getSpell(int level, int slot);
 	private:
 		// character name and job
 		std::string name;
@@ -65,6 +68,9 @@ class Character {
 
 		// string in format num/denom
 		std::string getFraction(Stats num, Stats denom);
+
+		// IDs of spells this character knows
+		int spells[8][3];
 
 		// make a copy of this characacter object
 		void makeCopy(const Character &source);

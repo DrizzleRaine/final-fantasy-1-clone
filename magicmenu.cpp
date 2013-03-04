@@ -3,6 +3,7 @@
 MagicMenu::MagicMenu(int c) : subCursor(1) {
 	character = static_cast<Party::Characters>(c);
 	currentOption = USE;
+	curSpellID = -1;
 }
 
 MagicMenu::~MagicMenu() {
@@ -40,6 +41,7 @@ void MagicMenu::update() {
 		}
 	}
 
+	// switching characters
 	if (input->getRButton()) {
 		character = static_cast<Party::Characters>(character + 1);
 		if (character > Party::FOURTH) {
@@ -88,6 +90,10 @@ void MagicMenu::update() {
 	// update cursor selection
 	cursor.setSelection(newCurSel);
 
+	if (currentOption == USE || currentOption == DISCARD) {
+		curSpellID = party->getSpell(character, newCurSel / 3 + 1, newCurSel % 3);
+	}
+
 	// input handled
 	input->resetAll();
 }
@@ -131,23 +137,42 @@ void MagicMenu::renderText() {
 	twenty.drawText(windowWidth - (400 / 2) - (r.w / 2), windowHeight - 90, "Magic");
 
 	// current spell mp cost
-	twenty.drawText(windowWidth - 350, windowHeight - 215 - LINEHEIGHT * 2,
-			"MP Cost   -");
+	if (curSpellID != -1) {
+		twenty.drawText(windowWidth - 380, windowHeight - 215 - LINEHEIGHT * 2,
+			("MP Cost    " + std::to_string(spells.getMPCost(curSpellID))).c_str());
+	} else {
+		twenty.drawText(windowWidth - 380, windowHeight - 215 - LINEHEIGHT * 2,
+			"MP Cost    -");
+	}
 
-	for (int i = 1; i < 9; i++) {
-		if (party->getAttribute(character, Character::MAGLEVEL) < i) {
+	const int ROW1Y = windowHeight - 455;
+	const int LHSMALL = LINEHEIGHT - 8;
+	for (int i = 0; i < 8; i++) {
+		if (party->getAttribute(character, Character::MAGLEVEL) < (i + 1)) {
 			// TODO: fix font class method of changing colors
 			//twenty.setColor(0.5, 0.5, 0.5);	// gray
 		}
 
-		std::string lvl = "Lv. " + std::to_string(i);
-		twenty.drawText(-windowWidth + 50, windowHeight - 455 - (LINEHEIGHT - 8) * (i - 1), lvl.c_str());
+		// row level
+		std::string lvl = "Lv. " + std::to_string(i + 1);
+		twenty.drawText(-windowWidth + 50, ROW1Y - LHSMALL * i, lvl.c_str());
 
-		twenty.drawText(-windowWidth + 280, windowHeight - 455 - (LINEHEIGHT - 8) * (i - 1), "Protect");
-		twenty.drawText(-40, windowHeight - 455 - (LINEHEIGHT - 8) * (i - 1), "Protect");
-		twenty.drawText(360, windowHeight - 455 - (LINEHEIGHT - 8) * (i - 1), "Protect");
+		// 3 cols of spells
+		for (int slot = 0; slot < 3; slot++) {
+			int spellID = party->getSpell(character, i + 1, slot);
+			if (spellID > -1) {
+				twenty.drawText(-windowWidth + 280 + (400 * slot), 
+						ROW1Y - LHSMALL * i, spells.getName(spellID).c_str());
+			}
+		}
 	}
 	//twenty.setColor(1.0, 1.0, 1.0);	// white
+
+	// current spell description
+	if (curSpellID != -1) {
+		twenty.drawText(-windowWidth + 50, -windowHeight + 30, 
+				spells.getDescription(curSpellID).c_str());
+	}
 }
 
 void MagicMenu::charInfo() {
@@ -162,7 +187,7 @@ void MagicMenu::charInfo() {
 		party->getName(character).c_str());
 	twenty.drawText(-windowWidth + 600, TOPEDGE, ("Lv. " +
 		std::to_string(party->getAttribute(character, Character::LEVEL))).c_str());
-	twenty.drawText(-windowWidth + 800, windowHeight - 215, 
+	twenty.drawText(-windowWidth + 820, windowHeight - 215, 
 		party->getJob(character).c_str());
 
 	// hp/mp

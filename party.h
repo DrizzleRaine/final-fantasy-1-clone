@@ -86,6 +86,9 @@ class Party {
 		std::string getMPFraction(Characters c);
 		// future: dont need setters for hpmax/mpmax
 		// just have a level up function?
+
+		// get spell character c has at level and slot
+		int getSpell(Characters c, int level, int slot);
 	
 		// how much gil party has	
 		unsigned int getGil() { return gil; }

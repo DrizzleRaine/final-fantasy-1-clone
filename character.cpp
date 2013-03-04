@@ -37,6 +37,13 @@ Character::Character() {
 			randomNames[i][j] = names[i][j];
 		}
 	}
+
+	// initialize character to not have any spells
+	for (int lvl = 0; lvl < 8; lvl++) {
+		for (int slot = 0; slot < 3; slot++) {
+			spells[lvl][slot] = -1;
+		}
+	}
 }
 
 Character::~Character() {
@@ -223,4 +230,13 @@ std::string Character::getFraction(Stats num, Stats denom) {
 
 	// return fraction format
 	return (cur + '/' + max);
+}
+
+int Character::getSpell(int level, int slot) {
+	level--;	// convert to 0-based index
+	if (level < 0 || level > 7 || slot < 0 || slot > 2) {
+		// out of bounds
+		return 0;
+	}
+	return spells[level][slot];
 }

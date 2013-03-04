@@ -265,6 +265,13 @@ std::string Party::getMPFraction(Characters c) {
 	return "";
 }
 
+int Party::getSpell(Characters c, int level, int slot) {
+	if (c >= FIRST && c < SIZE) {
+		return characters[c].getSpell(level, slot);
+	}
+	return 0;
+}
+
 void Party::addItem(int id) {
 	if (!itemCount[id]) {
 		// party does not have any of this item
