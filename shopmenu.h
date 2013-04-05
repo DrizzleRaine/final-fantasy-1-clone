@@ -6,11 +6,15 @@
 class ShopMenu : public Menu {
 	public:
 		ShopMenu();
-		~ShopMenu();
+		virtual ~ShopMenu();
 	private:
 		// operations
-		void update();
-		void render();
+		virtual void update() = 0;
+		virtual void render() = 0;
+
+		// update and render things common to all shops
+		void updateShop();
+		void renderShop();
 
 		// blinking sub cursor
 		Cursor subCursor;

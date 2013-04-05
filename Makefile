@@ -14,7 +14,7 @@ $(ODIR)%.o: %.cpp
 	$(CMD) -c $< -o $@
 
 clean:
-	rm $(OBJECTS) One
+	rm -f $(OBJECTS) One
 
 new:
 	make clean

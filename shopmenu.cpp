@@ -7,7 +7,7 @@ ShopMenu::ShopMenu() : subCursor(1) {
 ShopMenu::~ShopMenu() {
 }
 
-void ShopMenu::update() {
+void ShopMenu::updateShop() {
 	const int CURSEL = cursor.getSelection();
 	int newCurSel = CURSEL;
 
@@ -30,7 +30,7 @@ void ShopMenu::update() {
 	input->resetAll();
 }
 
-void ShopMenu::render() {
+void ShopMenu::renderShop() {
 	// blue background and border entire window
 	blueBackground(windowWidth, windowHeight);
 	border(-windowWidth, windowWidth, windowHeight, -windowHeight);
