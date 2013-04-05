@@ -6,6 +6,8 @@
 class ItemShop : public ShopMenu {
 	public:
 	private:
+		void update();
+		void render();
 };
 
 #endif
