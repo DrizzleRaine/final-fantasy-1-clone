@@ -1,6 +1,8 @@
 #include "town.h"
 #include "world.h"
 
+#include "itemshop.h"
+
 Town::Town(int mapID) {
 	this->mapID = mapID;
 
@@ -100,10 +102,31 @@ void Town::update() {
 				frontX--;
 			}
 
-			// interact with npc in front of party (if there is one)
-			input->setRepeatDelay();		// set to default for interactions
-			npcs.interact(frontX, frontY);
-			input->setRepeatDelay(1);		// remove delay for walking
+			// find out which, if any, npc is in front of character
+			int npcInFront = npcs.exists(frontX, frontY);
+			if (npcInFront > -1) {
+				NPC::ShopTypes shopType = npcs.getShopType(npcInFront);
+				if (shopType > NPC::NONE && shopType < NPC::COUNT) {
+					// the npc is a shop, enter it
+					if (shopType == NPC::ITEM) {
+						mapState->enterMenu()->pushMenu(new ItemShop());
+					} else if (shopType == NPC::WHITE) {
+						// TODO
+					} else if (shopType == NPC::BLACK) {
+						// TODO
+					}
+					return;
+				} else {
+					// set to default for interactions
+					input->setRepeatDelay();
+
+					// npc isnt a shop, interact with it
+					npcs.interact(npcInFront);
+
+					// remove delay for walking
+					input->setRepeatDelay(1);
+				}
+			}
 		}
 	}
 

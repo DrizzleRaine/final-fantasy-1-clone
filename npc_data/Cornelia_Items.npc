@@ -2,10 +2,10 @@
 npc_data/store_bandana.tga
 200.0 100.0
 0 1 1220.0
-252 150 2
+252 150 2 0
 
 
 0 0
 0 0 0
-252 174 2
-Item Store
+252 174 2 1
+Cornelia_Items

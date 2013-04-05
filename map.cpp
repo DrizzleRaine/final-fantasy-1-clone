@@ -1,4 +1,5 @@
 #include "map.h"
+#include "partymenu.h"
 
 Map::Map() {
 	input = 0;
@@ -88,7 +89,7 @@ void Map::updateMap() {
 
 		// enter party menu from any
 		// map when start button pressed
-		mapState->enterMenu();
+		mapState->enterMenu()->pushMenu(new PartyMenu());
 		return;
 	}
 	update();

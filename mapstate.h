@@ -2,6 +2,7 @@
 #define MAPSTATE_H
 
 #include "state.h"
+#include "menustate.h"
 
 #include "map.h"
 class Map;
@@ -16,8 +17,9 @@ class MapState : public State {
 		void popMap();
 		void changeMap(Map *map);
 
-		// push given menu on top of state stack
-		void enterMenu();
+		// push MenuState on top of state stack
+		// and return the new MenuState on top
+		MenuState *enterMenu();
 	private:
 		// operations
 		void update();

@@ -75,6 +75,18 @@ void NPC::init(std::string mapName, int tSize, Party *p, Dialog *d) {
 		in >> npcs[i].x;
 		in >> npcs[i].y;
 		in >> npcs[i].direction;
+
+		// read in the shop type
+		int sType;
+		in >> sType;
+
+		// shop type bounds check for cast to enum
+		if (sType > NONE && sType < COUNT) {
+			npcs[i].shopType = static_cast<ShopTypes>(sType);
+		} else {
+			npcs[i].shopType = NONE;
+		}
+
 		in.ignore(256, '\n');	// go to the next line
 		getline(in, npcs[i].message, '\n');
 
@@ -93,18 +105,19 @@ void NPC::init(std::string mapName, int tSize, Party *p, Dialog *d) {
 	textures.createTextures(textureCount, textureNames);
 }
 
-void NPC::interact(int x, int y) {
-	int found = exists(x, y);
-	if (found < 0) {
-		return;	// no npc to interact with
-	}
-
+void NPC::interact(int npcID) {
 	// the npc being interacted with
-	NPCData *npc = &npcs[found];
+	NPCData *npc = &npcs[npcID];
 
 	if (npc->moves && npc->newDirection && 
 			(SDL_GetTicks() - npc->step) > npc->stepDelay && !npc->blocked) {
 		return;	// cant interact while npc is moving
+	}
+
+	// is this npc a shop?
+	if (npc->shopType > NONE && npc->shopType < COUNT) {
+		// if so it does not have a dialog, just return
+		return;
 	}
 
 	// if a dialog exists
@@ -138,6 +151,7 @@ void NPC::interact(int x, int y) {
 
 	// push npc dialog
 	dialog->push(npc->message);
+	return;
 }
 
 int NPC::exists(int x, int y) {
@@ -355,6 +369,17 @@ void NPC::unpause() {
 		npcs[i].step = SDL_GetTicks() - npcs[i].stepPause;
 		npcs[i].animation = SDL_GetTicks() - npcs[i].animationPause;
 	}
+}
+
+NPC::ShopTypes NPC::getShopType(int npcID) {
+	return npcs[npcID].shopType;
+}
+
+std::string NPC::getShopName(int npcID) {
+	if (getShopType(npcID) > NONE && getShopType(npcID) < COUNT) {
+		return npcs[npcID].message;
+	}
+	return "";
 }
 
 bool NPC::tileBlocked(int **tiles, int npc, int x, int y) {

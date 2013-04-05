@@ -1,5 +1,4 @@
 #include "mapstate.h"
-#include "partymenu.h"
 
 MapState::MapState() {
 	head = 0;
@@ -46,10 +45,10 @@ void MapState::changeMap(Map *map) {
 	pushMap(map);
 }
 
-void MapState::enterMenu() {
+MenuState *MapState::enterMenu() {
 	MenuState *ms = new MenuState();
 	stateManager->pushState(ms);
-	ms->pushMenu(new PartyMenu());
+	return ms;
 }
 
 void MapState::update() {

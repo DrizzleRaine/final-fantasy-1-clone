@@ -16,7 +16,7 @@ class NPC {
 		void init(std::string mapName, int tSize, Party *p, Dialog *d);
 
 		// interact with an npc
-		void interact(int x, int y);
+		void interact(int npcID);
 
 		// get npc at (x, y) if there is one (-1 if none)
 		int exists(int x, int y);
@@ -32,6 +32,13 @@ class NPC {
 		// pause/unpause npc steps/animation	
 		void pause();
 		void unpause();
+
+		// possible shops types for npcs
+		enum ShopTypes {NONE = 0, ITEM, WHITE, BLACK, COUNT};
+
+		// shop type and name accessors
+		ShopTypes getShopType(int npcID);
+		std::string getShopName(int npcID);
 	private:
 		// npcs have access to the party
 		Party *party;
@@ -46,7 +53,8 @@ class NPC {
 			// which texture represents this npc
 			int textureID; 
 
-			//what npc will say to player
+			// what npc will say to player
+			// if npc is a shop, this contains shop name
 			std::string message;
 
 			// dimensions of the sprite sheet
@@ -69,6 +77,9 @@ class NPC {
 
 			// current position and direction
 			int x, y, direction;
+
+			// npc shop type
+			ShopTypes shopType;
 
 			// next direction to walk chosen
 			bool newDirection;
