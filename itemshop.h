@@ -1,13 +1,31 @@
 #ifndef ITEMSHOP_H
 #define ITEMSHOP_H
 
+#include "items.h"
 #include "shopmenu.h"
 
 class ItemShop : public ShopMenu {
 	public:
+		ItemShop();
+		~ItemShop();
 	private:
 		void update();
 		void render();
+
+		Items items;
+
+		// how many items scrolled down currently in sell menu
+		// (# rows scrolled down) * (2 columns)
+		int scrolled;
+
+		// currently selected item to buy/sell
+		int itemSelected;
+
+		// amount of itemSelected to buy/sell
+		int amountSelected;
+
+		// cursor position before selecting item
+		int prevCurPos;
 };
 
 #endif

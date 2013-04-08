@@ -231,16 +231,10 @@ void Party::initialize() {
 	for (int i = FIRST; i < SIZE; i++) {
 		characters[static_cast<Characters>(i)].initStats();
 	}
-	gil = 0;
+	gil = 500;
 	for (int i = 0; i < INVENTORY_SIZE; i++) {
-		items[i] = 0;
+		items[i] = -1;
 		itemCount[i] = 0;
-	}
-
-	// temporary to test item menu
-	for (int i = 0; i < 10; i++) {
-		items[i] = i;
-		itemCount[i] = i;
 	}
 }
 
@@ -272,17 +266,42 @@ int Party::getSpell(Characters c, int level, int slot) {
 	return 0;
 }
 
-void Party::addItem(int id) {
-	if (!itemCount[id]) {
-		// party does not have any of this item
+int Party::getItemCount(int id) {
+	if (id < 0 || id >= INVENTORY_SIZE) {
+		return 0;
+	}
+	return itemCount[id];
+}
+
+void Party::addItem(int id, int amount) {
+	if (id < 0 || id >= INVENTORY_SIZE) {
+		return;
+	}
+
+	// update item count
+	itemCount[id] += amount;
+	
+	if (itemCount[id] == amount) {
+		// added item party did not previously have
 		for (int i = 0; i < INVENTORY_SIZE; i++) {
-			if (!items[i]) {
+			if (items[i] == -1) {
 				// new item goes in first empty slot
 				items[i] = id;
+				return;
+			}
+		}
+	} else if (itemCount[id] <= 0) {
+		itemCount[id] = 0;
+
+		// party no longer has any of the item
+		for (int i = 0; i < INVENTORY_SIZE; i++) {
+			if (items[i] == id) {
+				// remove the item from inentory slot
+				items[i] = -1;
+				return;
 			}
 		}
 	}
-	itemCount[id]++;
 }
 
 void Party::swapItems(int pos1, int pos2) {
@@ -294,7 +313,7 @@ void Party::swapItems(int pos1, int pos2) {
 void Party::sortItems() {
 	// sort items by ID
 	for (int i = 0, j = 0; i < INVENTORY_SIZE; i++) {
-		items[i] = 0;		// clear inventory
+		items[i] = -1;		// clear inventory
 		if (itemCount[i]) {	// party has this item
 			items[j] = i;	// put it in current slot
 			j++;			// increment current slot

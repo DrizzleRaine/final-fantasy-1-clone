@@ -11,6 +11,7 @@ class Items {
 
 		std::string getName(int id);
 		std::string getDescription(int id);
+		int getWorth(int id);
 	private:
 		// item categories
 		enum Categories {KEY, HEAL, CURE, EQUIPMENT};
@@ -23,6 +24,9 @@ class Items {
 			// item category and type
 			Categories category;
 			Types type;
+
+			// sell value to shops
+			int worth;
 
 			// name and description
 			std::string name;

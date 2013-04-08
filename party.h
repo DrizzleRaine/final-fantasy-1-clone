@@ -97,8 +97,8 @@ class Party {
 		// party inventory
 		static const int INVENTORY_SIZE = 256;
 		int getItem(int pos) { return items[pos]; }
-		int getItemCount(int id) { return itemCount[id]; }
-		void addItem(int id);
+		int getItemCount(int id);
+		void addItem(int id, int amount = 1);
 		void swapItems(int pos1, int pos2);
 		void sortItems();
 

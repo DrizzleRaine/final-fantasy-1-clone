@@ -83,19 +83,27 @@ void ItemMenu::update() {
 		// scroll at top and bottom
 		if (newCurSel < 0) {
 			if (newCurSel == -1) {
+				// wrap to top right
 				newCurSel = 1;
 			} else {
+				// wrap to bottom left
 				newCurSel = 0;
 			}
+
+			// scroll up if not at top
 			if (scrolled > 0) {
 				scrolled -= 2;
 			}
 		} else if (newCurSel > 19) {
 			if (newCurSel == 20) {
+				// wrap to bottom left
 				newCurSel = 18;
 			} else {
+				// wrap to bottom right
 				newCurSel = 19;
 			}
+
+			// scroll down if not at bottom
 			if (scrolled < Party::INVENTORY_SIZE / 2) {
 				scrolled += 2;
 			}
@@ -110,7 +118,7 @@ void ItemMenu::update() {
 }
 
 void ItemMenu::render() {
-	// blue background and border entire window
+	// blue background
 	blueBackground(windowWidth, windowHeight);
 
 	// borders around submenus
@@ -147,11 +155,11 @@ void ItemMenu::renderText() {
 	int y, itemID, itemCount;
 	std::string name, count;
 	for (int i = 0; i < 20; i += 2) {
-		// for 20 rows of items
+		// for 10 rows of items with 2 columns
 		y = windowHeight - 210 - (i / 2) * LINEHEIGHT;
 
 		// first column
-		itemID = party->getItem(i + (scrolled));
+		itemID = party->getItem(i + scrolled);
 		itemCount = party->getItemCount(itemID);
 		name = items.getName(itemID);
 		count = std::to_string(itemCount);
@@ -161,7 +169,7 @@ void ItemMenu::renderText() {
 		}
 
 		// second column
-		itemID = party->getItem(i + 1 + (scrolled));
+		itemID = party->getItem(i + 1 + scrolled);
 		itemCount = party->getItemCount(itemID);
 		name = items.getName(itemID);
 		count = std::to_string(itemCount);
@@ -173,7 +181,7 @@ void ItemMenu::renderText() {
 
 	if (currentOption == USE) {
 		// item description
-		itemID =  party->getItem(cursor.getSelection() + scrolled);
+		itemID = party->getItem(cursor.getSelection() + scrolled);
 		if (party->getItemCount(itemID)) {
 			twenty.drawText(-windowWidth + 50, -windowHeight + 35 + LINEHEIGHT, 
 					items.getDescription(itemID).c_str());
@@ -184,8 +192,8 @@ void ItemMenu::renderText() {
 void ItemMenu::cursorRender() {
 	// locations to base cursor drawings
 	const int ROW1Y = windowHeight - 140;
-	const int COL1X = -windowWidth + 100;
-	const int COL2X = 50;
+	const int COL1X = -windowWidth + 100;	// left col
+	const int COL2X = 50;					// right col
 
 	// how far to move when cursor goes to new line
 	const int LINEHEIGHT = twenty.getLineSkip();
@@ -204,7 +212,7 @@ void ItemMenu::cursorRender() {
 			}
 		}
 
-		// cursor is pointing at second character to swap
+		// cursor is pointing at second item to swap
 		int curSel = cursor.getSelection();
 		if (curSel % 2) {	// right column
 			cursor.render(COL2X, ROW1Y - ((curSel / 2) * LINEHEIGHT));

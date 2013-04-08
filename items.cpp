@@ -22,6 +22,9 @@ Items::Items() {
 		in >> type;
 		items[i].type = static_cast<Item::Types>(type);
 
+		// item worth
+		in >> items[i].worth;
+
 		// go to the next line
 		in.ignore(256, '\n');
 
@@ -33,6 +36,7 @@ Items::Items() {
 		for (int j = 0; j < 4; j++) {
 			in >> items[i].values[j];
 		}
+
 	}
 	in.close();
 }
@@ -54,6 +58,13 @@ std::string Items::getDescription(int id) {
 		return "";
 	}
 	return items[id].description;
+}
+
+int Items::getWorth(int id) {
+	if (!inBounds(id)) {
+		return 0;
+	}
+	return items[id].worth;
 }
 
 bool Items::inBounds(int id) {
