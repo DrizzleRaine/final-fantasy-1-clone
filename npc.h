@@ -13,7 +13,7 @@ class NPC {
 		~NPC();
 
 		// initialize the npcs
-		void init(std::string mapName, int tSize, Party *p, Dialog *d);
+		void init(std::string mapFile, int tSize, Party *p, Dialog *d);
 
 		// interact with an npc
 		void interact(int npcID);

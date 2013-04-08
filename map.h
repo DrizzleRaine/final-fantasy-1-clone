@@ -50,8 +50,9 @@ class Map {
 		// id of the map
 		int mapID;
 
-		// name of the map
-		std::string mapName;
+		// name of the region and map file
+		std::string region;
+		std::string mapFile;
 
 		// array of info about map tiles
 		int **tiles;

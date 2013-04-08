@@ -46,8 +46,8 @@ class Party {
 		// current map
 		int getMap() { return map; }
 		void setMap(int mapID) { map = mapID; }
-		std::string getMapName() { return mapName; }
-		void setMapName(std::string name) { mapName = name; }
+		std::string getRegion() { return region; }
+		void setRegion(std::string name) { region = name; }
 
 		// render the party, character, or given job
 		void renderParty(int width, int height);		// first char, cur pos
@@ -117,7 +117,7 @@ class Party {
 
 		// map party is on at (x, y)
 		int map, x, y;
-		std::string mapName;
+		std::string region;
 
 		// which direction party is facing
 		Directions direction;

@@ -34,14 +34,14 @@ void Map::init(Party *p, Input *in, MapState *ms) {
 
 	// update parties current map
 	party->setMap(mapID);
-	party->setMapName(mapName);
+	party->setRegion(region);
 
 	// generate textures
-	std::string textureNames[] = {"map_data/" + mapName + ".tga"};
+	std::string textureNames[] = {"map_data/" + mapFile + ".tga"};
 	textures.createTextures(COUNT, textureNames);
 
 	// map filename containing map data
-	std::string mapData = "map_data/" + mapName + ".map";
+	std::string mapData = "map_data/" + mapFile + ".map";
 
 	// load map and tile info
 	int direction;
@@ -136,7 +136,7 @@ void Map::unpauseMap() {
 	party->setY(currentY);
 
 	// restore map name
-	party->setMapName(mapName);
+	party->setRegion(region);
 
 	unpause();
 }

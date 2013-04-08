@@ -9,7 +9,8 @@ Town::Town(int mapID) {
 	std::ifstream in;
 	in.open("map_data/maps");
 	for (int i = 0; i < mapID; i++) {
-		in >> mapName;
+		in >> region;
+		in >> mapFile;
 	}
 	in.close();
 }
@@ -19,10 +20,12 @@ Town::~Town() {
 
 void Town::init() {
 	// initialize npcs
-	npcs.init(mapName, tileSize, party, &dialog);
+	npcs.init(mapFile, tileSize, party, &dialog);
 
-	// display town name for 2 seconds
-	dialog.push(mapName, 2000);
+	if (mapFile.find('_') == std::string::npos) {
+		// if region is not a sub region (e.g. Cornelia_Inn inside Cornelia)
+		dialog.push(region, 2000);	// display region name for 2 seconds
+	}
 }
 
 void Town::update() {

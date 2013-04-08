@@ -3,7 +3,8 @@
 
 World::World() {
 	mapID = 1;
-	mapName = "World";
+	region = "World";	// TODO update based on possible encounters
+	mapFile = "World/World";
 }
 
 World::~World() {

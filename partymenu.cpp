@@ -197,11 +197,11 @@ void PartyMenu::subText() {
 	twenty.drawText(rightEdge - r.w, -windowHeight + 410 - LINEHEIGHT, 
 			party->getTime().c_str());
 
-	// draw map name centered
-	std::string mapName = party->getMapName();
-	twenty.textSize(mapName.c_str(), &r);
+	// draw region name centered
+	std::string region = party->getRegion();
+	twenty.textSize(region.c_str(), &r);
 	twenty.drawText(windowWidth - (650 / 2) - (r.w / 2), -windowHeight + 35, 
-			mapName.c_str());
+			region.c_str());
 }
 
 void PartyMenu::cursorRender(const int SPRITEX, const float *SPRITEY) {

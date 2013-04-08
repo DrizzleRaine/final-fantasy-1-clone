@@ -15,13 +15,13 @@ NPC::~NPC() {
 	}
 }
 
-void NPC::init(std::string mapName, int tSize, Party *p, Dialog *d) {
+void NPC::init(std::string mapFile, int tSize, Party *p, Dialog *d) {
 	party = p;
 	dialog = d;
 	tileSize = tSize;
 
 	// open the npc file for this map
-	std::string npcFile = "npc_data/" + mapName + ".npc";
+	std::string npcFile = "npc_data/" + mapFile + ".npc";
 	std::ifstream in;
 	in.open(npcFile.c_str());
 
