@@ -40,13 +40,22 @@ void ItemShop::update() {
 			menuState->exitMenus();		// exit shop menu
 			return;						// return immediately
 		} else if (itemSelected == -1) {
+			message = "Thanks! Anything else?";
 			newCurSel = currentOption;	// restore cursor
 			currentOption = NONE;		// return to menu options
 		} else {
+			if (currentOption == BUY) {
+				message = "So, what'll it be?";
+			} else if (currentOption == SELL) {
+				message = "What would you like to sell?";
+			}
 			newCurSel = prevCurPos;		// restore cursor
 			prevCurPos = -1;			// unset previous position
 			itemSelected = -1;			// cancel item buy/sell
 		}
+
+		// remove timed message
+		msgTimer = 0;
 	}
 
 	// check if option selected
@@ -55,9 +64,16 @@ void ItemShop::update() {
 			if (CURSEL == EXIT) {
 				menuState->exitMenus();	// exit shop menu
 				return;					// return immediately
+			} else if (CURSEL == BUY) {
+				message = "So, what'll it be?";
+			} else if (CURSEL == SELL) {
+				message = "What would you like to sell?";
 			}
 
-			// else buy or sell selected
+			// remove timed message
+			msgTimer = 0;
+
+			// buy or sell option selected
 			currentOption = static_cast<Options>(CURSEL);
 			subCursor.setSelection(CURSEL);
 			newCurSel = 0;
@@ -76,17 +92,28 @@ void ItemShop::update() {
 			party->addItem(itemSelected, numberItems);
 
 			// transaction complete
+			message = "So, what'll it be?";
+			timedMessage = "Thanks!";
+			msgTimer = SDL_GetTicks();
+
 			newCurSel = prevCurPos;		// restore cursor
 			prevCurPos = -1;			// unset previous position
 			itemSelected = -1;			// cancel item buy/sell
 		} else if (currentOption == BUY) {
 			if (price[CURSEL] > party->getGil()) {
 				// party cant afford the item
-				// TODO change welcome message
+				timedMessage = "You don't have enough gil.";
+				msgTimer = SDL_GetTicks();
 			} else {
 				// item to buy selected
 				itemSelected = stockID[CURSEL];
 				amountSelected = 1;
+
+				// set message and remove timed message
+				message = "How many would you like?";
+				msgTimer = 0;
+
+				// store and reset cursor
 				prevCurPos = newCurSel;
 				newCurSel = 0;
 			}
@@ -94,6 +121,12 @@ void ItemShop::update() {
 			// selling an item party has more than 0 of
 			itemSelected = party->getItem(CURSEL + scrolled);
 			amountSelected = 1;
+			
+			// set message and remove timed message
+			message = "How many are you selling?";
+			msgTimer = 0;
+
+			// store and reset cursor
 			prevCurPos = newCurSel;
 			newCurSel = 0;
 		}

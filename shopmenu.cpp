@@ -2,6 +2,8 @@
 
 ShopMenu::ShopMenu() : subCursor(1) {
 	currentOption = NONE;
+	message = "Welcome!";
+	msgTimer = 0;
 }
 
 ShopMenu::~ShopMenu() {
@@ -78,7 +80,13 @@ void ShopMenu::sellFormat() {
 
 void ShopMenu::subText() {
 	// draw current message
-	twenty.drawText(-windowWidth + 50, windowHeight - 90, "Welcome!");
+	if (msgTimer && (SDL_GetTicks() - msgTimer) <= 1000) {
+		// display timed messages for 1 second
+		twenty.drawText(-windowWidth + 50, windowHeight - 90, timedMessage.c_str());
+	} else {
+		msgTimer = 0;
+		twenty.drawText(-windowWidth + 50, windowHeight - 90, message.c_str());
+	}
 
 	// draw shop type centered in upper right sub window	
 	SDL_Rect r = {0, 0, 0, 0};

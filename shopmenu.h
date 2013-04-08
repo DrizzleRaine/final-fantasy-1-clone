@@ -11,6 +11,13 @@ class ShopMenu : public Menu {
 		// shop type to display
 		std::string shopType;
 
+		// message to display
+		std::string message;
+
+		// message to display for a brief time
+		unsigned int msgTimer;
+		std::string timedMessage;
+
 		// number of available goods
 		int stockCount;
 
