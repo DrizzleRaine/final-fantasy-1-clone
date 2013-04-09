@@ -1,21 +1,11 @@
 #include "itemshop.h"
 
-ItemShop::ItemShop() {
-	shopType = "Item";
+ItemShop::ItemShop(std::string type, std::string file) : ShopMenu(type, file) {
 	scrolled = 0;
 	itemSelected = -1;
 
-	// TODO: fill from file
-	stockCount = 4;
-
-	stockID = new int[stockCount];
 	price = new int[stockCount];
 	stock = new std::string[stockCount];
-
-	stockID[0] = 0;
-	stockID[1] = 3;
-	stockID[2] = 2;
-	stockID[3] = 7;
 
 	for (int i = 0; i < stockCount; i++) {
 		stock[i] = items.getName(stockID[i]);
@@ -24,7 +14,6 @@ ItemShop::ItemShop() {
 }
 
 ItemShop::~ItemShop() {
-	delete[] stockID;
 	delete[] price;
 	delete[] stock;
 }
@@ -272,19 +261,8 @@ void ItemShop::render() {
 		twenty.drawText((windowWidth / 2) - 330 - r.w, windowHeight - 410, 
 				totalStr.c_str());
 
-		// draw 'stock'
-		twenty.drawText((windowWidth / 2) - 150, windowHeight - 335, "Stock");
-
-		// amount party currently has
-		std::string partyStock = std::to_string(party->getItemCount(itemSelected));
-
-		// draw party stock right aligned
-		twenty.textSize(partyStock.c_str(), &r);
-		twenty.drawText(windowWidth - 70 - r.w, windowHeight - 380, partyStock.c_str());
-
-		// item description
-		twenty.drawText(-windowWidth + 50, -windowHeight + 35,
-				items.getDescription(itemSelected).c_str());
+		// render everything else
+		basicDetails(itemSelected);
 	} else if (currentOption == BUY) {
 		// basic common shop outline
 		basicFormat();
@@ -292,20 +270,8 @@ void ItemShop::render() {
 		// render stock list
 		renderStock();
 
-		// draw 'stock'
-		twenty.drawText((windowWidth / 2) - 150, windowHeight - 335, "Stock");
-
-		// amount party currently has
-		std::string partyStock = std::to_string(party->getItemCount(stockID[cursor.getSelection()]));
-
-		// draw party stock right aligned
-		SDL_Rect r = {0, 0, 0, 0};
-		twenty.textSize(partyStock.c_str(), &r);
-		twenty.drawText(windowWidth - 70 - r.w, windowHeight - 380, partyStock.c_str());
-
-		// item description
-		twenty.drawText(-windowWidth + 50, -windowHeight + 35,
-				items.getDescription(stockID[cursor.getSelection()]).c_str());
+		// render everything else
+		basicDetails(stockID[cursor.getSelection()]);
 	} else if (currentOption == SELL) {
 		sellFormat();
 
@@ -352,4 +318,59 @@ void ItemShop::render() {
 
 	// render cursor(s) on top
 	cursorRender();
+}
+
+void ItemShop::basicDetails(int itemID) {
+	// draw 'stock'
+	twenty.drawText((windowWidth / 2) - 150, windowHeight - 335, "Stock");
+
+	// number party currently has
+	std::string partyStock = std::to_string(party->getItemCount(itemID));
+
+	// draw party stock right aligned
+	SDL_Rect r = {0, 0, 0, 0};
+	twenty.textSize(partyStock.c_str(), &r);
+	twenty.drawText(windowWidth - 70 - r.w, windowHeight - 380, partyStock.c_str());
+
+	// if item is equippable
+	if (items.equippable(itemID)) {
+		// draw 'equipped'
+		twenty.drawText((windowWidth / 2) - 150, windowHeight - 450, "Equipped");
+
+		// draw number equipped right aligned
+		twenty.textSize("TODO", &r);
+		twenty.drawText(windowWidth - 70 - r.w, windowHeight - 495, "TODO");
+
+		if (currentOption == BUY) {
+			// draw characters, dance if can equip and show comparison
+			for (int i = Party::FIRST; i < Party::SIZE; i++) {
+				Party::Characters c = static_cast<Party::Characters>(i);
+
+				int xPos = -windowHeight - 100 + (windowWidth * 2) / 4 * i;
+				party->render(c, xPos, -windowHeight + 320);
+			}
+		}
+
+		if (itemSelected != -1) {
+			int values[4];
+			items.getValues(itemID, values);
+
+			// draw atk and acc or def and wgt
+			/* TODO
+			if (values[0] == 0 && values[1] == 0) {
+				// armor
+				twenty.drawText(-windowWidth + 400, windowHeight - 450, "DEF");
+				twenty.drawText(-windowWidth + 400, windowHeight - 495, "WGT");
+			} else {
+				// weapon
+				twenty.drawText(-windowWidth + 400, windowHeight - 450, "ATK");
+				twenty.drawText(-windowWidth + 400, windowHeight - 495, "ACC");
+			}
+			*/
+		}
+	}
+
+	// item description
+	twenty.drawText(-windowWidth + 50, -windowHeight + 35,
+				items.getDescription(itemID).c_str());
 }

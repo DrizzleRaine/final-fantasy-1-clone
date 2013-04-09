@@ -111,13 +111,19 @@ void Town::update() {
 				NPC::ShopTypes shopType = npcs.getShopType(npcInFront);
 				if (shopType > NPC::NONE && shopType < NPC::COUNT) {
 					// the npc is a shop, enter it
+					ShopMenu *sm;
 					if (shopType == NPC::ITEM) {
-						mapState->enterMenu()->pushMenu(new ItemShop());
+						sm = new ItemShop("Items", mapFile);
+					} else if (shopType == NPC::WEAPON) {
+						sm = new ItemShop("Weapons", mapFile);
+					} else if (shopType == NPC::ARMOR) {
+						sm = new ItemShop("Armor", mapFile);
 					} else if (shopType == NPC::WHITE) {
 						// TODO
 					} else if (shopType == NPC::BLACK) {
 						// TODO
 					}
+					mapState->enterMenu()->pushMenu(sm);
 					return;
 				} else {
 					// set to default for interactions

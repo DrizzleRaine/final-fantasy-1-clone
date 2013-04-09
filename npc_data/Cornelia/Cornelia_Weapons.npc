@@ -1,5 +1,5 @@
 2
-npc_data/store_bandana.tga
+npc_data/store_beard.tga
 200.0 100.0
 0 1 1220.0
 252 150 2 0
@@ -7,4 +7,4 @@ npc_data/store_bandana.tga
 
 0 0
 0 0 0
-252 174 2 1
+252 174 2 2

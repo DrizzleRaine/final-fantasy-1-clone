@@ -1,12 +1,25 @@
 #include "shopmenu.h"
 
-ShopMenu::ShopMenu() : subCursor(1) {
+ShopMenu::ShopMenu(std::string type, std::string mapFile) : subCursor(1) {
+	shopType = type;
+
+	// read shop data
+	std::ifstream in;
+	in.open("map_data/" + mapFile + ".shop");
+	in >> stockCount;
+	stockID = new int[stockCount];
+	for (int i = 0; i < stockCount; i++) {
+		in >> stockID[i];
+	}
+	in.close();
+
 	currentOption = NONE;
 	message = "Welcome!";
 	msgTimer = 0;
 }
 
 ShopMenu::~ShopMenu() {
+	delete[] stockID;
 }
 
 void ShopMenu::renderStock() {

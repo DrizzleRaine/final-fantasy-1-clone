@@ -6,11 +6,15 @@
 
 class ItemShop : public ShopMenu {
 	public:
-		ItemShop();
+		ItemShop(std::string type, std::string file);
 		~ItemShop();
 	private:
 		void update();
 		void render();
+
+		// draw party stock, # equipped, party members
+		// and item description for basic format shop
+		void basicDetails(int itemID);
 
 		Items items;
 

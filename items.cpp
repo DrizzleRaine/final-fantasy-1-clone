@@ -20,7 +20,7 @@ Items::Items() {
 		in >> cat;
 		items[i].category = static_cast<Categories>(cat);
 		in >> type;
-		items[i].type = static_cast<Item::Types>(type);
+		items[i].type = static_cast<Types>(type);
 
 		// item worth
 		in >> items[i].worth;
@@ -65,6 +65,37 @@ int Items::getWorth(int id) {
 		return 0;
 	}
 	return items[id].worth;
+}
+
+bool Items::equippable(int id, int job) {
+	if (!inBounds(id)) {
+		return false;
+	}
+
+	if (items[id].type < SWORD) {
+		return false;
+	}
+
+	if (job == -1) {
+		// no job specified and it is equippable by some job
+		return true;
+	}
+
+	switch(items[id].type) {
+		case SWORD:
+		case FIST:
+		case HAMMER:
+		case STAFF:
+		case SHIELD:
+		case LIGHT_ARM:
+		case HEAVY_ARM:
+		case HELMET:
+		case GLOVE:
+		default:
+			return true;
+	}
+
+	return false;
 }
 
 bool Items::inBounds(int id) {

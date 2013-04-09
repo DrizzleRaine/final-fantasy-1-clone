@@ -1,11 +1,12 @@
 #ifndef SHOPMENU_H
 #define SHOPMENU_H
 
+#include <fstream>
 #include "menu.h"
 
 class ShopMenu : public Menu {
 	public:
-		ShopMenu();
+		ShopMenu(std::string type, std::string mapFile);
 		virtual ~ShopMenu();
 	protected:
 		// shop type to display

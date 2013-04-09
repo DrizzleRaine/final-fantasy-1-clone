@@ -34,7 +34,7 @@ class NPC {
 		void unpause();
 
 		// possible shops types for npcs
-		enum ShopTypes {NONE = 0, ITEM, WHITE, BLACK, COUNT};
+		enum ShopTypes {NONE = 0, ITEM, WEAPON, ARMOR, WHITE, BLACK, COUNT};
 
 		// shop type and name accessors
 		ShopTypes getShopType(int npcID);
