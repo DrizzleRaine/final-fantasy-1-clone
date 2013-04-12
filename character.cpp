@@ -88,42 +88,78 @@ void Character::initStats() {
 
 			// initial warrior stats (hpmax, mpmax, str, agl, ..., def, eva)
 			int attrValues[] = {35, 0, 10, 8, 1, 15, 8, 5, 18, 0, 61};
-			fillAttrs(attrValues);
+
+			// initial warrior equip (knife and clothes)
+			int equipValues[5][5] = {{10, 5, 10, 0, 0}, {-1, 0, 0, 0, 0}, 
+				{-1, 0, 0, 0, 0}, {15, 0, 0, 1, 2}, {-1, 0, 0, 0, 0}};
+
+			// initialize character stats and equipment
+			fillValues(attrValues, equipValues);
 			break;
 		} case THIEF: {
 			attributes[MAGLEVEL] = 0;
 
 			// initial thief stats (hpmax, mpmax, str, agl, ..., def, eva)
 			int attrValues[] = {30, 0, 5, 15, 1, 5, 15, 2, 30, 0, 73};
-			fillAttrs(attrValues);
+
+			// initial thief equip (knife and clothes)
+			int equipValues[5][5] = {{10, 5, 10, 0, 0}, {-1, 0, 0, 0, 0}, 
+				{-1, 0, 0, 0, 0}, {15, 0, 0, 1, 2}, {-1, 0, 0, 0, 0}};
+
+			// initialize character stats and equipment
+			fillValues(attrValues, equipValues);
 			break;
 		} case WHITE: {
 			attributes[MAGLEVEL] = 1;
 
 			// initial white mage stats (hpmax, mpmax, str, agl, ..., def, eva)
 			int attrValues[] = {33, 10, 5, 5, 15, 8, 5, 2, 10, 0, 58};
-			fillAttrs(attrValues);
+
+			// initial white mage equip (staff and clothes)
+			int equipValues[5][5] = {{14, 6, 0, 0, 0}, {-1, 0, 0, 0, 0}, 
+				{-1, 0, 0, 0, 0}, {15, 0, 0, 1, 2}, {-1, 0, 0, 0, 0}};
+
+			// initialize character stats and equipment
+			fillValues(attrValues, equipValues);
 			break;
 		} case BLACK: {
 			attributes[MAGLEVEL] = 1;
 
 			// initial black mage stats (hpmax, mpmax, str, agl, ..., def, eva)
 			int attrValues[] = {25, 10, 3, 5, 20, 2, 10, 1, 13, 0, 58};
-			fillAttrs(attrValues);
+
+			// initial black mage equip (knife and clothes)
+			int equipValues[5][5] = {{10, 5, 10, 0, 0}, {-1, 0, 0, 0, 0}, 
+				{-1, 0, 0, 0, 0}, {15, 0, 0, 1, 2}, {-1, 0, 0, 0, 0}};
+
+			// initialize character stats and equipment
+			fillValues(attrValues, equipValues);
 			break;
 		} case MONK: {
 			attributes[MAGLEVEL] = 0;
 
 			// initial monk stats (hpmax, mpmax, str, agl, ..., def, eva)
 			int attrValues[] = {33, 0, 12, 5, 1, 10, 5, 14, 13, 5, 55};
-			fillAttrs(attrValues);
+
+			// initial monk equip (staff and clothes)
+			int equipValues[5][5] = {{14, 6, 0, 0, 0}, {-1, 0, 0, 0, 0}, 
+				{-1, 0, 0, 0, 0}, {15, 0, 0, 1, 2}, {-1, 0, 0, 0, 0}};
+
+			// initialize character stats and equipment
+			fillValues(attrValues, equipValues);
 			break;
 		} case RED: {
 			attributes[MAGLEVEL] = 1;
 
 			// initial red mage stats (hpmax, mpmax, str, agl, ..., def, eva)
 			int attrValues[] = {30, 10, 5, 10, 10, 5, 5, 2, 22, 0, 63};
-			fillAttrs(attrValues);
+
+			// initial red mage equip (knife and clothes)
+			int equipValues[5][5] = {{10, 5, 10, 0, 0}, {-1, 0, 0, 0, 0}, 
+				{-1, 0, 0, 0, 0}, {15, 0, 0, 1, 2}, {-1, 0, 0, 0, 0}};
+
+			// initialize character stats and equipment
+			fillValues(attrValues, equipValues);
 			break;
 		} default:
 			break;
@@ -132,9 +168,14 @@ void Character::initStats() {
 	attributes[MP] = attributes[MPMAX];
 }
 
-void Character::fillAttrs(int *initAttrs) {
+void Character::fillValues(int initAttrs[STATSCOUNT], int initEquip[5][5]) {
 	for (int i = HPMAX; i < STATSCOUNT; i++) {
 		attributes[i] = initAttrs[i - HPMAX];
+	}
+	for (int i = 0; i < 5; i++) {
+		for (int j = 0; j < 5; j++) {
+			equipment[i][j] = initEquip[i][j];
+		}
 	}
 }
 
@@ -235,8 +276,14 @@ std::string Character::getFraction(Stats num, Stats denom) {
 int Character::getSpell(int level, int slot) {
 	level--;	// convert to 0-based index
 	if (level < 0 || level > 7 || slot < 0 || slot > 2) {
-		// out of bounds
-		return 0;
+		return 0; // out of bounds
 	}
 	return spells[level][slot];
+}
+
+int Character::getEquip(int slot) {
+	if (slot < 0 || slot > 4) {
+		return 0; // out of bounds
+	}
+	return equipment[slot][0];
 }

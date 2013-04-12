@@ -89,6 +89,9 @@ class Party {
 
 		// get spell character c has at level and slot
 		int getSpell(Characters c, int level, int slot);
+
+		// get equipment character c has in given slot
+		int getEquip(Characters c, int lot);
 	
 		// how much gil party has	
 		unsigned int getGil() { return gil; }

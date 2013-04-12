@@ -266,6 +266,13 @@ int Party::getSpell(Characters c, int level, int slot) {
 	return 0;
 }
 
+int Party::getEquip(Characters c, int slot) {
+	if (c >= FIRST && c < SIZE) {
+		return characters[c].getEquip(slot);
+	}
+	return 0;
+}
+
 int Party::getItemCount(int id) {
 	if (id < 0 || id >= INVENTORY_SIZE) {
 		return 0;

@@ -1,6 +1,7 @@
 #include "partymenu.h"
 #include "itemmenu.h"
 #include "magicmenu.h"
+#include "equipmenu.h"
 #include "statusmenu.h"
 
 PartyMenu::PartyMenu() : subCursor(1), subCursorSwap(1) {
@@ -50,6 +51,11 @@ void PartyMenu::update() {
 			cursor.setSelection(ITEMS);				// reset cursor before switching
 			menuState->pushMenu(new MagicMenu(CURSEL));
 			return;
+		} else if (currentOption == EQUIPMENT) {
+			currentOption = NONE;
+			cursor.setSelection(ITEMS);				// reset cursor before switching
+			menuState->pushMenu(new EquipMenu(CURSEL));
+			return;
 		} else if (currentOption == STATUS) {
 			currentOption = NONE;
 			cursor.setSelection(ITEMS);				// reset cursor before switching
@@ -64,6 +70,10 @@ void PartyMenu::update() {
 			return;
 		} else if (CURSEL == MAGIC) {
 			currentOption = MAGIC;
+			subCursor.setSelection(CURSEL);
+			newCurSel = Party::FIRST;
+		} else if (CURSEL == EQUIPMENT) {
+			currentOption = EQUIPMENT;
 			subCursor.setSelection(CURSEL);
 			newCurSel = Party::FIRST;
 		} else if (CURSEL == STATUS) {

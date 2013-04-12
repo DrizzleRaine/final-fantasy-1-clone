@@ -48,6 +48,9 @@ class Character {
 
 		// get spell id at given level and slot
 		int getSpell(int level, int slot);
+
+		// get equipment id at given slot
+		int getEquip(int slot);
 	private:
 		// character name and job
 		std::string name;
@@ -62,12 +65,15 @@ class Character {
 		// character attributes
 		int attributes[STATSCOUNT];
 
-		// helper function to fill in attributes array
-		// so it can be initialized easier
-		void fillAttrs(int initAttrs[]);
+		// helper function to fill in attributes and equipment arrays
+		// so they can be initialized easier
+		void fillValues(int initAttrs[STATSCOUNT], int initEquip[5][5]);
 
 		// string in format num/denom
 		std::string getFraction(Stats num, Stats denom);
+
+		// 5 slots for equipment, each has id and 4 stats
+		int equipment[5][5];
 
 		// IDs of spells this character knows
 		int spells[8][3];
