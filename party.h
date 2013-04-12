@@ -92,6 +92,10 @@ class Party {
 
 		// get equipment character c has in given slot
 		int getEquip(Characters c, int lot);
+
+		// set/remove equipment character c has in given slot
+		void setEquip(Characters c, int slot, int id, int vals[4]);
+		void removeEquip(Characters c, int slot);
 	
 		// how much gil party has	
 		unsigned int getGil() { return gil; }

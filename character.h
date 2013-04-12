@@ -51,6 +51,10 @@ class Character {
 
 		// get equipment id at given slot
 		int getEquip(int slot);
+
+		// set/remove equipment at given slot
+		void setEquip(int slot, int id, int values[4]);
+		void removeEquip(int slot);
 	private:
 		// character name and job
 		std::string name;

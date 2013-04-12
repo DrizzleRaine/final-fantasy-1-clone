@@ -287,3 +287,18 @@ int Character::getEquip(int slot) {
 	}
 	return equipment[slot][0];
 }
+
+void Character::setEquip(int slot, int id, int values[4]) {
+	if (slot < 0 || slot > 4) {
+		return; // out of bounds
+	}
+	equipment[slot][0] = id;
+	for (int i = 0; i < 4; i++) {
+		equipment[slot][i + 1] = values[i];
+	}
+}
+
+void Character::removeEquip(int slot) {
+	int values[4] = {0, 0, 0, 0};
+	setEquip(slot, -1, values);
+}

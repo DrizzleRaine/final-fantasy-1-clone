@@ -40,7 +40,7 @@ void EquipMenu::update() {
 		} else if (currentOption == EQUIP) {
 			// TODO
 		} else if (currentOption == REMOVE) {
-			// TODO
+			party->removeEquip(character, CURSEL);
 		}
 	}
 

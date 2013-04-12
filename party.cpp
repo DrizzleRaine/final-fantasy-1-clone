@@ -273,6 +273,18 @@ int Party::getEquip(Characters c, int slot) {
 	return 0;
 }
 
+void Party::setEquip(Characters c, int slot, int id, int vals[4]) {
+	if (c >= FIRST && c < SIZE) {
+		characters[c].setEquip(slot, id, vals);
+	}
+}
+
+void Party::removeEquip(Characters c, int slot) {
+	if (c >= FIRST && c < SIZE) {
+		characters[c].removeEquip(slot);
+	}
+}
+
 int Party::getItemCount(int id) {
 	if (id < 0 || id >= INVENTORY_SIZE) {
 		return 0;
