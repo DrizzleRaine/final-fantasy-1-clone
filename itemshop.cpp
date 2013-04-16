@@ -339,9 +339,22 @@ void ItemShop::basicDetails(int itemID) {
 		// draw 'equipped'
 		twenty.drawText((windowWidth / 2) - 150, windowHeight - 450, "Equipped");
 
+		// find out how many of itemID are currently equipped on party members
+		int numEquipped = 0;
+		int slot = items.getType(itemID) - Items::WEAPON;
+		if (slot >= 0 && slot <= 4) {
+			for (int i = Party::FIRST; i < Party::SIZE; i++) {
+				Party::Characters c = static_cast<Party::Characters>(i);
+				if (party->getEquip(c, slot) == itemID) {
+					numEquipped++;
+				}
+			}
+		}
+
 		// draw number equipped right aligned
-		twenty.textSize("TODO", &r);
-		twenty.drawText(windowWidth - 70 - r.w, windowHeight - 495, "TODO");
+		const char *numEquippedStr = std::to_string(numEquipped).c_str();
+		twenty.textSize(numEquippedStr, &r);
+		twenty.drawText(windowWidth - 70 - r.w, windowHeight - 495, numEquippedStr);
 
 		if (currentOption == BUY) {
 			// draw characters, dance if can equip and show comparison

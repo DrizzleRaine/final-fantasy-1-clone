@@ -83,6 +83,13 @@ int Items::getWorth(int id) {
 	return items[id].worth;
 }
 
+int Items::getType(int id) {
+	if (!inBounds(id)) {
+		return -1;
+	}
+	return items[id].type;
+}
+
 int Items::getValue(int id, int v) {
 	if (!inBounds(id) || v < 0 || v > 3) {
 		return 0;

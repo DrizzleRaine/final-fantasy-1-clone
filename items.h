@@ -20,16 +20,19 @@ class Items {
 		int getCost(int id);
 		int getWorth(int id);
 
-		// get value[v]
-		int getValue(int id, int v);
+		// item types
+		enum Types {KEY, HEAL_SINGLE, HEAL_PARTY, CURE_STATUS, 
+					WEAPON, SHIELD, HELMET, ARMOR, GLOVE};
+
+		// type
+		int getType(int id);
 
 		// is item equippable in given slot, -1 means any slot
 		bool equippable(int id, int slot = -1, int job = -1);
-	private:
-		// item types
-		enum Types {KEY, HEAL_SINGLE, HEAL_PARTY, CURE_STATUS, 
-					WEAPON, SHIELD, ARMOR, HELMET, GLOVE};
 
+		// get value[v]
+		int getValue(int id, int v);
+	private:
 		struct Item {
 			// name and description
 			std::string name;
