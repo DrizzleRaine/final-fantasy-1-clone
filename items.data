@@ -1,73 +1,73 @@
 18
-1 1 20
 Potion
 Restores 50 HP.
+40 20 1 0
 50 0 0 0
-1 1 75
 Hi-Potion
 Restores 150 HP.
+150 75 1 0
 150 0 0 0
-2 3 250
 Phoenix Down
 Revives one KO'd ally.
+500 250 3 0
 1 0 0 0
-2 3 25
 Antidote
 Cures poison.
+50 25 3 0
 2 0 0 0
-2 3 25
 Eye Drops
 Cures darkness.
+50 25 3 0
 3 0 0 0
-2 3 25
 Echo Grass
 Cures silence.
+50 25 3 0
 4 0 0 0
-2 3 250
 Gold Needle
 Cures stone.
+500 250 3 0
 5 0 0 0
-1 2 25
 Sleeping Bag
 Partially restores party's HP.
+50 25 2 0
 100 0 0 0
-1 2 1000
 Cottage
 Restores all of the party's HP and MP.
+2000 1000 2 0
 999 999 0 0
-1 1 1
 Elixir
 Restores all of one party member's HP and MP.
+1 1 1 0
 999 999 0 0
-3 4 2
 Knife
 A small knife.
+4 2 4 2795
 5 10 0 0
-3 4 4
 Rapier
 A sword with a slender blade.
+8 4 4 2275
 9 5 0 0
-3 5 4
 Nunchaku
 Wooden nunchaku.
+8 4 4 1168
 5 6 0 0 0
-3 6 4
 Hammer
 A hammer made for battle.
+8 4 4 453
 9 0 0 0
-3 7 2
 Staff
 A wooden staff.
+4 2 4 4093
 6 0 0 0
-3 9 4
 Clothes
 Ordinary clothing.
-0 0 1 2
-3 9 20
+8 4 6 4095
+0 0 1 -2
 Leather Armor
 Armor made of hardened leather.
-0 0 4 8
-3 10 32
+40 20 6 3315
+0 0 4 -8
 Chain Mail
 Mail of interwoven chain links.
-0 0 15 15
+64 32 6 2273
+0 0 15 -15

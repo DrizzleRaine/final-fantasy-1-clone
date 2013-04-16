@@ -1,0 +1,193 @@
+equipmenu.cpp:			curItemID = party->getEquip(character, newCurSel);
+equipmenu.cpp:				curItemID = party->getEquip(character, newCurSel);
+equipmenu.cpp:			for (int i = 0; i < party->INVENTORY_SIZE; i++) {
+equipmenu.cpp:				int itemID = party->getItem(i);
+equipmenu.cpp:						party->canEquip(character, itemID)) {
+equipmenu.cpp:			int itemIDRemoved = party->getEquip(character, CURSEL);
+equipmenu.cpp:			party->removeEquip(character, CURSEL);	// remove the equip at CURSEL
+equipmenu.cpp:			party->addItem(itemIDRemoved);
+equipmenu.cpp:		curItemID = party->getEquip(character, newCurSel);
+equipmenu.cpp:		curItemID = party->getEquip(character, newCurSel);
+equipmenu.cpp:		curItemID = party->getEquip(character, newCurSel);
+equipmenu.cpp:		int statVal = party->getAttribute(character, stat);
+equipmenu.cpp:		int curEquipID = party->getEquip(character, subCursor.getSelection());
+equipmenu.cpp:		party->setEquip(character, subCursor.getSelection(), newItemID, values);
+equipmenu.cpp:			int statVal = party->getAttribute(character, stat);
+equipmenu.cpp:		party->setEquip(character, subCursor.getSelection(), curEquipID, values);
+equipmenu.cpp:	party->render(character, -windowWidth + 50, windowHeight - 280);
+equipmenu.cpp:		party->getName(character).c_str());
+equipmenu.cpp:		std::to_string(party->getAttribute(character, Character::LEVEL))).c_str());
+equipmenu.cpp:		party->getJob(character).c_str());
+equipmenu.cpp:	std::string hpFraction = party->getHPFraction(character);
+equipmenu.cpp:	std::string mpFraction = party->getMPFraction(character);
+equipmenu.cpp:		int itemID = party->getEquip(character, i);
+itemmenu.cpp:				party->swapItems(itemSelected, CURSEL + scrolled);
+itemmenu.cpp:			party->sortItems();						// sort inventory
+itemmenu.cpp:		itemID = party->getItem(i + scrolled);
+itemmenu.cpp:		itemCount = party->getItemCount(itemID);
+itemmenu.cpp:		itemID = party->getItem(i + 1 + scrolled);
+itemmenu.cpp:		itemCount = party->getItemCount(itemID);
+itemmenu.cpp:		itemID = party->getItem(cursor.getSelection() + scrolled);
+itemmenu.cpp:		if (party->getItemCount(itemID)) {
+itemshop.cpp:			party->addGil(gilToAdd);
+itemshop.cpp:			party->addItem(itemSelected, numberItems);
+itemshop.cpp:			if (price[CURSEL] > party->getGil()) {
+itemshop.cpp:		} else if (party->getItemCount(party->getItem(CURSEL + scrolled)) > 0) {
+itemshop.cpp:			itemSelected = party->getItem(CURSEL + scrolled);
+itemshop.cpp:			int maxPartyCanAfford = party->getGil() / price[prevCurPos];
+itemshop.cpp:			if (amountSelected > party->getItemCount(itemSelected)) {
+itemshop.cpp:				amountSelected = party->getItemCount(itemSelected);
+itemshop.cpp:			itemID = party->getItem(i + scrolled);
+itemshop.cpp:			itemCount = party->getItemCount(itemID);
+itemshop.cpp:			itemID = party->getItem(i + 1 + scrolled);
+itemshop.cpp:			itemCount = party->getItemCount(itemID);
+itemshop.cpp:		itemID = party->getItem(cursor.getSelection() + scrolled);
+itemshop.cpp:		if (party->getItemCount(itemID)) {
+itemshop.cpp:	std::string partyStock = std::to_string(party->getItemCount(itemID));
+itemshop.cpp:				party->render(c, xPos, -windowHeight + 320);
+jobmenu.cpp:			party->setJob(CURSEL);
+jobmenu.cpp:			party->setJob(CURSEL + 2);
+jobmenu.cpp:			party->setJob(CURSEL);
+jobmenu.cpp:			party->setJob(CURSEL - 4);
+jobmenu.cpp:		party->render(c, SPRITEX, SPRITEY[i] + 90);
+jobmenu.cpp:		twenty.drawText(SPRITEX + 140, SPRITEY[i] + 18, party->getName(c).c_str());
+jobmenu.cpp:		twenty.drawText(SPRITEX, SPRITEY[i] - 110, party->getJob(c).c_str());
+jobmenu.cpp:		twenty.textSize(party->getJob(Character::MONK).c_str(), &r);
+jobmenu.cpp:		party->render(Character::MONK, LEFTSPRITE, TOPSPRITE);
+jobmenu.cpp:		twenty.drawText(centered, TOPTEXT, party->getJob(Character::MONK).c_str());
+jobmenu.cpp:		twenty.textSize(party->getJob(Character::RED).c_str(), &r);
+jobmenu.cpp:		party->render(Character::RED, RIGHTSPRITE, TOPSPRITE);
+jobmenu.cpp:		twenty.drawText(centered, TOPTEXT, party->getJob(Character::RED).c_str());
+jobmenu.cpp:		twenty.textSize(party->getJob(Character::WHITE).c_str(), &r);
+jobmenu.cpp:		party->render(Character::WHITE, LEFTSPRITE, BOTSPRITE);
+jobmenu.cpp:		twenty.drawText(centered, BOTTEXT, party->getJob(Character::WHITE).c_str());
+jobmenu.cpp:		twenty.textSize(party->getJob(Character::BLACK).c_str(), &r);
+jobmenu.cpp:		party->render(Character::BLACK, RIGHTSPRITE, BOTSPRITE);
+jobmenu.cpp:		twenty.drawText(centered, BOTTEXT, party->getJob(Character::BLACK).c_str());
+jobmenu.cpp:		twenty.textSize(party->getJob(Character::WARRIOR).c_str(), &r);
+jobmenu.cpp:		party->render(Character::WARRIOR, LEFTSPRITE, TOPSPRITE);
+jobmenu.cpp:		twenty.drawText(centered, TOPTEXT, party->getJob(Character::WARRIOR).c_str());
+jobmenu.cpp:		twenty.textSize(party->getJob(Character::THIEF).c_str(), &r);
+jobmenu.cpp:		party->render(Character::THIEF, RIGHTSPRITE, TOPSPRITE);
+jobmenu.cpp:		twenty.drawText(centered, TOPTEXT, party->getJob(Character::THIEF).c_str());
+jobmenu.cpp:		twenty.textSize(party->getJob(Character::MONK).c_str(), &r);
+jobmenu.cpp:		party->render(Character::MONK, LEFTSPRITE, BOTSPRITE);
+jobmenu.cpp:		twenty.drawText(centered, BOTTEXT, party->getJob(Character::MONK).c_str());
+jobmenu.cpp:		twenty.textSize(party->getJob(Character::RED).c_str(), &r);
+jobmenu.cpp:		party->render(Character::RED, RIGHTSPRITE, BOTSPRITE);
+jobmenu.cpp:		twenty.drawText(centered, BOTTEXT, party->getJob(Character::RED).c_str());
+jobmenu.cpp:		if (party->getActive() == i) {
+magicmenu.cpp:		curSpellID = party->getSpell(character, newCurSel / 3 + 1, newCurSel % 3);
+magicmenu.cpp:		if (party->getAttribute(character, Character::MAGLEVEL) < (i + 1)) {
+magicmenu.cpp:			int spellID = party->getSpell(character, i + 1, slot);
+magicmenu.cpp:	party->render(character, -windowWidth + 100, windowHeight - 165);
+magicmenu.cpp:		party->getName(character).c_str());
+magicmenu.cpp:		std::to_string(party->getAttribute(character, Character::LEVEL))).c_str());
+magicmenu.cpp:		party->getJob(character).c_str());
+magicmenu.cpp:	std::string hpFraction = party->getHPFraction(character);
+magicmenu.cpp:	std::string mpFraction = party->getMPFraction(character);
+map.cpp:	party->setMap(mapID);
+map.cpp:	party->setRegion(region);
+map.cpp:	party->setX(currentX);
+map.cpp:	party->setY(currentY);
+map.cpp:	party->setDirection(direction);
+map.cpp:	party->setStepDelay(250.0);
+map.cpp:	texCoords[2] = (party->getX(tileSize) + (tileSize * 7.5)) / mapWidth;
+map.cpp:	texCoords[3] = (party->getY(tileSize) + (tileSize * 5.0)) / mapHeight;
+map.cpp:	texCoords[0] = (party->getX(tileSize) - (tileSize * 7.5)) / mapWidth;
+map.cpp:	texCoords[1] = (party->getY(tileSize) - (tileSize * 5.0)) / mapHeight;
+map.cpp:	party->renderParty(windowWidth, windowHeight);
+map.cpp:	party->setX(currentX);
+map.cpp:	party->setY(currentY);
+map.cpp:	party->setRegion(region);
+namemenu.cpp:			party->setName("??????");		// set name back to all ?
+namemenu.cpp:			party->setName("??????");		// uninitialize active char's name
+namemenu.cpp:			party->setName(newName);
+namemenu.cpp:		party->render(c, SPRITEX, SPRITEY[i] + 90);
+namemenu.cpp:		if (party->getActive() == c) {	// the character who's name is being edited
+namemenu.cpp:			twenty.drawText(SPRITEX + 140, SPRITEY[i] + 18, party->getName(c).c_str());
+namemenu.cpp:		twenty.drawText(SPRITEX, SPRITEY[i] - 110, party->getJob(c).c_str());
+namemenu.cpp:	subCursor.render(SPRITEX + 140, SPRITEY[party->getActive()] + 78);
+newmenu.cpp:				party->initialize();				// initialize the party
+newmenu.cpp:			party->setActive(CURSEL / 2);
+newmenu.cpp:				menuState->pushMenu(new NameMenu(party->getName()));// switch menus
+newmenu.cpp:		party->setActive(CURSEL / 2);
+newmenu.cpp:		//party->setName(randomNames[CURSEL / 2][rand() % 10]);
+newmenu.cpp:		party->randomName();
+newmenu.cpp:			if (party->emptyName(static_cast<Party::Characters>(i))) {
+newmenu.cpp:		party->render(c, SPRITEX, SPRITEY[i] + 72);
+newmenu.cpp:		twenty.drawText(-windowWidth / 2, SPRITEY[i], party->getName(c).c_str());
+newmenu.cpp:		twenty.drawText(-windowWidth / 2, SPRITEY[i] - 80, party->getJob(c).c_str());
+newmenu.cpp:			if (party->emptyName(c)) {	// if this character has no name
+npc.cpp:			party->unpause();				// unpause the party
+npc.cpp:	if (party->getDirection() == Party::NORTH) {		// party north
+npc.cpp:	} else if (party->getDirection() == Party::EAST) {	// party east
+npc.cpp:	} else if (party->getDirection() == Party::SOUTH) {
+npc.cpp:	} else if (party->getDirection() == Party::WEST) {
+npc.cpp:	party->pause();
+npc.cpp:		float xDist = (npcs[i].x + npcs[i].xStepDistance) - party->getX(tileSize);
+npc.cpp:		float yDist = (npcs[i].y + npcs[i].yStepDistance) - party->getY(tileSize);
+npc.cpp:	int partyX = party->getX() / tileSize;
+npc.cpp:	int partyY = party->getY() / tileSize;
+npc.cpp:	if (party->stepping()) {
+npc.cpp:		if (party->getDirection() == Party::NORTH) {
+npc.cpp:		} else if (party->getDirection() == Party::EAST) {
+npc.cpp:		} else if (party->getDirection() == Party::SOUTH) {
+npc.cpp:		} else if (party->getDirection() == Party::WEST) {
+partymenu.cpp:			party->swapCharacters(subCursor.getSelection(), CURSEL);
+partymenu.cpp:				party->getName(c).c_str());
+partymenu.cpp:		party->render(c, SPRITEX, SPRITEY[i] + 50);
+partymenu.cpp:				std::to_string(party->getAttribute(c, Character::LEVEL)) + "  ";
+partymenu.cpp:		std::string details = level + party->getJob(c) + "\nHP\nMP";
+partymenu.cpp:		std::string hpFraction = "\n" + party->getHPFraction(c);
+partymenu.cpp:		std::string mpFraction = "\n\n" + party->getMPFraction(c);
+partymenu.cpp:	std::string gil = std::to_string(party->getGil());
+partymenu.cpp:	std::string time = party->getTime();
+partymenu.cpp:			party->getTime().c_str());
+partymenu.cpp:	std::string region = party->getRegion();
+shopmenu.cpp:	std::string gilAmount = std::to_string(party->getGil());
+statusmenu.cpp:	party->render(character, -windowWidth + 80, windowHeight - 70);	
+statusmenu.cpp:			party->getName(character).c_str());
+statusmenu.cpp:			party->getJob(character).c_str());
+statusmenu.cpp:		std::to_string(party->getAttribute(character, Character::LEVEL));
+statusmenu.cpp:	std::string hpFraction = party->getHPFraction(character);
+statusmenu.cpp:	std::string mpFraction = party->getMPFraction(character);
+statusmenu.cpp:	value = std::to_string(party->getAttribute(character, Character::MAGLEVEL));
+statusmenu.cpp:	value = std::to_string(party->getAttribute(character, Character::EXP));
+statusmenu.cpp:		value = value + std::to_string(party->getAttribute(character, stat));
+town.cpp:	int xPos = party->getX() / tileSize;
+town.cpp:	int yPos = party->getY() / tileSize;
+town.cpp:	if (!party->stepping()) {	// if not already taking a step
+town.cpp:		if (input->upPressed() && !party->isPaused()) {
+town.cpp:			party->setDirection(Party::NORTH);
+town.cpp:		} else if (input->downPressed() && !party->isPaused()) {
+town.cpp:			party->setDirection(Party::SOUTH);
+town.cpp:		} else if (input->rightPressed() && !party->isPaused()) {
+town.cpp:			party->setDirection(Party::EAST);
+town.cpp:		} else if (input->leftPressed() && !party->isPaused()) {
+town.cpp:			party->setDirection(Party::WEST);
+town.cpp:				party->startStep();			// start step in new direction
+town.cpp:			party->setStepDelay(125.0);		// run
+town.cpp:			party->setStepDelay(250.0);		// walk
+town.cpp:			int frontX = party->getX() / tileSize;
+town.cpp:			int frontY = party->getY() / tileSize;
+town.cpp:			if (party->getDirection() == Party::NORTH) {
+town.cpp:			} else if (party->getDirection() == Party::EAST) {
+town.cpp:			} else if (party->getDirection() == Party::SOUTH) {
+town.cpp:			} else if (party->getDirection() == Party::WEST) {
+town.cpp:		party->setStepDelay(250.0);
+town.cpp:		currentX = party->getX();
+town.cpp:		currentY = party->getY();
+world.cpp:	int xPos = party->getX() / tileSize;
+world.cpp:	int yPos = party->getY() / tileSize;
+world.cpp:	if (!party->stepping()) {					// if not already taking a step
+world.cpp:			party->setDirection(Party::NORTH);	// face that direction
+world.cpp:				party->startStep();				// start stepping to it
+world.cpp:			party->setDirection(Party::SOUTH);
+world.cpp:				party->startStep();
+world.cpp:			party->setDirection(Party::EAST);
+world.cpp:				party->startStep();
+world.cpp:			party->setDirection(Party::WEST);
+world.cpp:				party->startStep();
+world.cpp:		currentX = party->getX();	// store current position
+world.cpp:		currentY = party->getY();

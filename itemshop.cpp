@@ -9,7 +9,7 @@ ItemShop::ItemShop(std::string type, std::string file) : ShopMenu(type, file) {
 
 	for (int i = 0; i < stockCount; i++) {
 		stock[i] = items.getName(stockID[i]);
-		price[i] = items.getWorth(stockID[i]) * 2;
+		price[i] = items.getCost(stockID[i]);
 	}
 }
 
@@ -68,11 +68,13 @@ void ItemShop::update() {
 			newCurSel = 0;
 		} else if (itemSelected > -1) {
 			// buy/sell selected item and amount
-			int numberItems = amountSelected;
-			int gilToAdd = numberItems * items.getWorth(itemSelected);
+			int gilToAdd, numberItems = amountSelected;
 			if (currentOption == BUY) {
-				gilToAdd *= -2;		// removing gil (twice what shop buys it for)
+				// removing gil from party, adding items
+				gilToAdd = numberItems * items.getCost(itemSelected) * -1;
 			} else if (currentOption == SELL) {
+				// removing items from party, adding gil
+				gilToAdd = numberItems * items.getWorth(itemSelected);
 				numberItems *= -1;	// removing item(s)
 			}
 
@@ -251,7 +253,7 @@ void ItemShop::render() {
 		// current total cost
 		std::string totalStr;
 		if (currentOption == BUY) {
-			totalStr = std::to_string(amountSelected * price[prevCurPos]);
+			totalStr = std::to_string(amountSelected * items.getCost(itemSelected));
 		} else if (currentOption == SELL) {
 			totalStr = std::to_string(amountSelected * items.getWorth(itemSelected));
 		}
@@ -352,9 +354,6 @@ void ItemShop::basicDetails(int itemID) {
 		}
 
 		if (itemSelected != -1) {
-			int values[4];
-			items.getValues(itemID, values);
-
 			// draw atk and acc or def and wgt
 			/* TODO
 			if (values[0] == 0 && values[1] == 0) {

@@ -52,6 +52,9 @@ class Character {
 		// get equipment id at given slot
 		int getEquip(int slot);
 
+		// can character equip item type
+		bool canEquip(int type);
+
 		// set/remove equipment at given slot
 		void setEquip(int slot, int id, int values[4]);
 		void removeEquip(int slot);

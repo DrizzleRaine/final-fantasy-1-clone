@@ -16,27 +16,36 @@ Items::Items() {
 		// go to the next line
 		in.ignore(256, '\n');
 
+		/*
 		// category and type
 		in >> cat;
 		items[i].category = static_cast<Categories>(cat);
 		in >> type;
 		items[i].type = static_cast<Types>(type);
 
-		// item worth
+		// item worth to shops
 		in >> items[i].worth;
 
 		// go to the next line
 		in.ignore(256, '\n');
+		*/
 
 		// name and description
 		getline(in, items[i].name, '\n');
 		getline(in, items[i].description, '\n');
 
+		// cost and worth
+		in >> items[i].cost;
+		in >> items[i].worth;
+
+		// equip bits
+		in >> items[i].type;
+		in >> items[i].equipBits;
+
 		// item values
 		for (int j = 0; j < 4; j++) {
 			in >> items[i].values[j];
 		}
-
 	}
 	in.close();
 }
@@ -60,6 +69,13 @@ std::string Items::getDescription(int id) {
 	return items[id].description;
 }
 
+int Items::getCost(int id) {
+	if (!inBounds(id)) {
+		return 0;
+	}
+	return items[id].cost;
+}
+
 int Items::getWorth(int id) {
 	if (!inBounds(id)) {
 		return 0;
@@ -67,34 +83,43 @@ int Items::getWorth(int id) {
 	return items[id].worth;
 }
 
-bool Items::equippable(int id, int job) {
+int Items::getValue(int id, int v) {
+	if (!inBounds(id) || v < 0 || v > 3) {
+		return 0;
+	}
+	return items[id].values[v];
+}
+
+bool Items::equippable(int id, int slot, int job) {
 	if (!inBounds(id)) {
 		return false;
 	}
 
-	if (items[id].type < SWORD) {
+	if (!items[id].equipBits) {
+		// item not equippable
 		return false;
 	}
 
-	if (job == -1) {
-		// no job specified and it is equippable by some job
+	if (slot == -1 && items[id].type >= WEAPON) {
+		// no slot specified and it is equippable in some slot
 		return true;
 	}
 
-	switch(items[id].type) {
-		case SWORD:
-		case FIST:
-		case HAMMER:
-		case STAFF:
-		case SHIELD:
-		case LIGHT_ARM:
-		case HEAVY_ARM:
-		case HELMET:
-		case GLOVE:
-		default:
-			return true;
+	if (slot != (items[id].type - WEAPON)) {
+		// not equippable in this slot
+		return false;
 	}
 
+	if (job == -1 && items[id].equipBits) {
+		//  no job specified and it is equippable by some job
+		return true;
+	}
+
+	if (items[id].equipBits & (1 << job)) {
+		// if bit job is set this job can equip
+		return true;
+	}
+	
 	return false;
 }
 

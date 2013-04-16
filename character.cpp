@@ -243,8 +243,46 @@ std::string Character::getJobName(Jobs job) {
 }
 
 int Character::getAttribute(Stats s) {
-	if (s < STATSCOUNT) {
+	if (s < ATK) {
+		// attribute unmodified by equipment
 		return attributes[s];
+	}
+
+	// return value modified by current equipment
+	if (s == ATK) {
+		if (job == MONK) {
+			if (equipment[0][0] == -1) {
+				// monk not wearing weapon
+				return attributes[LEVEL] * 2;
+			}
+			// monk with weapon: weaponatk + str/2 + 1
+			return equipment[0][1] + attributes[STR] / 2 + 1;
+		}
+		// weaponatk + str/2
+		return equipment[0][1] + attributes[STR] / 2;
+	} else if (s == ACC) {
+		// weaponacc + characteracc
+		return equipment[0][2] + attributes[ACC];
+	} else if (s == DEF) {
+		if (job == MONK) {
+			// monk defense = level
+			return attributes[LEVEL];
+		}
+
+		// total defense of equipment
+		int totalEquippedDef = 0;
+		for (int i = 0; i < 4; i++) {
+			totalEquippedDef += equipment[i][3];
+		}
+		return totalEquippedDef + attributes[DEF];
+	} else if (s == EVA) {
+		// 48 + agl - armor weight
+		// armor weights are represented with negative eva
+		int totalWeight = 0;
+		for (int i = 0; i < 4; i++) {
+			totalWeight += equipment[i][4];
+		}
+		return attributes[EVA] + totalWeight;
 	}
 	return 0;
 }
@@ -286,6 +324,13 @@ int Character::getEquip(int slot) {
 		return 0; // out of bounds
 	}
 	return equipment[slot][0];
+}
+
+bool Character::canEquip(int type) {
+	if (type == -1) {
+		return 0;
+	}
+	return 1;
 }
 
 void Character::setEquip(int slot, int id, int values[4]) {

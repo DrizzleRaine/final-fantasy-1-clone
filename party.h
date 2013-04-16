@@ -68,6 +68,9 @@ class Party {
 		// change the job of the active character to newJob
 		void setJob(int newJob);
 
+		// get the int value of given characters job
+		int getJobInt(Characters c);
+
 		// get string of job name
 		std::string getJob(Characters c);				// character c's job
 		std::string getJob(Character::Jobs job);		// given job
@@ -91,7 +94,10 @@ class Party {
 		int getSpell(Characters c, int level, int slot);
 
 		// get equipment character c has in given slot
-		int getEquip(Characters c, int lot);
+		int getEquip(Characters c, int slot);
+
+		// can character c equip items of given type
+		bool canEquip(Characters c, int type);
 
 		// set/remove equipment character c has in given slot
 		void setEquip(Characters c, int slot, int id, int vals[4]);

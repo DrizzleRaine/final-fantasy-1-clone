@@ -9,31 +9,50 @@ class Items {
 		Items();
 		~Items();
 
+		// equipment slots
+		enum Slots {WPN, SHD, HLM, ARM, GLV};
+
+		// name and description
 		std::string getName(int id);
 		std::string getDescription(int id);
 
+		// cost and worth
+		int getCost(int id);
 		int getWorth(int id);
-		bool equippable(int id, int job = -1);
-		void getValues(int id, int *v) { v = items[id].values; }
-	private:
-		// item categories
-		enum Categories {KEY, HEAL, CURE, EQUIPMENT};
 
+		// get value[v]
+		int getValue(int id, int v);
+
+		// is item equippable in given slot, -1 means any slot
+		bool equippable(int id, int slot = -1, int job = -1);
+	private:
 		// item types
-		enum Types {NONE, HEAL_SINGLE, HEAL_PARTY, CURE_STATUS, SWORD, FIST, 
-			HAMMER, STAFF, SHIELD, LIGHT_ARM, HEAVY_ARM, HELMET, GLOVE};
+		enum Types {KEY, HEAL_SINGLE, HEAL_PARTY, CURE_STATUS, 
+					WEAPON, SHIELD, ARMOR, HELMET, GLOVE};
 
 		struct Item {
-			// item category and type
-			Categories category;
-			Types type;
-
-			// sell value to shops
-			int worth;
-
 			// name and description
 			std::string name;
 			std::string description;
+
+			int cost;	// how much shop sells item for
+			int worth;	// how much player sells item for
+
+			// item type
+			int type;
+
+			/* which jobs can equip bits
+			 *
+			 * war thf wMg bMg mnk rMg
+			 * kni nin wWz bWz mst rWz
+			 *
+			 * 1   2   4   8   16   32
+			 * 64  128 256 512 1024 2048
+			 *
+			 * so 4095 means all can equip, 0 means none
+			 * 3 means only war and thf, etc..
+			 */
+			int equipBits;
 
 			// items have a max of 4 values
 			int values[4];

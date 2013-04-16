@@ -206,6 +206,13 @@ void Party::setJob(int newJob) {
 	characters[active].setJob(static_cast<Character::Jobs>(newJob));
 }
 
+int Party::getJobInt(Characters c) {
+	if (c >= FIRST && c < SIZE) {
+		return characters[c].getJob();
+	}
+	return -1;
+}
+
 std::string Party::getJob(Characters c) {
 	if (c >= FIRST && c < SIZE) {
 		return characters[c].getJobName();
@@ -269,6 +276,13 @@ int Party::getSpell(Characters c, int level, int slot) {
 int Party::getEquip(Characters c, int slot) {
 	if (c >= FIRST && c < SIZE) {
 		return characters[c].getEquip(slot);
+	}
+	return 0;
+}
+
+bool Party::canEquip(Characters c, int type) {
+	if (c >= FIRST && c < SIZE) {
+		return characters[c].canEquip(type);
 	}
 	return 0;
 }
