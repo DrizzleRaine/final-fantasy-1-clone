@@ -11,24 +11,9 @@ Items::Items() {
 	items = new Item[itemCount];
 
 	// fill the array from the file
-	int cat, type;
 	for (int i = 0; i < itemCount; i++) {
 		// go to the next line
 		in.ignore(256, '\n');
-
-		/*
-		// category and type
-		in >> cat;
-		items[i].category = static_cast<Categories>(cat);
-		in >> type;
-		items[i].type = static_cast<Types>(type);
-
-		// item worth to shops
-		in >> items[i].worth;
-
-		// go to the next line
-		in.ignore(256, '\n');
-		*/
 
 		// name and description
 		getline(in, items[i].name, '\n');

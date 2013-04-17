@@ -367,18 +367,47 @@ void ItemShop::basicDetails(int itemID) {
 		}
 
 		if (itemSelected != -1) {
-			// draw atk and acc or def and wgt
-			/* TODO
-			if (values[0] == 0 && values[1] == 0) {
-				// armor
-				twenty.drawText(-windowWidth + 400, windowHeight - 450, "DEF");
-				twenty.drawText(-windowWidth + 400, windowHeight - 495, "WGT");
-			} else {
-				// weapon
-				twenty.drawText(-windowWidth + 400, windowHeight - 450, "ATK");
-				twenty.drawText(-windowWidth + 400, windowHeight - 495, "ACC");
+			// if equipment selected, show its stats
+			int vals[2] = {0};
+			if (items.getType(itemID) == Items::WEAPON) {
+				// weapon, draw atk and acc
+				twenty.drawText(-windowWidth + 400, windowHeight - 495, "ATK");
+				twenty.drawText(-windowWidth + 400, windowHeight - 540, "ACC");
+
+				// get atk and acc values
+				vals[0] = items.getValue(itemID, 0);
+				vals[1] = items.getValue(itemID, 1);
+
+				// draw atk and acc values right aligned
+				const int RIGHTEDGE = (windowWidth / 2) - 260;
+				for (int i = 0; i < 2; i++) {
+					int yPos = windowHeight - 495 - 45 * i;
+
+					const char *valStr = std::to_string(vals[i]).c_str();
+					twenty.textSize(valStr, &r);
+					twenty.drawText(RIGHTEDGE - r.w, yPos, valStr);
+					
+				}
+			} else if (items.getType(itemID) > Items::WEAPON) {
+				// armor, draw def and wgt
+				twenty.drawText(-windowWidth + 400, windowHeight - 495, "DEF");
+				twenty.drawText(-windowWidth + 400, windowHeight - 540, "WGT");
+
+				// get def and wgt values
+				vals[0] = items.getValue(itemID, 2);
+				vals[1] = items.getValue(itemID, 3) * -1;	// show positive wgt
+
+				// draw def and wgt values right aligned
+				const int RIGHTEDGE = (windowWidth / 2) - 260;
+				for (int i = 0; i < 2; i++) {
+					int yPos = windowHeight - 495 - 45 * i;
+
+					const char *valStr = std::to_string(vals[i]).c_str();
+					twenty.textSize(valStr, &r);
+					twenty.drawText(RIGHTEDGE - r.w, yPos, valStr);
+					
+				}
 			}
-			*/
 		}
 	}
 
