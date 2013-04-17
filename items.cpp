@@ -75,13 +75,6 @@ int Items::getType(int id) {
 	return items[id].type;
 }
 
-int Items::getValue(int id, int v) {
-	if (!inBounds(id) || v < 0 || v > 3) {
-		return 0;
-	}
-	return items[id].values[v];
-}
-
 bool Items::equippable(int id, int slot, int job) {
 	if (!inBounds(id)) {
 		return false;
@@ -114,6 +107,32 @@ bool Items::equippable(int id, int slot, int job) {
 	
 	return false;
 }
+
+int Items::getValue(int id, int v) {
+	if (!inBounds(id) || v < 0 || v > 3) {
+		return 0;
+	}
+	return items[id].values[v];
+}
+
+int Items::compare(int thisID, int thatID) {
+	if (!inBounds(thisID) || !inBounds(thatID)) {
+		return 0;
+	}
+	if (items[thisID].type != items[thatID].type) {
+		return 0;
+	}
+
+	if (items[thisID].type == WEAPON) {
+		// weapons, return difference in atk
+		return (items[thisID].values[0] - items[thatID].values[0]);
+	} else if (items[thisID].type > WEAPON) {
+		// armors, return difference in def
+		return (items[thisID].values[2] - items[thatID].values[2]);
+	}
+
+	return 0;
+}		
 
 bool Items::inBounds(int id) {
 	if (id >= 0 && id < itemCount) {

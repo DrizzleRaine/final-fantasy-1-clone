@@ -32,6 +32,12 @@ class Items {
 
 		// get value[v]
 		int getValue(int id, int v);
+
+		// compare two pieces of equipment
+		// returns negative if this < that
+		// returns 0 		if this == that
+		// returns positive if this > that
+		int compare(int thisID, int thatID);
 	private:
 		struct Item {
 			// name and description

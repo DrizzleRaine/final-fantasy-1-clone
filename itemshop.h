@@ -18,6 +18,9 @@ class ItemShop : public ShopMenu {
 
 		Items items;
 
+		// down arrow, up arrow, equals sign textures
+		Textures textures;
+
 		// how many items scrolled down currently in sell menu
 		// (# rows scrolled down) * (2 columns)
 		int scrolled;

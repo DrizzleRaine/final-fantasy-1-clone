@@ -91,7 +91,7 @@ void Character::initStats() {
 
 			// initial warrior equip (knife and clothes)
 			int equipValues[5][5] = {{10, 5, 10, 0, 0}, {-1, 0, 0, 0, 0}, 
-				{-1, 0, 0, 0, 0}, {15, 0, 0, 1, 2}, {-1, 0, 0, 0, 0}};
+				{-1, 0, 0, 0, 0}, {15, 0, 0, 1, -2}, {-1, 0, 0, 0, 0}};
 
 			// initialize character stats and equipment
 			fillValues(attrValues, equipValues);
@@ -104,7 +104,7 @@ void Character::initStats() {
 
 			// initial thief equip (knife and clothes)
 			int equipValues[5][5] = {{10, 5, 10, 0, 0}, {-1, 0, 0, 0, 0}, 
-				{-1, 0, 0, 0, 0}, {15, 0, 0, 1, 2}, {-1, 0, 0, 0, 0}};
+				{-1, 0, 0, 0, 0}, {15, 0, 0, 1, -2}, {-1, 0, 0, 0, 0}};
 
 			// initialize character stats and equipment
 			fillValues(attrValues, equipValues);
@@ -117,7 +117,7 @@ void Character::initStats() {
 
 			// initial white mage equip (staff and clothes)
 			int equipValues[5][5] = {{14, 6, 0, 0, 0}, {-1, 0, 0, 0, 0}, 
-				{-1, 0, 0, 0, 0}, {15, 0, 0, 1, 2}, {-1, 0, 0, 0, 0}};
+				{-1, 0, 0, 0, 0}, {15, 0, 0, 1, -2}, {-1, 0, 0, 0, 0}};
 
 			// initialize character stats and equipment
 			fillValues(attrValues, equipValues);
@@ -130,7 +130,7 @@ void Character::initStats() {
 
 			// initial black mage equip (knife and clothes)
 			int equipValues[5][5] = {{10, 5, 10, 0, 0}, {-1, 0, 0, 0, 0}, 
-				{-1, 0, 0, 0, 0}, {15, 0, 0, 1, 2}, {-1, 0, 0, 0, 0}};
+				{-1, 0, 0, 0, 0}, {15, 0, 0, 1, -2}, {-1, 0, 0, 0, 0}};
 
 			// initialize character stats and equipment
 			fillValues(attrValues, equipValues);
@@ -143,7 +143,7 @@ void Character::initStats() {
 
 			// initial monk equip (staff and clothes)
 			int equipValues[5][5] = {{14, 6, 0, 0, 0}, {-1, 0, 0, 0, 0}, 
-				{-1, 0, 0, 0, 0}, {15, 0, 0, 1, 2}, {-1, 0, 0, 0, 0}};
+				{-1, 0, 0, 0, 0}, {15, 0, 0, 1, -2}, {-1, 0, 0, 0, 0}};
 
 			// initialize character stats and equipment
 			fillValues(attrValues, equipValues);
@@ -156,7 +156,7 @@ void Character::initStats() {
 
 			// initial red mage equip (knife and clothes)
 			int equipValues[5][5] = {{10, 5, 10, 0, 0}, {-1, 0, 0, 0, 0}, 
-				{-1, 0, 0, 0, 0}, {15, 0, 0, 1, 2}, {-1, 0, 0, 0, 0}};
+				{-1, 0, 0, 0, 0}, {15, 0, 0, 1, -2}, {-1, 0, 0, 0, 0}};
 
 			// initialize character stats and equipment
 			fillValues(attrValues, equipValues);
@@ -249,13 +249,14 @@ int Character::getAttribute(Stats s) {
 	}
 
 	// return value modified by current equipment
+	// TODO: Some of these formulas are outdated and
+	//       from the original FF1, (specifically monk)
 	if (s == ATK) {
-		if (job == MONK) {
-			if (equipment[0][0] == -1) {
-				// monk not wearing weapon
-				return attributes[LEVEL] * 2;
-			}
-			// monk with weapon: weaponatk + str/2 + 1
+		if (job == MONK && equipment[0][0] == -1) {
+			// monk not wearing weapon
+			return attributes[LEVEL] * 2;
+		} else if (job == MONK || job == BLACK) {
+			// monk or blm with weapon: weaonatk + str/2 + 1
 			return equipment[0][1] + attributes[STR] / 2 + 1;
 		}
 		// weaponatk + str/2

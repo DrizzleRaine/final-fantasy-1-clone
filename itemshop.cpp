@@ -4,6 +4,9 @@ ItemShop::ItemShop(std::string type, std::string file) : ShopMenu(type, file) {
 	scrolled = 0;
 	itemSelected = -1;
 
+	std::string textureNames[] = {"img/green_up.tga", "img/red_down.tga", "img/equals.tga"};
+	textures.createTextures(3, textureNames);
+
 	price = new int[stockCount];
 	stock = new std::string[stockCount];
 
@@ -360,9 +363,38 @@ void ItemShop::basicDetails(int itemID) {
 			// draw characters, dance if can equip and show comparison
 			for (int i = Party::FIRST; i < Party::SIZE; i++) {
 				Party::Characters c = static_cast<Party::Characters>(i);
-
 				int xPos = -windowHeight - 100 + (windowWidth * 2) / 4 * i;
-				party->render(c, xPos, -windowHeight + 320);
+
+				if (items.equippable(itemID, slot, party->getJobInt(c))) {
+					// TODO dance
+					int result = items.compare(itemID, party->getEquip(c, slot));
+					if (result > 0) {		// itemID is better than current equip
+						result = 0;
+						//twenty.drawText(xPos - 60, -windowHeight + 210, "^");
+					} else if (result < 0) {// itemID is worse than current equip
+						result = 1;
+						//twenty.drawText(xPos - 60, -windowHeight + 210, "\\/");
+					} else {				// itemID is equal with current equip
+						result = 2;
+						//twenty.drawText(xPos - 60, -windowHeight + 210, "=");
+					}
+					glBindTexture(GL_TEXTURE_2D, textures.getTexture(result));
+					glBegin(GL_QUADS);
+						glTexCoord2f(0, 0);
+						glVertex3f(xPos - 50, -windowHeight + 254, 0.0f);
+						glTexCoord2f(0, 1);
+						glVertex3f(xPos - 50, -windowHeight + 230, 0.0f);
+						glTexCoord2f(1, 1);
+						glVertex3f(xPos - 18, -windowHeight + 230, 0.0f);
+						glTexCoord2f(1, 0);
+						glVertex3f(xPos - 18, -windowHeight + 254, 0.0f);
+					glEnd();
+
+					// TODO: draw character dancing
+					party->render(c, xPos, -windowHeight + 320);
+				} else {
+					party->render(c, xPos, -windowHeight + 320);
+				}
 			}
 		}
 
