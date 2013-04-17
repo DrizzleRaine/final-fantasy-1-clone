@@ -266,6 +266,13 @@ std::string Party::getMPFraction(Characters c) {
 	return "";
 }
 
+int Party::expToNext(Characters c) {
+	if (c >= FIRST && c < SIZE) {
+		return characters[c].expToNext();
+	}
+	return 0;
+}
+
 int Party::getSpell(Characters c, int level, int slot) {
 	if (c >= FIRST && c < SIZE) {
 		return characters[c].getSpell(level, slot);

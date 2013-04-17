@@ -46,6 +46,9 @@ class Character {
 		std::string getHPFraction();
 		std::string getMPFraction();
 
+		// get exp to next level
+		int expToNext();
+
 		// get spell id at given level and slot
 		int getSpell(int level, int slot);
 
@@ -79,7 +82,7 @@ class Character {
 		// string in format num/denom
 		std::string getFraction(Stats num, Stats denom);
 
-		// 5 slots for equipment, each has id and 4 stats
+		// 5 equipment slots, store id and 4 stats
 		int equipment[5][5];
 
 		// IDs of spells this character knows

@@ -121,8 +121,9 @@ void StatusMenu::overview() {
 	twenty.drawText(rightEdge - r.w, TOPEDGE - LINEHEIGHT * 4, value.c_str());
 
 	// exp to next level
-	twenty.textSize("0", &r);
-	twenty.drawText(rightEdge - r.w, TOPEDGE - LINEHEIGHT * 6, "0");
+	value = std::to_string(party->expToNext(character));
+	twenty.textSize(value.c_str(), &r);
+	twenty.drawText(rightEdge - r.w, TOPEDGE - LINEHEIGHT * 6, value.c_str());
 }
 
 void StatusMenu::equip() {
@@ -137,6 +138,9 @@ void StatusMenu::equip() {
 	for (int i = 0; i < 5; i++) {
 		twenty.drawText(LEFTEDGE, TOPEDGE - (LINEHEIGHT - 12) * i, 
 				slots[i].c_str());
+
+		twenty.drawText(LEFTEDGE + 180, TOPEDGE - (LINEHEIGHT - 12) * i,
+				items.getName(party->getEquip(character, i)).c_str());
 	}
 
 }

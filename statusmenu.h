@@ -1,6 +1,7 @@
 #ifndef STATUSMENU_H
 #define STATUSMENU_H
 
+#include "items.h"
 #include "menu.h"
 
 class StatusMenu : public Menu {
@@ -11,6 +12,8 @@ class StatusMenu : public Menu {
 		// operations
 		void update();
 		void render();
+
+		Items items;
 
 		// current character
 		Party::Characters character;

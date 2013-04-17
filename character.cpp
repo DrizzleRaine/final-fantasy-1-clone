@@ -312,6 +312,17 @@ std::string Character::getFraction(Stats num, Stats denom) {
 	return (cur + '/' + max);
 }
 
+int Character::expToNext() {
+	// experience needed for first 20 levels
+	int expNeeded[] = {0, 14, 42, 98, 196, 350, 574, 882, 1288, 1806, 2450, 3234, 4172, 5278, 6566, 8050, 9744, 11662, 13818, 16226};
+
+	if (attributes[LEVEL] >= 20) {
+		return 0;	// only supporting first 20 levels for now
+	}
+
+	return (expNeeded[attributes[LEVEL]] - attributes[EXP]);
+}
+
 int Character::getSpell(int level, int slot) {
 	level--;	// convert to 0-based index
 	if (level < 0 || level > 7 || slot < 0 || slot > 2) {

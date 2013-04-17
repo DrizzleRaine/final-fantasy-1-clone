@@ -90,6 +90,9 @@ class Party {
 		// future: dont need setters for hpmax/mpmax
 		// just have a level up function?
 
+		// exp to next level for character c
+		int expToNext(Characters c);
+
 		// get spell character c has at level and slot
 		int getSpell(Characters c, int level, int slot);
 
