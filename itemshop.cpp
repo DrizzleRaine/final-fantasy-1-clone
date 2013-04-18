@@ -370,13 +370,10 @@ void ItemShop::basicDetails(int itemID) {
 					int result = items.compare(itemID, party->getEquip(c, slot));
 					if (result > 0) {		// itemID is better than current equip
 						result = 0;
-						//twenty.drawText(xPos - 60, -windowHeight + 210, "^");
 					} else if (result < 0) {// itemID is worse than current equip
 						result = 1;
-						//twenty.drawText(xPos - 60, -windowHeight + 210, "\\/");
 					} else {				// itemID is equal with current equip
 						result = 2;
-						//twenty.drawText(xPos - 60, -windowHeight + 210, "=");
 					}
 					glBindTexture(GL_TEXTURE_2D, textures.getTexture(result));
 					glBegin(GL_QUADS);

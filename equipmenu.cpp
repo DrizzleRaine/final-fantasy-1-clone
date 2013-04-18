@@ -217,6 +217,9 @@ void EquipMenu::renderText() {
 				items.getName(equippable[i]).c_str());
 	}
 
+	// store current character stats
+	int curStats[4];
+
 	// characters current stats
 	std::string label[] = {"ATK", "ACC", "DEF", "EVA"};
 	for (int i = 0; i < 4; i++) {
@@ -224,13 +227,13 @@ void EquipMenu::renderText() {
 
 		// get character's stat value with current equipment
 		Character::Stats stat = static_cast<Character::Stats>(Character::ATK + i);
-		int statVal = party->getAttribute(character, stat);
+		curStats[i] = party->getAttribute(character, stat);
 
 		// draw the label
 		twenty.drawText(150, yPos, label[i].c_str());
 
 		// draw the value right aligned
-		std::string statStr = std::to_string(statVal);
+		std::string statStr = std::to_string(curStats[i]);
 		twenty.textSize(statStr.c_str(), &r);
 		twenty.drawText(400 - r.w, yPos, statStr.c_str());
 
@@ -260,11 +263,26 @@ void EquipMenu::renderText() {
 			Character::Stats stat = static_cast<Character::Stats>(Character::ATK+i);
 			int statVal = party->getAttribute(character, stat);
 
+			// compare the new stats with the current stats
+			if (statVal > curStats[i]) {
+				// draw increase in stat in yellow
+				glColor3f(1.0f, 6.0f, 0.0f);
+			} else if (statVal < curStats[i]) {
+				// draw decrease in stat in gray
+				glColor3f(0.6f, 0.6f, 0.6f);
+			} else {
+				// no change in white
+				glColor3f(1.0f, 1.0f, 1.0f);
+			}
+
 			// show what stats would be with this item equipped
 			std::string newStr = std::to_string(statVal);
 			twenty.textSize(newStr.c_str(), &r);
 			twenty.drawText(windowWidth - 100 - r.w, yPos, newStr.c_str());
 		}
+
+		// restore white color
+		glColor3f(1.0f, 1.0f, 1.0f);
 
 		// re-equip current itemID on the character
 		for (int i = 0; i < 4; i++) {

@@ -149,8 +149,8 @@ void MagicMenu::renderText() {
 	const int LHSMALL = LINEHEIGHT - 8;
 	for (int i = 0; i < 8; i++) {
 		if (party->getAttribute(character, Character::MAGLEVEL) < (i + 1)) {
-			// TODO: fix font class method of changing colors
-			//twenty.setColor(0.5, 0.5, 0.5);	// gray
+			// gray out levels not reached
+			glColor4f(0.6f, 0.6f, 0.6f, 1.0f);
 		}
 
 		// row level
@@ -166,7 +166,8 @@ void MagicMenu::renderText() {
 			}
 		}
 	}
-	//twenty.setColor(1.0, 1.0, 1.0);	// white
+	// restore white color
+	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
 	// current spell description
 	if (curSpellID != -1) {
