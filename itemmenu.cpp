@@ -1,4 +1,5 @@
 #include "itemmenu.h"
+#include "useitemmenu.h"
 
 ItemMenu::ItemMenu() : subCursor(1), subCursorSwap(1) {
 	currentOption = USE;
@@ -32,15 +33,33 @@ void ItemMenu::update() {
 
 	// option or item selected
 	if (input->getConfirm()) {
+		input->resetConfirm();
 		if (itemSelected >= 0) {
 			if (itemSelected == (CURSEL + scrolled)) {
-				// use the item at this position
-				printf("USE ITEM AT POS %i\n", itemSelected);
+				// get the itemID to use
+				int itemID = party->getItem(itemSelected);
+
+				// unselect item to use
+				newCurSel = subCursor.getSelection();
+				subCursor.setSelection(subCursorSwap.getSelection());
+				itemSelected = -1;
+
+				// use the item based on its type
+				if (items.getType(itemID) == Items::HEAL_SINGLE ||
+					items.getType(itemID) == Items::CURE_STATUS) {
+					// use on a character, switch to UseItemMenu
+					menuState->pushMenu(new UseItemMenu(itemID));
+					return;
+				} else if (items.getType(itemID) == Items::HEAL_PARTY) {
+					printf("TODO HEAL PARTY WITH ITEM %i\n", itemID);
+				} else if (itemID != -1) {
+					printf("TODO SHOW EQUIP SCREEN FOR %i\n", itemID);
+				}
 			} else { // swap the items at the two positions
 				// second item to swap selected, swap item positions
 				party->swapItems(itemSelected, CURSEL + scrolled);
+				itemSelected = -1;					// swap completed
 			}
-			itemSelected = -1;						// use/swap completed
 		} else if (currentOption == USE) {
 			itemSelected = CURSEL + scrolled;		// 1st item to swap selected
 			subCursorSwap.setSelection(USE);		// points at use option
