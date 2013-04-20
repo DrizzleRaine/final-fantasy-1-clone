@@ -21,10 +21,27 @@ void UseItemMenu::update() {
 	// character selected
 	if (input->getConfirm()) {
 		input->resetConfirm();
-		// TODO use item
 
-		// remove one of the items from inventory
-		party->addItem(itemID, -1);
+		// character to use item on
+		Party::Characters c = static_cast<Party::Characters>(CURSEL);
+
+		// attempt to use item
+		int itemType = items.getType(itemID);
+		if (itemType == Items::HEAL_SINGLE) {
+			// attempt to heal the character
+			if (party->addHP(c, items.getValue(itemID, 0))) {
+				// if hp was healed, remove one of the items
+				party->addItem(itemID, -1);
+			}
+		} else if (itemType == Items::CURE_STATUS) {
+			// attempt to remove status from character
+			if (party->removeStatus(c, items.getValue(itemID, 0))) {
+				// if status removed, remove one of the items
+				party->addItem(itemID, -1);
+			}
+		}
+
+		// check how many of item left
 		if (!party->getItemCount(itemID)) {
 			// out of item, return to item menu
 			menuState->popMenu();
@@ -158,8 +175,9 @@ void UseItemMenu::subText() {
 				// doesnt fit, insert a newline before the word
 				desc[j] = '\n';
 
-				// move to new line
-				curLine.clear();
+				// move to new line and add to it the
+				// word that wouldn't fit on the last
+				curLine = desc.substr(j, i - j);
 			}
 			j = i;
 		}

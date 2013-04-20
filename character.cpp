@@ -44,6 +44,9 @@ Character::Character() {
 			spells[lvl][slot] = -1;
 		}
 	}
+
+	// no status effects
+	statusBits = 0;
 }
 
 Character::~Character() {
@@ -310,6 +313,42 @@ std::string Character::getFraction(Stats num, Stats denom) {
 
 	// return fraction format
 	return (cur + '/' + max);
+}
+
+int Character::addHP(int amount) {
+	int excess = 0;
+	attributes[HP] += amount;
+	if (attributes[HP] > attributes[HPMAX]) {
+		// hp exceeds maxhp
+		excess = attributes[HP] - attributes[HPMAX];
+		attributes[HP] = attributes[HPMAX];
+	} else if (attributes[HP] < 0) {
+		// hp fell below 0
+		excess = attributes[HP];
+		attributes[HP] = 0;
+	}
+
+	// calculate how much hp was added
+	return (amount - excess);
+}
+
+bool Character::setStatus(unsigned int status) {
+	if (statusBits & (1 << status)) {
+		return 0;	// character already has status
+	}
+
+	// set status bit
+	statusBits |= 1 << status;
+	return 1;	// status successfully set
+}
+
+bool Character::removeStatus(unsigned int status) {
+	if (statusBits & (1 << status)) {
+		// clear status bit
+		statusBits &= ~(1 << status);
+		return 1;	// 	status successfully removed
+	}
+	return 0;	// character does not have status
 }
 
 int Character::expToNext() {

@@ -90,6 +90,14 @@ class Party {
 		// future: dont need setters for hpmax/mpmax
 		// just have a level up function?
 
+		// add amount hp for character c, return amount healed
+		int addHP(Characters c, int amount);
+
+		// set/remove status effect on character c
+		// returns true if succesffuly set/removed
+		bool setStatus(Characters c, unsigned int status);
+		bool removeStatus(Characters c, unsigned int status);
+
 		// exp to next level for character c
 		int expToNext(Characters c);
 

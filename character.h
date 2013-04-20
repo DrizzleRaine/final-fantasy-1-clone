@@ -46,6 +46,13 @@ class Character {
 		std::string getHPFraction();
 		std::string getMPFraction();
 
+		// heal amount hp, return amount healed
+		int addHP(int amount);
+
+		// set/remove status, return true if successful
+		bool setStatus(unsigned int status);
+		bool removeStatus(unsigned int status);
+
 		// get exp to next level
 		int expToNext();
 
@@ -74,6 +81,11 @@ class Character {
 
 		// character attributes
 		int attributes[STATSCOUNT];
+
+		// status effect bits
+		// 1 - KO, 2 - poison, 3 - darkness
+		// 4 - silence, 5 - stone
+		int statusBits;
 
 		// helper function to fill in attributes and equipment arrays
 		// so they can be initialized easier

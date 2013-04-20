@@ -266,6 +266,27 @@ std::string Party::getMPFraction(Characters c) {
 	return "";
 }
 
+int Party::addHP(Characters c, int amount) {
+	if (c >= FIRST && c < SIZE) {
+		return characters[c].addHP(amount);
+	}
+	return 0;
+}
+
+bool Party::setStatus(Characters c, unsigned int status) {
+	if (c >= FIRST && c < SIZE) {
+		return characters[c].setStatus(status);
+	}
+	return 0;
+}
+
+bool Party::removeStatus(Characters c, unsigned int status) {
+	if (c >= FIRST && c < SIZE) {
+		return characters[c].removeStatus(status);
+	}
+	return 0;
+}
+
 int Party::expToNext(Characters c) {
 	if (c >= FIRST && c < SIZE) {
 		return characters[c].expToNext();
