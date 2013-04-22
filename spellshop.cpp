@@ -247,7 +247,17 @@ void SpellShop::render() {
 		// list which jobs can learn current spell
 		for (int i = 0; i < 5; i++) {
 			const char *jobName = party->getJob(jobs[i]).c_str();
-			if (spells.learnable(stockID[cursor.getSelection()], jobs[i])) {
+
+			// find spellID currently selected
+			int curSpellID;
+			if (spellSelected > -1) {
+				curSpellID = stockID[subCursor.getSelection()];
+			} else {
+				curSpellID = stockID[cursor.getSelection()];
+			}
+
+			// display job in gray if cant learn, white if can
+			if (spells.learnable(stockID[curSpellID], jobs[i])) {
 				glColor3f(1.0f, 1.0f, 1.0f);	// can learn spell, list in white
 			} else {
 				glColor3f(0.6f, 0.6f, 0.6f);	// cant learn, list in gray
