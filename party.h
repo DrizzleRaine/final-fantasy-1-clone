@@ -104,6 +104,12 @@ class Party {
 		// get spell character c has at level and slot
 		int getSpell(Characters c, int level, int slot);
 
+		// add given spell to character c at given level
+		bool addSpell(Characters c, int id, int level);
+
+		// does character c have given spell
+		bool hasSpell(Characters c, int id);
+
 		// get equipment character c has in given slot
 		int getEquip(Characters c, int slot);
 

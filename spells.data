@@ -1,8 +1,25 @@
-2
+8
 Cure
 Restores a little HP to one ally.
-0 1 1 3 40 0 100
+0 2404 1 1 3 40 0 100
 Dia
 Deals damage to all undead foes.
-9 0 1 5 10 0 100
-
+9 260 0 1 5 10 0 100
+Protect
+Raises one ally's defense.
+2 2404 0 1 3 0 10 100
+Blink
+Raises caster's evasion.
+2 2372 0 1 3 0 11 100
+Fire
+Deals fire damage to one foe.
+6 2728 0 1 5 10 0 100
+Thunder
+Deals lightning damage to one foe.
+6 2728 0 1 5 10 0 100
+Sleep
+Puts all foes to sleep.
+11 2728 0 1 3 0 6 30
+Focus
+Lowers one foe's evasion.
+10 2728 0 1 3 0 12 80

@@ -4,7 +4,7 @@ Character::Character() {
 	setName("??????");
 
 	std::string textureNames[] = {"img/warrior_menu.tga", "img/thief_menu.tga", "img/white_menu.tga", "img/black_menu.tga", "img/monk_menu.tga", "img/red_menu.tga"};
-	textures.createTextures(JOBSCOUNT, textureNames);
+	textures.createTextures(6, textureNames);
 
 
 	// initialize the possible random names
@@ -240,6 +240,18 @@ std::string Character::getJobName(Jobs job) {
 			return "Monk";
 		case RED:
 			return "Red Mage";
+		case KNIGHT:
+			return "Knight";
+		case NINJA:
+			return "Ninja";
+		case WHITEW:
+			return "White Wizard";
+		case BLACKW:
+			return "Black Wizard";
+		case MASTER:
+			return "Master";
+		case REDW:
+			return "Red Wizard";
 		default:
 			return "";
 	}
@@ -368,6 +380,31 @@ int Character::getSpell(int level, int slot) {
 		return 0; // out of bounds
 	}
 	return spells[level][slot];
+}
+
+bool Character::addSpell(int id, int level) {
+	level--;	// convert to 0 based index
+	if (level >= 0 && level < 8) {
+		for (int slot = 0; slot < 3; slot++) {
+			if (spells[level][slot] == -1) {
+				spells[level][slot] = id;
+				return 1;
+			}
+		}
+	}
+	// spell not learned
+	return 0;
+}
+
+bool Character::hasSpell(int id) {
+	for (int lvl = 0; lvl < 8; lvl++) {
+		for (int slot = 0; slot < 3; slot++) {
+			if (spells[lvl][slot] == id) {
+				return 1;
+			}
+		}
+	}
+	return 0;
 }
 
 int Character::getEquip(int slot) {

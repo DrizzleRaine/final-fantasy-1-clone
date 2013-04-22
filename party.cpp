@@ -301,6 +301,20 @@ int Party::getSpell(Characters c, int level, int slot) {
 	return 0;
 }
 
+bool Party::addSpell(Characters c, int id, int level) {
+	if (c >= FIRST && c < SIZE) {
+		return characters[c].addSpell(id, level);
+	}
+	return 0;
+}
+
+bool Party::hasSpell(Characters c, int id) {
+	if (c >= FIRST && c < SIZE) {
+		return characters[c].hasSpell(id);
+	}
+	return 0;
+}
+
 int Party::getEquip(Characters c, int slot) {
 	if (c >= FIRST && c < SIZE) {
 		return characters[c].getEquip(slot);

@@ -11,7 +11,7 @@ Items::Items() {
 	items = new Item[itemCount];
 
 	// fill the array from the file
-	for (int i = 0; i < itemCount; i++) {
+	for (unsigned int i = 0; i < itemCount; i++) {
 		// go to the next line
 		in.ignore(256, '\n');
 
@@ -95,7 +95,7 @@ bool Items::equippable(int id, int slot, int job) {
 		return false;
 	}
 
-	if (job == -1 && items[id].equipBits) {
+	if (job == -1) {
 		//  no job specified and it is equippable by some job
 		return true;
 	}

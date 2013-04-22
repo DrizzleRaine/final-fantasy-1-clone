@@ -13,7 +13,8 @@ class Character {
 		Character &operator=(const Character &rhs);
 
 		// character jobs
-		enum Jobs {WARRIOR, THIEF, WHITE, BLACK, MONK, RED, JOBSCOUNT};
+		enum Jobs {WARRIOR, THIEF, WHITE, BLACK, MONK, RED, 
+				   KNIGHT, NINJA, WHITEW, BLACKW, MASTER, REDW, JOBSCOUNT};
 
 		// character stats
 		enum Stats {LEVEL, EXP, MAGLEVEL, HP, MP, HPMAX, MPMAX, 
@@ -58,6 +59,12 @@ class Character {
 
 		// get spell id at given level and slot
 		int getSpell(int level, int slot);
+
+		// add given spell at first open slot in level
+		bool addSpell(int id, int level);
+
+		// does character know given spell
+		bool hasSpell(int id);
 
 		// get equipment id at given slot
 		int getEquip(int slot);

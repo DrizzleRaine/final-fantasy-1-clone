@@ -11,8 +11,7 @@ Spells::Spells() {
 	spells = new Spell[spellCount];
 
 	// fill the array from the file
-	int type;
-	for (int i = 0; i < spellCount; i++) {
+	for (unsigned int i = 0; i < spellCount; i++) {
 		// go to the next line
 		in.ignore(256, '\n');
 
@@ -20,9 +19,9 @@ Spells::Spells() {
 		getline(in, spells[i].name, '\n');
 		getline(in, spells[i].description, '\n');
 
-		// type
-		in >> type;
-		spells[i].type = static_cast<Spell::Types>(type);
+		// type and learn bits
+		in >> spells[i].type;
+		in >> spells[i].learnBits;
 
 		// values
 		in >> spells[i].menu;
@@ -54,13 +53,6 @@ std::string Spells::getDescription(int id) {
 	return spells[id].description;
 }
 
-bool Spells::menuUse(int id) {
-	if (!inBounds(id)) {
-		return 0;
-	}
-	return spells[id].menu;
-}
-
 int Spells::getLevel(int id) {
 	if (!inBounds(id)) {
 		return -1;
@@ -73,6 +65,43 @@ int Spells::getMPCost(int id) {
 		return -1;
 	}
 	return spells[id].mp;
+}
+
+int Spells::getType(int id) {
+	if (!inBounds(id)) {
+		return -1;
+	}
+	return spells[id].type;
+}
+
+bool Spells::learnable(int id, int job) {
+	if (!inBounds(id)) {
+		return false;
+	}
+
+	if (!spells[id].learnBits) {
+		// spell not learnable
+		return false;
+	}
+
+	if (job == -1) {
+		// no job specified, and learnable by some job
+		return true;
+	}
+
+	if (spells[id].learnBits & (1 << job)) {
+		// if bit job is set this job can learn
+		return true;
+	}
+
+	return false;
+}
+
+bool Spells::menuUse(int id) {
+	if (!inBounds(id)) {
+		return 0;
+	}
+	return spells[id].menu;
 }
 
 bool Spells::inBounds(int id) {

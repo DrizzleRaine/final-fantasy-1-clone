@@ -363,10 +363,10 @@ void ItemShop::basicDetails(int itemID) {
 			// draw characters, dance if can equip and show comparison
 			for (int i = Party::FIRST; i < Party::SIZE; i++) {
 				Party::Characters c = static_cast<Party::Characters>(i);
-				int xPos = -windowHeight - 100 + (windowWidth * 2) / 4 * i;
+				int xPos = -windowWidth + 140 + (windowWidth / 2) * i;
 
 				if (items.equippable(itemID, slot, party->getJobInt(c))) {
-					// TODO dance
+					// draw comparison textures
 					int result = items.compare(itemID, party->getEquip(c, slot));
 					if (result > 0) {		// itemID is better than current equip
 						result = 0;
@@ -375,6 +375,8 @@ void ItemShop::basicDetails(int itemID) {
 					} else {				// itemID is equal with current equip
 						result = 2;
 					}
+
+					// render texture
 					glBindTexture(GL_TEXTURE_2D, textures.getTexture(result));
 					glBegin(GL_QUADS);
 						glTexCoord2f(0, 0);

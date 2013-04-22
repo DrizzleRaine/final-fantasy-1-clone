@@ -2,6 +2,7 @@
 #include "world.h"
 
 #include "itemshop.h"
+#include "spellshop.h"
 
 Town::Town(int mapID) {
 	this->mapID = mapID;
@@ -119,9 +120,9 @@ void Town::update() {
 					} else if (shopType == NPC::ARMOR) {
 						sm = new ItemShop("Armor", mapFile);
 					} else if (shopType == NPC::WHITE) {
-						// TODO
+						sm = new SpellShop("W. Magic", mapFile);
 					} else if (shopType == NPC::BLACK) {
-						// TODO
+						sm = new SpellShop("B. Magic", mapFile);
 					}
 					mapState->enterMenu()->pushMenu(sm);
 					return;

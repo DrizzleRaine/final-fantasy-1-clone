@@ -9,9 +9,6 @@ class Items {
 		Items();
 		~Items();
 
-		// equipment slots
-		enum Slots {WPN, SHD, HLM, ARM, GLV};
-
 		// name and description
 		std::string getName(int id);
 		std::string getDescription(int id);
@@ -71,7 +68,7 @@ class Items {
 		Item *items;
 
 		// how many different items the game has
-		int itemCount;
+		unsigned int itemCount;
 
 		// id bounds check
 		bool inBounds(int id);
