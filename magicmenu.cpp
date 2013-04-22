@@ -28,16 +28,15 @@ void MagicMenu::update() {
 	// option or item selected
 	if (input->getConfirm()) {
 		if (currentOption == NONE) {
-			// option selected (Use or Discard
+			// option selected (Use or Discard)
 			currentOption = static_cast<Options>(CURSEL);
 			subCursor.setSelection(CURSEL);	// points at selected option
 			newCurSel = 0;					// start at first magic spell position
+		} else if (subCursor.getSelection() == DISCARD) {
+			// discard spell from character at selected location
+			party->removeSpell(character, CURSEL / 3 + 1, CURSEL % 3);
 		} else {
-			if (subCursor.getSelection() == DISCARD) {
-				printf("DISCARD SPELL\n");
-			} else {
-				printf("USE SPELL\n");
-			}
+			printf("USE SPELL\n");
 		}
 	}
 

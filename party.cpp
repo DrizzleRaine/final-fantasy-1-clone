@@ -308,6 +308,13 @@ bool Party::addSpell(Characters c, int id, int level) {
 	return 0;
 }
 
+bool Party::removeSpell(Characters c, int level, int slot) {
+	if (c >= FIRST && c < SIZE) {
+		return characters[c].removeSpell(level, slot);
+	}
+	return 0;
+}
+
 bool Party::hasSpell(Characters c, int id) {
 	if (c >= FIRST && c < SIZE) {
 		return characters[c].hasSpell(id);

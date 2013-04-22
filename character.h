@@ -63,6 +63,9 @@ class Character {
 		// add given spell at first open slot in level
 		bool addSpell(int id, int level);
 
+		// remove spell at given level and slot
+		bool removeSpell(int level, int slot);
+
 		// does character know given spell
 		bool hasSpell(int id);
 

@@ -107,6 +107,9 @@ class Party {
 		// add given spell to character c at given level
 		bool addSpell(Characters c, int id, int level);
 
+		// remove spell from character c at given level and slot
+		bool removeSpell(Characters c, int level, int slot);
+
 		// does character c have given spell
 		bool hasSpell(Characters c, int id);
 

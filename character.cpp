@@ -396,6 +396,29 @@ bool Character::addSpell(int id, int level) {
 	return 0;
 }
 
+bool Character::removeSpell(int level, int slot) {
+	level--;	// conver to 0 based index
+	if (level >= 0 && level < 8 && slot >= 0 && slot < 3) {
+		// if in bounds
+		if (spells[level][slot] != -1) {
+			// if spell exists at given level and slot
+			spells[level][slot] = -1;	// remove the spell
+
+			// shift all slots after removed spell left by 1
+			while (slot < 2) {
+				spells[level][slot] = spells[level][slot + 1];
+				spells[level][slot + 1] = -1;
+				slot++;
+			}
+	
+			// spell removed successfully
+			return 1;
+		}
+	}
+	// spell not removed
+	return 0;
+}
+
 bool Character::hasSpell(int id) {
 	for (int lvl = 0; lvl < 8; lvl++) {
 		for (int slot = 0; slot < 3; slot++) {
