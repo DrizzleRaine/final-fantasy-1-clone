@@ -104,6 +104,16 @@ bool Spells::menuUse(int id) {
 	return spells[id].menu;
 }
 
+int Spells::cast(int id) {
+	if (!inBounds(id)) {
+		return 0;
+	}
+
+	// TODO, return correct amount
+	// depending on its type, use correct formula
+	return 10;
+}
+
 bool Spells::inBounds(int id) {
 	if (id >= 0 && id < spellCount) {
 		return true;

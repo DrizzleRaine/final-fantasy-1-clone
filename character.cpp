@@ -344,6 +344,23 @@ int Character::addHP(int amount) {
 	return (amount - excess);
 }
 
+int Character::addMP(int amount) {
+	int excess = 0;
+	attributes[MP] += amount;
+	if (attributes[MP] > attributes[MPMAX]) {
+		// mp exceeds maxmp
+		excess = attributes[MP] - attributes[MPMAX];
+		attributes[MP] = attributes[MPMAX];
+	} else if (attributes[MP] < 0) {
+		// mp fell below 0
+		excess = attributes[MP];
+		attributes[MP] = 0;
+	}
+
+	// calculate how much mp was added
+	return (amount - excess);
+}
+
 bool Character::setStatus(unsigned int status) {
 	if (statusBits & (1 << status)) {
 		return 0;	// character already has status

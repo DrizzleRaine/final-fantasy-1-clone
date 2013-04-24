@@ -31,6 +31,10 @@ class Spells {
 
 		// can be used in menu
 		bool menuUse(int id);
+
+		// cast spell
+		// return amount healed/damage done/status removed/added
+		int cast(int id);
 	private:
 		struct Spell {
 			// name and description

@@ -257,7 +257,7 @@ void SpellShop::render() {
 			}
 
 			// display job in gray if cant learn, white if can
-			if (spells.learnable(stockID[curSpellID], jobs[i])) {
+			if (spells.learnable(curSpellID, jobs[i])) {
 				glColor3f(1.0f, 1.0f, 1.0f);	// can learn spell, list in white
 			} else {
 				glColor3f(0.6f, 0.6f, 0.6f);	// cant learn, list in gray

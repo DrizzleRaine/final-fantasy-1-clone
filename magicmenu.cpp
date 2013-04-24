@@ -1,4 +1,5 @@
 #include "magicmenu.h"
+#include "usespellmenu.h"
 
 MagicMenu::MagicMenu(int c) : subCursor(1) {
 	character = static_cast<Party::Characters>(c);
@@ -22,11 +23,13 @@ void MagicMenu::update() {
 		} else {
 			newCurSel = currentOption;	// restore cursor
 			currentOption = NONE;		// return to menu options
+			curSpellID = -1;			// unselect spell
 		}
 	}
 
 	// option or item selected
 	if (input->getConfirm()) {
+		input->resetConfirm();
 		if (currentOption == NONE) {
 			// option selected (Use or Discard)
 			currentOption = static_cast<Options>(CURSEL);
@@ -35,8 +38,10 @@ void MagicMenu::update() {
 		} else if (subCursor.getSelection() == DISCARD) {
 			// discard spell from character at selected location
 			party->removeSpell(character, CURSEL / 3 + 1, CURSEL % 3);
-		} else {
-			printf("USE SPELL\n");
+		} else if (spells.menuUse(curSpellID)) {
+			// use spell on a character, switch to UseSpellMenu
+			menuState->pushMenu(new UseSpellMenu(curSpellID, character));
+			return;
 		}
 	}
 
@@ -136,13 +141,14 @@ void MagicMenu::renderText() {
 	twenty.drawText(windowWidth - (400 / 2) - (r.w / 2), windowHeight - 90, "Magic");
 
 	// current spell mp cost
+	std::string MPCost = "MP Cost    ";
 	if (curSpellID != -1) {
-		twenty.drawText(windowWidth - 380, windowHeight - 215 - LINEHEIGHT * 2,
-			("MP Cost    " + std::to_string(spells.getMPCost(curSpellID))).c_str());
-	} else {
-		twenty.drawText(windowWidth - 380, windowHeight - 215 - LINEHEIGHT * 2,
-			"MP Cost    -");
+		MPCost +=  std::to_string(spells.getMPCost(curSpellID));
+	} else if (currentOption != NONE) {
+		MPCost += "-";
 	}
+	twenty.drawText(windowWidth - 380, windowHeight - 215 - LINEHEIGHT * 2, 
+			MPCost.c_str());
 
 	const int ROW1Y = windowHeight - 455;
 	const int LHSMALL = LINEHEIGHT - 8;
@@ -160,6 +166,11 @@ void MagicMenu::renderText() {
 		for (int slot = 0; slot < 3; slot++) {
 			int spellID = party->getSpell(character, i + 1, slot);
 			if (spellID > -1) {
+				if (spells.menuUse(spellID)) {
+					glColor3f(1.0f, 1.0f, 1.0f);
+				} else {
+					glColor3f(0.6f, 0.6f, 0.6f);
+				}
 				twenty.drawText(-windowWidth + 280 + (400 * slot), 
 						ROW1Y - LHSMALL * i, spells.getName(spellID).c_str());
 			}

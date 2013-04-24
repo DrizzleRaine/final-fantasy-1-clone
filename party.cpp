@@ -273,6 +273,13 @@ int Party::addHP(Characters c, int amount) {
 	return 0;
 }
 
+int Party::addMP(Characters c, int amount) {
+	if (c >= FIRST && c < SIZE) {
+		return characters[c].addMP(amount);
+	}
+	return 0;
+}
+
 bool Party::setStatus(Characters c, unsigned int status) {
 	if (c >= FIRST && c < SIZE) {
 		return characters[c].setStatus(status);

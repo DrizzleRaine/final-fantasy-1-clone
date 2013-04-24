@@ -47,8 +47,9 @@ class Character {
 		std::string getHPFraction();
 		std::string getMPFraction();
 
-		// heal amount hp, return amount healed
+		// heal amount hp/mp, return amount healed
 		int addHP(int amount);
+		int addMP(int amount);
 
 		// set/remove status, return true if successful
 		bool setStatus(unsigned int status);
