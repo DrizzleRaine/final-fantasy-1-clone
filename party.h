@@ -94,6 +94,9 @@ class Party {
 		int addHP(Characters c, int amount);
 		int addMP(Characters c, int amount);
 
+		// check if character c has given status
+		bool hasStatus(Characters c, unsigned int status);
+
 		// set/remove status effect on character c
 		// returns true if succesffuly set/removed
 		bool setStatus(Characters c, unsigned int status);

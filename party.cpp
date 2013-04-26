@@ -280,6 +280,13 @@ int Party::addMP(Characters c, int amount) {
 	return 0;
 }
 
+bool Party::hasStatus(Characters c, unsigned int status) {
+	if (c >= FIRST && c < SIZE) {
+		return characters[c].hasStatus(status);
+	}
+	return 0;
+}
+
 bool Party::setStatus(Characters c, unsigned int status) {
 	if (c >= FIRST && c < SIZE) {
 		return characters[c].setStatus(status);

@@ -361,6 +361,10 @@ int Character::addMP(int amount) {
 	return (amount - excess);
 }
 
+bool Character::hasStatus(unsigned int status) {
+	return (statusBits & (1 << status));
+}
+
 bool Character::setStatus(unsigned int status) {
 	if (statusBits & (1 << status)) {
 		return 0;	// character already has status

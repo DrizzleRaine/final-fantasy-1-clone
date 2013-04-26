@@ -51,6 +51,9 @@ class Character {
 		int addHP(int amount);
 		int addMP(int amount);
 
+		// check if character has status
+		bool hasStatus(unsigned int status);
+
 		// set/remove status, return true if successful
 		bool setStatus(unsigned int status);
 		bool removeStatus(unsigned int status);

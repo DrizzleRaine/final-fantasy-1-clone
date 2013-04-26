@@ -18,6 +18,9 @@ class World : public Map {
 		// pause/unpause
 		void pause();
 		void unpause();
+
+		// steps to next encounter
+		int nextEncounter;
 };
 
 #endif

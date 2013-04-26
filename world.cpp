@@ -1,10 +1,12 @@
 #include "world.h"
 #include "town.h"
+#include "battlestate.h"
 
 World::World() {
 	mapID = 1;
 	region = "World";	// TODO update based on possible encounters
 	mapFile = "World/World";
+	nextEncounter = rand() % 39 + 11;
 }
 
 World::~World() {
@@ -45,9 +47,24 @@ void World::update() {
 	if (currentTile > 0) {			// if map change tile
 		mapState->pushMap(new Town(currentTile));
 		return;						// change maps
-	} else { 						// else if not a map change tile
-		currentX = party->getX();	// store current position
+	} 						
+
+	if (currentX != party->getX() || currentY != party->getY()) {
+		// step taken, store current position
+		currentX = party->getX();
 		currentY = party->getY();
+
+		// if on encounter tile, decrement steps to next encounter
+		if (currentTile < -1 && --nextEncounter == 0) {
+			// generate new random counter
+			nextEncounter = rand() % 38 + 11;
+
+			input->resetAll();
+
+			// enter battle
+			mapState->enterBattle(currentTile);
+			return;	
+		}
 	}
 }
 

@@ -3,6 +3,7 @@
 
 #include "state.h"
 #include "menustate.h"
+#include "battlestate.h"
 
 #include "map.h"
 class Map;
@@ -20,6 +21,10 @@ class MapState : public State {
 		// push MenuState on top of state stack
 		// and return the new MenuState on top
 		MenuState *enterMenu();
+
+		// push BattleState on top of state stack
+		// and return the new BattleState on top
+		BattleState *enterBattle(int battleID);
 	private:
 		// operations
 		void update();
