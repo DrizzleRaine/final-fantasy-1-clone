@@ -39,9 +39,13 @@ void MagicMenu::update() {
 			// discard spell from character at selected location
 			party->removeSpell(character, CURSEL / 3 + 1, CURSEL % 3);
 		} else if (spells.menuUse(curSpellID)) {
-			// use spell on a character, switch to UseSpellMenu
-			menuState->pushMenu(new UseSpellMenu(curSpellID, character));
-			return;
+			// if spell can be used in menus, check if player has enough MP
+			if (party->getAttribute(character, Character::MP) 
+					>= spells.getMPCost(curSpellID)) {
+				// use spell on a character, switch to UseSpellMenu
+				menuState->pushMenu(new UseSpellMenu(curSpellID, character));
+				return;
+			}
 		}
 	}
 
@@ -166,7 +170,9 @@ void MagicMenu::renderText() {
 		for (int slot = 0; slot < 3; slot++) {
 			int spellID = party->getSpell(character, i + 1, slot);
 			if (spellID > -1) {
-				if (spells.menuUse(spellID)) {
+				int curMP = party->getAttribute(character, Character::MP);
+				if (spells.menuUse(spellID) && curMP >= spells.getMPCost(spellID)) {
+					// character has enough MP for a spell that can be used in menus
 					glColor3f(1.0f, 1.0f, 1.0f);
 				} else {
 					glColor3f(0.6f, 0.6f, 0.6f);
