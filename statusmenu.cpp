@@ -63,7 +63,7 @@ void StatusMenu::header() {
 			windowHeight - 90, "Status");
 
 	// draw character sprite
-	party->render(character, -windowWidth + 80, windowHeight - 70);	
+	party->render(character, -windowWidth + 60, windowHeight - 60);	
 
 	// character name and job name
 	twenty.drawText(-windowWidth + 250, windowHeight - 140, 

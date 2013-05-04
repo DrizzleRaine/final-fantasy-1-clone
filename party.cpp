@@ -362,6 +362,23 @@ void Party::removeEquip(Characters c, int slot) {
 	}
 }
 
+void Party::setTurn(Characters c, Character::Turn t) {
+	if (c >= FIRST && c < SIZE) {
+		characters[c].setTurn(t);
+	}
+}
+
+Character::Turn Party::getTurn(Characters c) {
+	if (c >= FIRST && c < SIZE) {
+		return characters[c].getTurn();
+	}
+	Character::Turn t;
+	t.action = Character::Actions::NONE;
+	t.actionID = -1;
+	t.target = -1;
+	return t;
+}
+
 int Party::getItemCount(int id) {
 	if (id < 0 || id >= INVENTORY_SIZE) {
 		return 0;

@@ -3,6 +3,7 @@
 MenuState::MenuState() {
 	head = 0;
 	tail = 0;
+	size = 0;
 }
 
 MenuState::~MenuState() {
@@ -20,6 +21,8 @@ void MenuState::pushMenu(Menu *menu) {
 	menu->setPrev(tail);
 	tail = menu;
 	tail->init(party, &input, this);
+
+	size++;
 }
 
 void MenuState::popMenu() {
@@ -30,6 +33,8 @@ void MenuState::popMenu() {
 
 		delete toPop;
 		toPop = 0;
+
+		size--;
 	}
 }
 

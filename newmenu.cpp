@@ -141,7 +141,7 @@ void NewMenu::render() {
 	for (int i = Party::FIRST; i < Party::SIZE; i++) {
 		Party::Characters c = static_cast<Party::Characters>(i);
 
-		party->render(c, SPRITEX, SPRITEY[i] + 72);
+		party->render(c, SPRITEX - 20, SPRITEY[i] + 82);
 		twenty.drawText(-windowWidth / 2, SPRITEY[i], party->getName(c).c_str());
 		twenty.drawText(-windowWidth / 2, SPRITEY[i] - 80, party->getJob(c).c_str());
 	}

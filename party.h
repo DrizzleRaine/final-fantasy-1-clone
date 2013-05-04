@@ -126,6 +126,10 @@ class Party {
 		// set/remove equipment character c has in given slot
 		void setEquip(Characters c, int slot, int id, int vals[4]);
 		void removeEquip(Characters c, int slot);
+
+		// set/get given characters turn
+		void setTurn(Characters c, Character::Turn t);
+		Character::Turn getTurn(Characters c);
 	
 		// how much gil party has	
 		unsigned int getGil() { return gil; }

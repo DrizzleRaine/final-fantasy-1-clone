@@ -93,7 +93,7 @@ void UseSpellMenu::render() {
 		// character name and sprite
 		twenty.drawText(SPRITEX - 35, SPRITEY[i] + twenty.getLineSkip() * 0.75, 
 				party->getName(c).c_str());
-		party->render(c, SPRITEX, SPRITEY[i] + 50);
+		party->render(c, SPRITEX - 20 , SPRITEY[i] + 50);
 
 		// draw character details
 		std::string level = "Lv. " + 
@@ -182,7 +182,7 @@ void UseSpellMenu::subText() {
 	// draw description that will now fit
 	twenty.drawText(LEFTX, DESCY, desc.c_str());
 
-	const int CASTERY = -windowHeight + 350;	// y for caster sprite
+	const int CASTERY = -windowHeight + 352;	// y for caster sprite
 	const int NAMELVLX = LEFTX + 150;			// x for caster name and level
 	const int NAMEY = CASTERY - 60;				// y for caster name
 	const int LEVELY = CASTERY - 150;			// y for caster level
@@ -190,7 +190,7 @@ void UseSpellMenu::subText() {
 	const int MPX = LEFTX + 120;				// x for caster MP fraction
 
 	// draw caster
-	party->render(caster, LEFTX, CASTERY);
+	party->render(caster, LEFTX - 20, CASTERY);
 
 	// caster name
 	twenty.drawText(NAMELVLX, NAMEY, party->getName(caster).c_str());

@@ -303,7 +303,7 @@ void EquipMenu::charInfo() {
 	const int LHSMALL = twenty.getLineSkip() - 8;
 
 	// draw character sprite
-	party->render(character, -windowWidth + 50, windowHeight - 280);
+	party->render(character, -windowWidth + 30, windowHeight - 278);
 
 	// character name, level, and job
 	twenty.drawText(-windowWidth + 50, TOPEDGE, 

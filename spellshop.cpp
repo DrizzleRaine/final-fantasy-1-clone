@@ -187,7 +187,7 @@ void SpellShop::render() {
 
 			// draw character
 			Party::Characters c = static_cast<Party::Characters>(i);
-			party->render(c, xPos, yPos);
+			party->render(c, xPos - 20, yPos + 10);
 
 			// if spell selected
 			if (spellSelected > -1) {

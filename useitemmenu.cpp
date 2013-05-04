@@ -98,7 +98,7 @@ void UseItemMenu::render() {
 		// character name and sprite
 		twenty.drawText(SPRITEX - 35, SPRITEY[i] + twenty.getLineSkip() * 0.75, 
 				party->getName(c).c_str());
-		party->render(c, SPRITEX, SPRITEY[i] + 50);
+		party->render(c, SPRITEX - 20, SPRITEY[i] + 50);
 
 		// draw character details
 		std::string level = "Lv. " + 

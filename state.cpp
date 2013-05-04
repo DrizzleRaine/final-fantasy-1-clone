@@ -38,16 +38,8 @@ void State::renderState(int width, int height) {
 	windowWidth = width;
 	windowHeight = height;
 
-	// reset scene
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glLoadIdentity();
-	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
 	// render scene
 	render();
-
-	// swap buffers
-	SDL_GL_SwapBuffers();
 }
 
 void State::pauseState() {

@@ -1,4 +1,5 @@
 #include "battlestate.h"
+#include "battlemainmenu.h"
 
 BattleState::BattleState(int battleID, int advantage) {
 	this->battleID = battleID;
@@ -37,13 +38,12 @@ BattleState::BattleState(int battleID, int advantage) {
 		// read in enemy name
 		in >> enemy[i].name;
 
-		// temporary, just give them 10 HP
-		enemy[i].HP = 10;
-
 		// process the texture name
 		if (enemy[i].name == "0") {	// no enemy in this slot
 			enemy[i].textureID = -1;// no texture for this enemy
 		} else {					// else check for duplicate textures
+			// temporary, just give them 10 HP
+			enemy[i].HP = 10;
 
 			// full texture path and filename
 			std::string texFile = "battle_data/sprites/" + enemy[i].name + ".tga";
@@ -80,9 +80,19 @@ BattleState::BattleState(int battleID, int advantage) {
 		// initialize all slots to no action decided
 		slot[i].action = NONE;
 	}
+
+	menuState = 0;
+	battleBGMenu = new BattleBGMenu();
 }
 
 BattleState::~BattleState() {
+	delete battleBGMenu;
+	battleBGMenu = 0;
+
+	if (menuState) {
+		delete menuState;
+		menuState = 0;
+	}
 }
 
 void BattleState::update() {
@@ -93,8 +103,10 @@ void BattleState::update() {
 
 		// battle not over, enemy turn, decide actions
 		while (currentSlot < ENEMYSLOTS) {
+			enemyLocs[currentSlot] = 1;
 			if (enemy[currentSlot].name == "0" || enemy[currentSlot].HP <= 0) {
 				// empty slot or dead enemy, move to next
+				enemyLocs[currentSlot] = 0;
 				currentSlot++;
 				continue;
 			}
@@ -113,13 +125,60 @@ void BattleState::update() {
 			printf("enemy %i decides to attack %i\n", currentSlot, target);
 
 			// target decided
-			slot[currentSlot].targetSlot = target + ENEMYSLOTS;
+			slot[currentSlot].target = target + ENEMYSLOTS;
 
 			// enemy's turn over
 			currentSlot++;
 		}
 	}
 
+	if (currentSlot >= ENEMYSLOTS && currentSlot < SLOTCOUNT) {
+		// find first non dead character
+		int character = currentSlot - ENEMYSLOTS;
+
+		while (currentSlot < SLOTCOUNT && party->hasStatus(static_cast<Party::Characters>(character), 1)) {
+			currentSlot++;
+			character = currentSlot - ENEMYSLOTS;
+		}
+
+		Party::Characters c = static_cast<Party::Characters>(character);
+
+		// player turn
+		if (!menuState) {
+			// open menu for player
+			menuState = new MenuState();
+			menuState->init(party, stateManager);
+			menuState->pushMenu(new BattleMainMenu(c, enemyLocs));
+		// else if character has selected, deciding = 0, popstate
+		} else {
+			menuState->setInput(input);
+			menuState->updateState();
+
+			if (!menuState->getSize()) {
+				// player done deciding or wanting to go back
+				// TODO check if character turn decidided
+				delete menuState;
+				menuState = 0;
+
+				Character::Turn t = party->getTurn(c);
+				if (t.action == Character::Actions::NONE) {
+					// player wants to go back a character
+					if (currentSlot > ENEMYSLOTS) {
+						currentSlot--;
+					}	// else already at first character
+				} else {
+					// TODO just setting actino to ATTACK
+					// need a way to convert better
+					// maybe just use characters public implementation
+					slot[currentSlot].action = ATTACK;
+					slot[currentSlot].actionID = t.actionID;
+					slot[currentSlot].target = t.target;
+					currentSlot++;
+				}
+			}
+		}
+	}
+	/*
 	if (input.getConfirm()) {
 		input.resetConfirm();
 
@@ -143,12 +202,13 @@ void BattleState::update() {
 			printf("character %i decides to attack %i\n", currentSlot - ENEMYSLOTS, target);
 
 			// target decided
-			slot[currentSlot].targetSlot = target;
+			slot[currentSlot].target = target;
 
 			// players turn over
 			currentSlot++;
 		}
 	}
+	*/
 
 	if (currentSlot == SLOTCOUNT) {
 		printf("\n--EXECUTING--\n");
@@ -169,7 +229,7 @@ void BattleState::update() {
 		while (currentSlot) {
 			currentSlot--;
 			int attacker = attackSequence[currentSlot];
-			Slot curSlot = slot[attacker];
+			Turn curSlot = slot[attacker];
 			if (curSlot.action == NONE) {
 				continue;
 			}
@@ -184,17 +244,19 @@ void BattleState::update() {
 
 				// if enemy player wanted to attack already dead
 				// choose another enemy to attack at random
-				while (enemy[curSlot.targetSlot].name == "0" || enemy[curSlot.targetSlot].HP <= 0) {
-					curSlot.targetSlot = rand() % ENEMYSLOTS;
+				while (enemy[curSlot.target].name == "0" || enemy[curSlot.target].HP <= 0) {
+					curSlot.target = rand() % ENEMYSLOTS;
 				}
 
 				// just have character hit for rand num 1-10
 				int damage = rand() % 10 + 1;
-				printf("character %i hits %i for %i HP\n", attacker - ENEMYSLOTS, curSlot.targetSlot, damage);
-				enemy[curSlot.targetSlot].HP -= damage;
-				if (enemy[curSlot.targetSlot].HP <= 0) {
-					printf("ENEMY %i WAS KILLED\n", curSlot.targetSlot);
+				printf("character %i hits %i for %i HP\n", attacker - ENEMYSLOTS, curSlot.target, damage);
+				enemy[curSlot.target].HP -= damage;
+				if (enemy[curSlot.target].HP <= 0) {
+					printf("ENEMY %i WAS KILLED\n", curSlot.target);
 				}
+
+				curSlot.action = NONE;
 			} else {
 				int attackerHP = enemy[attacker].HP;
 				if (attackerHP <= 0) {
@@ -204,15 +266,15 @@ void BattleState::update() {
 
 				// if character enemy wanted to attack already dead
 				// choose another character to attack at random
-				while (party->getAttribute(static_cast<Party::Characters>(curSlot.targetSlot - ENEMYSLOTS), Character::HP) <= 0) {
-					curSlot.targetSlot = rand() % 4 + ENEMYSLOTS;
+				while (party->getAttribute(static_cast<Party::Characters>(curSlot.target - ENEMYSLOTS), Character::HP) <= 0) {
+					curSlot.target = rand() % 4 + ENEMYSLOTS;
 				}
 
 				// just have enemy hit for 1
-				printf("enemy %i hits %i for 1 HP\n", attacker, curSlot.targetSlot - ENEMYSLOTS);
-				party->addHP(static_cast<Party::Characters>(curSlot.targetSlot - ENEMYSLOTS), -1);
-				if (party->getAttribute(static_cast<Party::Characters>(curSlot.targetSlot - ENEMYSLOTS), Character::HP) <= 0) {
-					printf("CHARACTER %i WAS KILLED\n", curSlot.targetSlot - ENEMYSLOTS);
+				printf("enemy %i hits %i for 1 HP\n", attacker, curSlot.target - ENEMYSLOTS);
+				party->addHP(static_cast<Party::Characters>(curSlot.target - ENEMYSLOTS), -1);
+				if (party->getAttribute(static_cast<Party::Characters>(curSlot.target - ENEMYSLOTS), Character::HP) <= 0) {
+					printf("CHARACTER %i WAS KILLED\n", curSlot.target - ENEMYSLOTS);
 				}
 			}
 			curSlot.action = NONE;
@@ -249,6 +311,8 @@ void BattleState::update() {
 		stateManager->popState();
 		return;
 	}
+
+	input.resetAll();
 }
 
 void BattleState::render() {
@@ -268,9 +332,13 @@ void BattleState::render() {
 	// enemy sprite dimensions
 	const int SPRITEDIM = 192;
 
+	// while drawing, get count of each type of enemy
+	std::map<std::string, int> enemyTypes;
+
 	// draw each enemy
 	for (int i = 0; i < ENEMYSLOTS; i++) {
-		if (enemy[i].textureID >= 0) {
+		// if enemy exists and is alive
+		if (enemy[i].textureID >= 0 && enemy[i].HP > 0) {
 			int xPos = -windowWidth + SPRITEDIM * (i / 3) + 60;
 			int yPos = windowHeight - SPRITEDIM * (i % 3) - 120;
 
@@ -286,6 +354,14 @@ void BattleState::render() {
 				glTexCoord2f(1, 0);
 				glVertex3f(xPos + SPRITEDIM, yPos, 0.0f);
 			glEnd();
+
+			if (enemyTypes.find(enemy[i].name) == enemyTypes.end()) {
+				// this enemy is not in map yet, add it
+				enemyTypes[enemy[i].name] = 1;
+			} else {
+				// enemy already in map, increment count
+				enemyTypes[enemy[i].name]++;
+			}
 		}
 	}
 
@@ -293,9 +369,24 @@ void BattleState::render() {
 	for (int i = Party::FIRST; i < Party::SIZE; i++) {
 		Party::Characters c = static_cast<Party::Characters>(i);
 
-		int xPos = windowWidth - 360 + 50 * i;
-		int yPos = windowHeight - 180 - 120 * i;
+		int xPos = windowWidth - 380 + 50 * i;
+		int yPos = windowHeight - 170 - 120 * i;
 		party->render(c, xPos, yPos);
+	}
+
+	// get enemy names and counts strings to render
+	std::string enemyNames, enemyCounts;
+	std::map<std::string, int>::iterator it;
+	for (it = enemyTypes.begin(); it != enemyTypes.end(); ++it) {
+		enemyNames.append(it->first + '\n');
+		enemyCounts.append(std::to_string(it->second) + '\n');
+	}
+
+	// render menu for enemy names/count and characters name/hp/mp
+	battleBGMenu->render(windowWidth, windowHeight, party, enemyNames, enemyCounts);
+
+	if (menuState) {
+		menuState->renderState(windowWidth, windowHeight);
 	}
 }
 

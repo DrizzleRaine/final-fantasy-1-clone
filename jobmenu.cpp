@@ -100,7 +100,7 @@ void JobMenu::render() {
 	for (int i = Party::FIRST; i < Party::SIZE; i++) {
 		Party::Characters c = static_cast<Party::Characters>(i);
 
-		party->render(c, SPRITEX, SPRITEY[i] + 90);
+		party->render(c, SPRITEX - 20, SPRITEY[i] + 100);
 		twenty.drawText(SPRITEX + 140, SPRITEY[i] + 18, party->getName(c).c_str());
 		twenty.drawText(SPRITEX, SPRITEY[i] - 110, party->getJob(c).c_str());
 	}
@@ -160,8 +160,8 @@ void JobMenu::subText() {
 	SDL_Rect r = {0, 0, 0, 0};
 	const int SUBCOL = (windowWidth + 150) / 4;	// (sub window width / 4)
 	const int TOPSPRITE = windowHeight - 190, BOTSPRITE = windowHeight - 410;
-	const int TOPTEXT = windowHeight - 390, BOTTEXT = windowHeight - 610;
-	const int LEFTSPRITE = SUBCOL - 200, RIGHTSPRITE = windowWidth - SUBCOL - 100;
+	const int TOPTEXT = windowHeight - 400, BOTTEXT = windowHeight - 620;
+	const int LEFTSPRITE = SUBCOL - 220, RIGHTSPRITE = windowWidth - SUBCOL - 120;
 	if (cursor.getSelection() > 3) {			// if scrolled down
 		// monk top left
 		twenty.textSize(party->getJob(Character::MONK).c_str(), &r);

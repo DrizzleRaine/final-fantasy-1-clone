@@ -197,7 +197,7 @@ void MagicMenu::charInfo() {
 	const int LINEHEIGHT = twenty.getLineSkip();
 
 	// draw character sprite
-	party->render(character, -windowWidth + 100, windowHeight - 165);
+	party->render(character, -windowWidth + 80, windowHeight - 168);
 
 	// character name, level, and job
 	twenty.drawText(-windowWidth + 300, TOPEDGE, 

@@ -59,7 +59,16 @@ void StateManager::update() {
 }
 
 void StateManager::render(int width, int height) {
+	// reset scene
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glLoadIdentity();
+	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+	// render state
 	tail->renderState(width, height);
+
+	// swap buffers
+	SDL_GL_SwapBuffers();
 }
 
 void StateManager::startGame() {

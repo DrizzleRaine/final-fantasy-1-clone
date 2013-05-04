@@ -125,7 +125,7 @@ void NameMenu::render() {
 	for (int i = Party::FIRST; i < Party::SIZE; i++) {
 		Party::Characters c = static_cast<Party::Characters>(i);
 
-		party->render(c, SPRITEX, SPRITEY[i] + 90);
+		party->render(c, SPRITEX - 20, SPRITEY[i] + 100);
 		if (party->getActive() == c) {	// the character who's name is being edited
 			twenty.drawText(SPRITEX + 140, SPRITEY[i] + 18, newName.c_str());
 		} else {						// display current name for other characters

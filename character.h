@@ -82,6 +82,25 @@ class Character {
 		// set/remove equipment at given slot
 		void setEquip(int slot, int id, int values[4]);
 		void removeEquip(int slot);
+
+		// TODO, enemies and characters both inherit
+		// from parent entity class?
+		// different types of actions entity can perform
+		enum Actions {NONE, ATTACK, SPELL, ITEM, FLEE, COUNT};
+		struct Turn {
+			// action to take
+			Actions action;
+
+			// id of action (spellID/itemID)
+			int actionID;
+
+			// action target
+			int target;
+		};
+	
+		// set/get entity turn	
+		void setTurn(Turn t) { turn = t; }
+		Turn getTurn() { return turn; }
 	private:
 		// character name and job
 		std::string name;
@@ -90,7 +109,8 @@ class Character {
 		// 10 random names available for each job
 		std::string randomNames[JOBSCOUNT][10];
 
-		// character textures
+		// texture ids and count
+		enum TexInfo { CHARBATTLESPRITES, TEXTURECOUNT };
 		Textures textures;
 
 		// character attributes
@@ -113,6 +133,9 @@ class Character {
 
 		// IDs of spells this character knows
 		int spells[8][3];
+
+		// entity's turn
+		Turn turn;
 
 		// make a copy of this characacter object
 		void makeCopy(const Character &source);

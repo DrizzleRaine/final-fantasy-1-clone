@@ -3,9 +3,8 @@
 Character::Character() {
 	setName("??????");
 
-	std::string textureNames[] = {"img/warrior_menu.tga", "img/thief_menu.tga", "img/white_menu.tga", "img/black_menu.tga", "img/monk_menu.tga", "img/red_menu.tga"};
-	textures.createTextures(6, textureNames);
-
+	std::string textureNames[] = {"img/battle_sprites.tga"};
+	textures.createTextures(TEXTURECOUNT, textureNames);
 
 	// initialize the possible random names
 	std::string names[JOBSCOUNT][10] = {
@@ -47,6 +46,9 @@ Character::Character() {
 
 	// no status effects
 	statusBits = 0;
+
+	// taking no action
+	turn.action = NONE;
 }
 
 Character::~Character() {
@@ -187,16 +189,45 @@ void Character::render(int x, int y) {
 }
 
 void Character::render(Jobs job, int x, int y) {
-	glBindTexture(GL_TEXTURE_2D, textures.getTexture(job));
+	int spriteX = 1, spriteY;
+	// TODO if character has dead or critical status, change sprite x
+	if (job < WHITE) {
+		spriteY = job;		// warrior or thief
+	} else if (job < MONK) {
+		spriteY = job + 2;	// white or black
+	} else {
+		spriteY = job - 2;	// monk or red
+	}
+	spriteY++;
+
+	// width and height of sprite sheet
+	const float sheetWidth = 624.0;
+	const float sheetHeight = 624.0;
+
+	// width of character on sprite sheet
+	const float spriteWidth = 52;
+
+	// find coordinates of desired sprite
+	GLfloat texCoords[4];
+	texCoords[2] = ((spriteX * spriteWidth) / sheetWidth);
+	texCoords[3] = ((spriteY * spriteWidth) / sheetHeight);
+	texCoords[0] = (((spriteX - 1) * spriteWidth) / sheetWidth);
+	texCoords[1] = (((spriteY - 1) * spriteWidth) / sheetHeight);
+
+	// scaled dimensions char will be displayed as
+	float scaledWidth = 156;
+	float scaledHeight = 156;
+
+	glBindTexture(GL_TEXTURE_2D, textures.getTexture(CHARBATTLESPRITES));
 	glBegin(GL_QUADS);
-		glTexCoord2f(0, 0);
-		glVertex3f(x, y, 0.0f);
-		glTexCoord2f(0, 1);
-		glVertex3f(x, y - 148, 0.0f);
-		glTexCoord2f(1, 1);
-		glVertex3f(x + 120, y - 148, 0.0f);
-		glTexCoord2f(1, 0);
-		glVertex3f(x + 120, y, 0.0f);
+		glTexCoord2f(texCoords[0], texCoords[1]);
+		glVertex2f(x, y);
+		glTexCoord2f(texCoords[0], texCoords[3]);
+		glVertex2f(x, y - scaledHeight);
+		glTexCoord2f(texCoords[2], texCoords[3]);
+		glVertex2f(x + scaledWidth, y -scaledHeight);
+		glTexCoord2f(texCoords[2], texCoords[1]);
+		glVertex2f(x + scaledWidth, y);
 	glEnd();
 }
 

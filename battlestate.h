@@ -2,7 +2,11 @@
 #define BATTLESTATE_H
 
 #include <fstream>
+#include <map>
+
 #include "state.h"
+#include "menustate.h"
+#include "battlebgmenu.h"
 
 class BattleState : public State {
 	public:
@@ -18,20 +22,20 @@ class BattleState : public State {
 		// differenty types of actions player can take
 		enum Actions {NONE, ATTACK, SPELL, ITEM, FLEE, COUNT};
 
-		struct Slot {
-			// action slot is making
+		struct Turn {
+			// action to take during turn
 			Actions action;
 
 			// id of action (spellID/itemID)
 			int actionID;
 
-			// slot to target
-			int targetSlot;
+			// action target
+			int target;
 		};
 
 		// slots 0-7 are enemies, 8-11 characters
 		enum { SLOTCOUNT = 12 };
-		Slot slot[SLOTCOUNT];
+		Turn slot[SLOTCOUNT];
 
 		// current slot picking an action
 		int currentSlot;
@@ -49,6 +53,7 @@ class BattleState : public State {
 		// 8 slots for enemies
 		enum { ENEMYSLOTS = 8 };
 		Enemy enemy[ENEMYSLOTS];
+		bool enemyLocs[ENEMYSLOTS];
 
 		// background and enemy sprites
 		Textures textures;
@@ -64,6 +69,13 @@ class BattleState : public State {
 		// pause/unpause battle
 		void pause();
 		void unpause();
+
+		// menu state for character turns
+		MenuState *menuState;
+
+		// bottom battle menu background
+		// enemies and characters list
+		BattleBGMenu *battleBGMenu;
 };
 
 #endif
