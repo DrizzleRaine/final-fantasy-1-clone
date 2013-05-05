@@ -44,7 +44,9 @@ class BattleState : public State {
 			// enemy name
 			std::string name;
 
-			int HP;
+			int HP, ATK, ACC, CRT, DEF, EVA, MDEF, MOR;
+
+			int EXP, GIL;
 
 			// associated textureID for enemy
 			int textureID;

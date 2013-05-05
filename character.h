@@ -43,6 +43,9 @@ class Character {
 		// get character attribute
 		int getAttribute(Stats s);
 
+		// add exp
+		void addExp(int exp);
+
 		// get character hp/mp fraction
 		std::string getHPFraction();
 		std::string getMPFraction();
@@ -101,6 +104,15 @@ class Character {
 		// set/get entity turn	
 		void setTurn(Turn t) { turn = t; }
 		Turn getTurn() { return turn; }
+
+		// in battle step forward/backward
+		// for deciding action/spell casting/using items
+		void stepForward();
+		void stepBackward();
+
+		// is player stepped forward/taking step
+		bool forward();
+		bool stepping() { return step; }
 	private:
 		// character name and job
 		std::string name;
@@ -115,6 +127,9 @@ class Character {
 
 		// character attributes
 		int attributes[STATSCOUNT];
+
+		// increase characters level by one
+		void levelUp();
 
 		// status effect bits
 		// 1 - KO, 2 - poison, 3 - darkness
@@ -136,6 +151,13 @@ class Character {
 
 		// entity's turn
 		Turn turn;
+
+		// ticks since character started taking a step
+		unsigned int step;		// 0 if not walking
+		bool steppedForward;	// 1 if stepping/stepped forward
+
+		// how long it takes to take a step
+		float stepDelay;
 
 		// make a copy of this characacter object
 		void makeCopy(const Character &source);

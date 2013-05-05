@@ -130,6 +130,17 @@ class Party {
 		// set/get given characters turn
 		void setTurn(Characters c, Character::Turn t);
 		Character::Turn getTurn(Characters c);
+
+		// move character forward/backward
+		void stepCharForward(Characters c);
+		void stepCharBackward(Characters c);
+
+		// is character forward/stepping
+		bool charForward(Characters c);
+		bool charStepping(Characters c);
+
+		// add exp to given character
+		void addExp(Characters c, int exp);
 	
 		// how much gil party has	
 		unsigned int getGil() { return gil; }

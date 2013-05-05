@@ -379,6 +379,38 @@ Character::Turn Party::getTurn(Characters c) {
 	return t;
 }
 
+void Party::stepCharForward(Characters c) {
+	if (c >= FIRST && c < SIZE) {
+		characters[c].stepForward();
+	}
+}
+
+void Party::stepCharBackward(Characters c) {
+	if (c >= FIRST && c < SIZE) {
+		characters[c].stepBackward();
+	}
+}
+
+bool Party::charForward(Characters c) {
+	if (c >= FIRST && c < SIZE) {
+		return characters[c].forward();
+	}
+	return false;
+}
+
+bool Party::charStepping(Characters c) {
+	if (c >= FIRST && c < SIZE) {
+		return characters[c].stepping();
+	}
+	return false;
+}
+
+void Party::addExp(Characters c, int exp) {
+	if (c >= FIRST && c < SIZE) {
+		characters[c].addExp(exp);
+	}
+}
+
 int Party::getItemCount(int id) {
 	if (id < 0 || id >= INVENTORY_SIZE) {
 		return 0;

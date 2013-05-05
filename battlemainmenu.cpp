@@ -22,7 +22,9 @@ void BattleMainMenu::update() {
 		if (currentOption != NONE) {
 			newCurSel = subCursor.getSelection();	// restore cursor
 			currentOption = NONE;					// return to menu
-			input->resetCancel();					// cancel handled
+		} else {
+			menuState->popMenu();
+			return;
 		}
 	}
 
@@ -43,7 +45,7 @@ void BattleMainMenu::update() {
 		} else {
 			currentOption = ATTACK;			// Attack selected
 			subCursor.setSelection(CURSEL);	// points at Attack option
-			newCurSel = 0;					// points at first enemy
+			newCurSel = 6;					// points at first enemy
 		}
 	}
 
@@ -63,34 +65,51 @@ void BattleMainMenu::update() {
 		}
 	} else {
 		// enemy target selection
-		// TODO fix this logic
 		if (input->downPressed()) {
 			newCurSel++;
-			while (newCurSel < ENEMYSLOTS && !enemyLocations[newCurSel]) {
-				newCurSel++;
+			while (!enemyLocations[newCurSel]) {
+				if (newCurSel >= ENEMYSLOTS) {
+					newCurSel = 0;
+				} else {
+					newCurSel++;
+				}
 			}
 		} else if (input->upPressed()) {
 			newCurSel--;
+			while (!enemyLocations[newCurSel]) {
+				if (newCurSel < 0) {
+					newCurSel += ENEMYSLOTS;
+				} else {
+					newCurSel--;
+				}
+			}
 		} else if (input->rightPressed()) {
 			newCurSel += 3;
+			while (!enemyLocations[newCurSel]) {
+				if (newCurSel >= ENEMYSLOTS) {
+					newCurSel = newCurSel - ENEMYSLOTS;
+				} else {
+					newCurSel += 3;
+				}
+			}
 		} else if (input->leftPressed()) {
 			newCurSel -= 3;
-		}
-
-		if (newCurSel < 0) {
-			newCurSel = ENEMYSLOTS - 1;
-			while (newCurSel >= 0 && !enemyLocations[newCurSel]) {
-				newCurSel--;
+			while (!enemyLocations[newCurSel]) {
+				if (newCurSel < 0) {
+					newCurSel += ENEMYSLOTS;
+				} else {
+					newCurSel -= 3;
+				}
 			}
-		} else if (newCurSel >= ENEMYSLOTS) {
-			newCurSel = 0;
-			while (newCurSel < ENEMYSLOTS && !enemyLocations[newCurSel]) {
-				newCurSel++;
+		} else if (!enemyLocations[newCurSel]) {
+			// find the enemy closest to party and top
+			int closestOrder[] = {6, 7, 3, 4, 5, 0, 1, 2};
+			for (int i = 0; i < ENEMYSLOTS; i++) {
+				if (enemyLocations[closestOrder[i]]) {
+					newCurSel = closestOrder[i];
+					break;
+				}
 			}
-		}
-
-		while (newCurSel < ENEMYSLOTS && !enemyLocations[newCurSel]) {
-			newCurSel++;
 		}
 	}
 

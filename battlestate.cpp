@@ -26,7 +26,7 @@ BattleState::BattleState(int battleID, int advantage) {
 	std::string battleGroup = "A";
 	std::string filename = "battle_data/" + std::to_string(-1 * battleID) + "A";
 
-	std::ifstream in;
+	std::ifstream in, enemyIn;
 	in.open(filename);
 
 	// read in background type
@@ -41,9 +41,22 @@ BattleState::BattleState(int battleID, int advantage) {
 		// process the texture name
 		if (enemy[i].name == "0") {	// no enemy in this slot
 			enemy[i].textureID = -1;// no texture for this enemy
+			enemy[i].HP = 0;		// no hp, exp or gil for this enemy
+			enemy[i].EXP = 0;
+			enemy[i].GIL = 0;
 		} else {					// else check for duplicate textures
-			// temporary, just give them 10 HP
-			enemy[i].HP = 10;
+			enemyIn.open("battle_data/data/" + enemy[i].name + ".data");
+			enemyIn >> enemy[i].HP;
+			enemyIn >> enemy[i].ATK;
+			enemyIn >> enemy[i].ACC;
+			enemyIn >> enemy[i].CRT;
+			enemyIn >> enemy[i].DEF;
+			enemyIn >> enemy[i].EVA;
+			enemyIn >> enemy[i].MDEF;
+			enemyIn >> enemy[i].MOR;
+			enemyIn >> enemy[i].EXP;
+			enemyIn >> enemy[i].GIL;
+			enemyIn.close();
 
 			// full texture path and filename
 			std::string texFile = "battle_data/sprites/" + enemy[i].name + ".tga";
@@ -144,12 +157,13 @@ void BattleState::update() {
 		Party::Characters c = static_cast<Party::Characters>(character);
 
 		// player turn
-		if (!menuState) {
+		if (!party->charForward(c)) {
+			party->stepCharForward(c);
+		} else if (!menuState) {
 			// open menu for player
 			menuState = new MenuState();
 			menuState->init(party, stateManager);
 			menuState->pushMenu(new BattleMainMenu(c, enemyLocs));
-		// else if character has selected, deciding = 0, popstate
 		} else {
 			menuState->setInput(input);
 			menuState->updateState();
@@ -161,7 +175,13 @@ void BattleState::update() {
 				menuState = 0;
 
 				Character::Turn t = party->getTurn(c);
-				if (t.action == Character::Actions::NONE) {
+				if (input.getCancel()) {
+					if (currentSlot != ENEMYSLOTS) {
+						currentSlot--;
+					}
+					party->stepCharBackward(c);
+					input.resetCancel();
+				} else if (t.action == Character::Actions::NONE) {
 					// player wants to go back a character
 					if (currentSlot > ENEMYSLOTS) {
 						currentSlot--;
@@ -174,41 +194,13 @@ void BattleState::update() {
 					slot[currentSlot].actionID = t.actionID;
 					slot[currentSlot].target = t.target;
 					currentSlot++;
+
+					// player turn finished, step back
+					party->stepCharBackward(c);
 				}
 			}
 		}
 	}
-	/*
-	if (input.getConfirm()) {
-		input.resetConfirm();
-
-		if (currentSlot >= ENEMYSLOTS && currentSlot < SLOTCOUNT) {
-			// find first non dead character
-			int character = currentSlot - ENEMYSLOTS;
-			while (currentSlot < SLOTCOUNT && party->hasStatus(static_cast<Party::Characters>(character), 1)) {
-				currentSlot++;
-				character = currentSlot - ENEMYSLOTS;
-			}
-
-			// have them attack
-			slot[currentSlot].action = ATTACK;
-
-			// pick random enemy that exists and is alive
-			int target = rand() % ENEMYSLOTS;
-			while (enemy[target].name == "0" || enemy[target].HP <= 0) {
-				target = rand() % ENEMYSLOTS;
-			}
-
-			printf("character %i decides to attack %i\n", currentSlot - ENEMYSLOTS, target);
-
-			// target decided
-			slot[currentSlot].target = target;
-
-			// players turn over
-			currentSlot++;
-		}
-	}
-	*/
 
 	if (currentSlot == SLOTCOUNT) {
 		printf("\n--EXECUTING--\n");
@@ -304,14 +296,6 @@ void BattleState::update() {
 		printf("\n\n--NEXTROUND--\n");
 	}
 
-	if (input.getCancel()) {
-		input.resetCancel();
-
-		// temporary, let cancel button exit battles
-		stateManager->popState();
-		return;
-	}
-
 	input.resetAll();
 }
 
@@ -391,16 +375,37 @@ void BattleState::render() {
 }
 
 bool BattleState::battleOver() {
+	int totalExp = 0, totalGil = 0;
 	// check if all enemies dead
 	bool allDead = 1;
 	for (int i = 0; i < ENEMYSLOTS; i++) {
 		if (enemy[i].name != "0" && enemy[i].HP > 0) {
 			allDead = 0;
 			break;
+		} else {
+			totalExp += enemy[i].EXP;
+			totalGil += enemy[i].GIL;
 		}
 	}
 	if (allDead) {
 		printf("PARTY WINS\n");
+		int aliveCharacters = 0;
+		for (int i = Party::FIRST; i < Party::SIZE; i++) {
+			Party::Characters c = static_cast<Party::Characters>(i);
+			if (!party->hasStatus(c, 1)) {
+				aliveCharacters++;
+			}
+		}
+		totalExp /= aliveCharacters;
+		printf("exp: %d, gil: %d\n", totalExp, totalGil);
+		for (int i = Party::FIRST; i < Party::SIZE; i++) {
+			Party::Characters c = static_cast<Party::Characters>(i);
+			if (!party->hasStatus(c, 1)) {
+				party->addExp(c, totalExp);
+				aliveCharacters++;
+			}
+		}
+		party->addGil(totalGil);
 		stateManager->popState();
 		return 1;
 	}

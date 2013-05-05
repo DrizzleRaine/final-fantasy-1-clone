@@ -49,6 +49,13 @@ Character::Character() {
 
 	// taking no action
 	turn.action = NONE;
+
+	// time to take a step 
+	stepDelay = 200.0;
+
+	// character not stepped/stepping forward
+	step = 0;
+	steppedForward = 0;
 }
 
 Character::~Character() {
@@ -189,7 +196,41 @@ void Character::render(int x, int y) {
 }
 
 void Character::render(Jobs job, int x, int y) {
+	// calculate step offset
+	float xStepDistance = 0.0;
+	float totalDistance = 150.0;
+	if (step) {
+		const int stepTime = SDL_GetTicks() - step;
+
+		if (step && stepTime < stepDelay) {
+			if (steppedForward) {
+				xStepDistance = -totalDistance + (stepTime / stepDelay) * totalDistance;
+			} else {
+				xStepDistance = -(stepTime / stepDelay) * totalDistance;
+			}
+		} else if (step) {
+			step = 0;
+			if (steppedForward) {
+				steppedForward = 0;
+			} else {
+				steppedForward = 1;
+				xStepDistance = -totalDistance;
+			}
+		}
+	} else if (steppedForward) {
+		xStepDistance = -totalDistance;
+	}
+
+	// sprite's (x, y) coordinates
 	int spriteX = 1, spriteY;
+
+	// if taking step, animate it
+	if (step && (SDL_GetTicks() - step) < (stepDelay * (1 / 3.0))) {
+		spriteX = 2;
+	} else if (step && (SDL_GetTicks() - step) < (stepDelay * (2 / 3.0))) {
+		spriteX = 3;
+	}
+
 	// TODO if character has dead or critical status, change sprite x
 	if (job < WHITE) {
 		spriteY = job;		// warrior or thief
@@ -213,6 +254,11 @@ void Character::render(Jobs job, int x, int y) {
 	texCoords[3] = ((spriteY * spriteWidth) / sheetHeight);
 	texCoords[0] = (((spriteX - 1) * spriteWidth) / sheetWidth);
 	texCoords[1] = (((spriteY - 1) * spriteWidth) / sheetHeight);
+	if (step && steppedForward) {	// reverse the sprite
+		GLfloat temp = texCoords[0];
+		texCoords[0] = texCoords[2];
+		texCoords[2] = temp;
+	}
 
 	// scaled dimensions char will be displayed as
 	float scaledWidth = 156;
@@ -221,13 +267,13 @@ void Character::render(Jobs job, int x, int y) {
 	glBindTexture(GL_TEXTURE_2D, textures.getTexture(CHARBATTLESPRITES));
 	glBegin(GL_QUADS);
 		glTexCoord2f(texCoords[0], texCoords[1]);
-		glVertex2f(x, y);
+		glVertex2f(x + xStepDistance, y);
 		glTexCoord2f(texCoords[0], texCoords[3]);
-		glVertex2f(x, y - scaledHeight);
+		glVertex2f(x + xStepDistance, y - scaledHeight);
 		glTexCoord2f(texCoords[2], texCoords[3]);
-		glVertex2f(x + scaledWidth, y -scaledHeight);
+		glVertex2f(x + xStepDistance + scaledWidth, y -scaledHeight);
 		glTexCoord2f(texCoords[2], texCoords[1]);
-		glVertex2f(x + scaledWidth, y);
+		glVertex2f(x + xStepDistance + scaledWidth, y);
 	glEnd();
 }
 
@@ -332,6 +378,18 @@ int Character::getAttribute(Stats s) {
 		return attributes[EVA] + totalWeight;
 	}
 	return 0;
+}
+
+void Character::addExp(int exp) {
+	attributes[EXP] += exp;
+
+	while (expToNext() <= 0) {
+		levelUp();
+	}
+}
+
+void Character::levelUp() {
+	attributes[LEVEL]++;
 }
 
 std::string Character::getHPFraction() {
@@ -509,4 +567,20 @@ void Character::setEquip(int slot, int id, int values[4]) {
 void Character::removeEquip(int slot) {
 	int values[4] = {0, 0, 0, 0};
 	setEquip(slot, -1, values);
+}
+
+void Character::stepForward() {
+	if (!step) {
+		step = SDL_GetTicks();
+	}
+}
+
+void Character::stepBackward() {
+	if (!step) {
+		step = SDL_GetTicks();
+	}
+}
+
+bool Character::forward() {
+	return steppedForward;
 }
