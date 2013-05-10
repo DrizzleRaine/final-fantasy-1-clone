@@ -47,10 +47,7 @@ Character::Character() {
 	// no status effects
 	statusBits = 0;
 
-	// taking no action
-	turn.action = NONE;
-
-	// time to take a step 
+	// time to take a step in battle
 	stepDelay = 200.0;
 
 	// character not stepped/stepping forward
@@ -79,7 +76,7 @@ Character &Character::operator=(const Character &rhs) {
 }
 
 void Character::makeCopy(const Character &source) {
-	name = source.name;
+	setName(source.getName());
 	job = source.job;
 
 	for (int i = 0; i < STATSCOUNT; i++) {
@@ -92,14 +89,12 @@ void Character::makeCopy(const Character &source) {
 }
 
 void Character::initStats() {
-	attributes[LEVEL] = 1;
-	attributes[EXP] = 0;
 	switch (job) {
 		case WARRIOR: {
 			attributes[MAGLEVEL] = 0;
 
-			// initial warrior stats (hpmax, mpmax, str, agl, ..., def, eva)
-			int attrValues[] = {35, 0, 10, 8, 1, 15, 8, 5, 18, 0, 61};
+			// initial warrior stats (hpmax, mpmax, str, agl, ..., mdef, crt, mor)
+			int attrValues[] = {35, 0, 10, 8, 1, 15, 8, 5, 18, 0, 61, 0, 0, 0};
 
 			// initial warrior equip (knife and clothes)
 			int equipValues[5][5] = {{10, 5, 10, 0, 0}, {-1, 0, 0, 0, 0}, 
@@ -111,8 +106,8 @@ void Character::initStats() {
 		} case THIEF: {
 			attributes[MAGLEVEL] = 0;
 
-			// initial thief stats (hpmax, mpmax, str, agl, ..., def, eva)
-			int attrValues[] = {30, 0, 5, 15, 1, 5, 15, 2, 30, 0, 73};
+			// initial thief stats (hpmax, mpmax, str, agl, ..., mdef, crt, mor)
+			int attrValues[] = {30, 0, 5, 15, 1, 5, 15, 2, 30, 0, 73, 0, 0, 0};
 
 			// initial thief equip (knife and clothes)
 			int equipValues[5][5] = {{10, 5, 10, 0, 0}, {-1, 0, 0, 0, 0}, 
@@ -124,8 +119,8 @@ void Character::initStats() {
 		} case WHITE: {
 			attributes[MAGLEVEL] = 1;
 
-			// initial white mage stats (hpmax, mpmax, str, agl, ..., def, eva)
-			int attrValues[] = {33, 10, 5, 5, 15, 8, 5, 2, 10, 0, 58};
+			// initial white mage stats (hpmax, mpmax, str, agl, ..., mdef, crt,mor)
+			int attrValues[] = {33, 10, 5, 5, 15, 8, 5, 2, 10, 0, 58, 0, 0, 0};
 
 			// initial white mage equip (staff and clothes)
 			int equipValues[5][5] = {{14, 6, 0, 0, 0}, {-1, 0, 0, 0, 0}, 
@@ -137,8 +132,8 @@ void Character::initStats() {
 		} case BLACK: {
 			attributes[MAGLEVEL] = 1;
 
-			// initial black mage stats (hpmax, mpmax, str, agl, ..., def, eva)
-			int attrValues[] = {25, 10, 3, 5, 20, 2, 10, 1, 13, 0, 58};
+			// initial black mage stats (hpmax, mpmax, str, agl, ..., mdef, crt,mor)
+			int attrValues[] = {25, 10, 3, 5, 20, 2, 10, 1, 13, 0, 58, 0, 0, 0};
 
 			// initial black mage equip (knife and clothes)
 			int equipValues[5][5] = {{10, 5, 10, 0, 0}, {-1, 0, 0, 0, 0}, 
@@ -150,8 +145,8 @@ void Character::initStats() {
 		} case MONK: {
 			attributes[MAGLEVEL] = 0;
 
-			// initial monk stats (hpmax, mpmax, str, agl, ..., def, eva)
-			int attrValues[] = {33, 0, 12, 5, 1, 10, 5, 14, 13, 5, 55};
+			// initial monk stats (hpmax, mpmax, str, agl, ..., mdef, crt, mor)
+			int attrValues[] = {33, 0, 12, 5, 1, 10, 5, 14, 13, 5, 55, 0, 0, 0};
 
 			// initial monk equip (staff and clothes)
 			int equipValues[5][5] = {{14, 6, 0, 0, 0}, {-1, 0, 0, 0, 0}, 
@@ -163,8 +158,8 @@ void Character::initStats() {
 		} case RED: {
 			attributes[MAGLEVEL] = 1;
 
-			// initial red mage stats (hpmax, mpmax, str, agl, ..., def, eva)
-			int attrValues[] = {30, 10, 5, 10, 10, 5, 5, 2, 22, 0, 63};
+			// initial red mage stats (hpmax, mpmax, str, agl, ..., mdef, crt, mor)
+			int attrValues[] = {30, 10, 5, 10, 10, 5, 5, 2, 22, 0, 63, 0, 0, 0};
 
 			// initial red mage equip (knife and clothes)
 			int equipValues[5][5] = {{10, 5, 10, 0, 0}, {-1, 0, 0, 0, 0}, 
@@ -180,7 +175,7 @@ void Character::initStats() {
 	attributes[MP] = attributes[MPMAX];
 }
 
-void Character::fillValues(int initAttrs[STATSCOUNT], int initEquip[5][5]) {
+void Character::fillValues(int initAttrs[STATSCOUNT - HPMAX], int initEquip[5][5]) {
 	for (int i = HPMAX; i < STATSCOUNT; i++) {
 		attributes[i] = initAttrs[i - HPMAX];
 	}
@@ -229,6 +224,8 @@ void Character::render(Jobs job, int x, int y) {
 		spriteX = 2;
 	} else if (step && (SDL_GetTicks() - step) < (stepDelay * (2 / 3.0))) {
 		spriteX = 3;
+	} else if (getTurn().action != NONE) {
+		spriteX = 4;
 	}
 
 	// TODO if character has dead or critical status, change sprite x
@@ -277,16 +274,8 @@ void Character::render(Jobs job, int x, int y) {
 	glEnd();
 }
 
-void Character::setName(std::string newName) {
-	name = newName;
-}
-
-std::string Character::getName() {
-	return name;
-}
-
 void Character::setRandomName() {
-	name = randomNames[job][rand() % 10];
+	setName(randomNames[job][rand() % 10]);
 }
 
 void Character::setJob(Jobs newJob) {
@@ -414,40 +403,6 @@ std::string Character::getFraction(Stats num, Stats denom) {
 
 	// return fraction format
 	return (cur + '/' + max);
-}
-
-int Character::addHP(int amount) {
-	int excess = 0;
-	attributes[HP] += amount;
-	if (attributes[HP] > attributes[HPMAX]) {
-		// hp exceeds maxhp
-		excess = attributes[HP] - attributes[HPMAX];
-		attributes[HP] = attributes[HPMAX];
-	} else if (attributes[HP] < 0) {
-		// hp fell below 0
-		excess = attributes[HP];
-		attributes[HP] = 0;
-	}
-
-	// calculate how much hp was added
-	return (amount - excess);
-}
-
-int Character::addMP(int amount) {
-	int excess = 0;
-	attributes[MP] += amount;
-	if (attributes[MP] > attributes[MPMAX]) {
-		// mp exceeds maxmp
-		excess = attributes[MP] - attributes[MPMAX];
-		attributes[MP] = attributes[MPMAX];
-	} else if (attributes[MP] < 0) {
-		// mp fell below 0
-		excess = attributes[MP];
-		attributes[MP] = 0;
-	}
-
-	// calculate how much mp was added
-	return (amount - excess);
 }
 
 bool Character::hasStatus(unsigned int status) {

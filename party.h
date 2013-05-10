@@ -127,9 +127,13 @@ class Party {
 		void setEquip(Characters c, int slot, int id, int vals[4]);
 		void removeEquip(Characters c, int slot);
 
-		// set/get given characters turn
+		// set/reset/get given characters turn
 		void setTurn(Characters c, Character::Turn t);
+		void resetTurn(Characters c);
 		Character::Turn getTurn(Characters c);
+
+		// set target for character c's turn
+		void setTarget(Characters c, int target);
 
 		// move character forward/backward
 		void stepCharForward(Characters c);

@@ -5,6 +5,7 @@
 #include <map>
 
 #include "state.h"
+#include "enemy.h"
 #include "menustate.h"
 #include "battlebgmenu.h"
 
@@ -16,54 +17,36 @@ class BattleState : public State {
 		// battle ID
 		int battleID;
 
+		// operations
+		void update();
+		void render();
+
 		// preemptive or surpsise attack?
 		bool preemptive, surprise;
 
-		// differenty types of actions player can take
-		enum Actions {NONE, ATTACK, SPELL, ITEM, FLEE, COUNT};
-
-		struct Turn {
-			// action to take during turn
-			Actions action;
-
-			// id of action (spellID/itemID)
-			int actionID;
-
-			// action target
-			int target;
-		};
-
 		// slots 0-7 are enemies, 8-11 characters
-		enum { SLOTCOUNT = 12 };
-		Turn slot[SLOTCOUNT];
+		enum { CHARACTERSLOTS = 4, ENEMYSLOTS = 8, SLOTCOUNT = 12 };
 
 		// current slot picking an action
 		int currentSlot;
 
-		struct Enemy {
-			// enemy name
-			std::string name;
-
-			int HP, ATK, ACC, CRT, DEF, EVA, MDEF, MOR;
-
-			int EXP, GIL;
-
-			// associated textureID for enemy
-			int textureID;
-		};
-
-		// 8 slots for enemies
-		enum { ENEMYSLOTS = 8 };
+		// array of enemies, textures and locations
 		Enemy enemy[ENEMYSLOTS];
 		bool enemyLocs[ENEMYSLOTS];
 
-		// background and enemy sprites
-		Textures textures;
-		int backgroundTexID;
+		// character/enemy turns being executed
+		bool executingTurns;
 
-		// operations
-		void update();
-		void render();
+		// order of character/enemy turns
+		int attackSequence[SLOTCOUNT];
+
+		// enemy decide/act
+		void enemyDecide();
+		void enemyAct();
+
+		// character decide/act
+		void characterDecide();
+		void characterAct();
 
 		// is the battle over
 		bool battleOver();
@@ -78,6 +61,9 @@ class BattleState : public State {
 		// bottom battle menu background
 		// enemies and characters list
 		BattleBGMenu *battleBGMenu;
+
+		// battlefield background
+		Textures textures;
 };
 
 #endif

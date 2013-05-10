@@ -368,6 +368,12 @@ void Party::setTurn(Characters c, Character::Turn t) {
 	}
 }
 
+void Party::resetTurn(Characters c) {
+	if (c >= FIRST && c < SIZE) {
+		characters[c].resetTurn();
+	}
+}
+
 Character::Turn Party::getTurn(Characters c) {
 	if (c >= FIRST && c < SIZE) {
 		return characters[c].getTurn();
@@ -377,6 +383,12 @@ Character::Turn Party::getTurn(Characters c) {
 	t.actionID = -1;
 	t.target = -1;
 	return t;
+}
+
+void Party::setTarget(Characters c, int target) {
+	if (c >= FIRST && c < SIZE) {
+		characters[c].setTarget(target);
+	}
 }
 
 void Party::stepCharForward(Characters c) {

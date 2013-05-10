@@ -13,20 +13,16 @@ BattleState::BattleState(int battleID, int advantage) {
 		surprise = 1;
 	} else if (advantage >= 90) {
 		preemptive = 1;
-		currentSlot = 8;	// start with first character's slot
+
+		// start with first character's slot
+		currentSlot = ENEMYSLOTS;
 	}
-
-	// number of unique enemy textures found
-	int textureCount = 0;
-
-	// there will be <= ENEMYSLOTS textureNames + 1 background texture
-	std::string textureNames[ENEMYSLOTS + 1];
 
 	// TODO battleGroup should be a random possible group
 	std::string battleGroup = "A";
-	std::string filename = "battle_data/" + std::to_string(-1 * battleID) + "A";
+	std::string filename = "battle_data/" + std::to_string(-battleID) + "A";
 
-	std::ifstream in, enemyIn;
+	std::ifstream in;
 	in.open(filename);
 
 	// read in background type
@@ -35,64 +31,35 @@ BattleState::BattleState(int battleID, int advantage) {
 
 	// read in enemy data
 	for (int i = 0; i < ENEMYSLOTS; i++) {
-		// read in enemy name
-		in >> enemy[i].name;
+		// read in enemy name's
+		std::string name;
+		in >> name;
 
-		// process the texture name
-		if (enemy[i].name == "0") {	// no enemy in this slot
-			enemy[i].textureID = -1;// no texture for this enemy
-			enemy[i].HP = 0;		// no hp, exp or gil for this enemy
-			enemy[i].EXP = 0;
-			enemy[i].GIL = 0;
-		} else {					// else check for duplicate textures
-			enemyIn.open("battle_data/data/" + enemy[i].name + ".data");
-			enemyIn >> enemy[i].HP;
-			enemyIn >> enemy[i].ATK;
-			enemyIn >> enemy[i].ACC;
-			enemyIn >> enemy[i].CRT;
-			enemyIn >> enemy[i].DEF;
-			enemyIn >> enemy[i].EVA;
-			enemyIn >> enemy[i].MDEF;
-			enemyIn >> enemy[i].MOR;
-			enemyIn >> enemy[i].EXP;
-			enemyIn >> enemy[i].GIL;
-			enemyIn.close();
+		// initialize enemy
+		enemy[i].init(name);
 
-			// full texture path and filename
-			std::string texFile = "battle_data/sprites/" + enemy[i].name + ".tga";
-
-			bool textureExists = 0;
-			for (int j = 0; j < textureCount; j++) {
-				if (texFile == textureNames[j]) {
-					// this enemy using same texture as another enemy
-					textureExists = 1;
-					enemy[i].textureID = j;
-					break;
-				}
-			}
-
-			if (!textureExists) {
-				// no enemy so far with this texture, add it
-				enemy[i].textureID = textureCount;
-				textureNames[textureCount++] = texFile;
-			}
-
-		}
 	}
 	in.close();
 
-	// add background texture to texture array
-	backgroundTexID = textureCount;
-	textureNames[textureCount++] = "battle_data/backgrounds/" + background + ".tga";
+	std::string textureNames[] = {"battle_data/backgrounds/" + background + ".tga"};
+	textures.createTextures(1, textureNames);
 
-	// create textureCount enemy textures with no duplicates
-	// and the battle background texture
-	textures.createTextures(textureCount, textureNames);
-
-	for (int i = 0; i < SLOTCOUNT; i++) {
-		// initialize all slots to no action decided
-		slot[i].action = NONE;
+	// reset every enities turn
+	for (int i = 0; i < ENEMYSLOTS; i++) {
+		enemy[i].resetTurn();
 	}
+	for (int i = ENEMYSLOTS; i < SLOTCOUNT; i++) {
+		Party::Characters c = static_cast<Party::Characters>(i);
+		party->resetTurn(c);
+	}
+
+	// initialize attack sequence array
+	for (int i = 0; i < SLOTCOUNT; i++) {
+		attackSequence[i] = i;
+	}
+
+	// not executing turns
+	executingTurns = 0;
 
 	menuState = 0;
 	battleBGMenu = new BattleBGMenu();
@@ -109,191 +76,55 @@ BattleState::~BattleState() {
 }
 
 void BattleState::update() {
-	if (currentSlot == 0) {
-		if (battleOver()) {
-			return;
-		}
+	if (executingTurns) {
+		// store slot about to execute turn
+		int slotToExecute = currentSlot;
 
-		// battle not over, enemy turn, decide actions
-		while (currentSlot < ENEMYSLOTS) {
-			enemyLocs[currentSlot] = 1;
-			if (enemy[currentSlot].name == "0" || enemy[currentSlot].HP <= 0) {
-				// empty slot or dead enemy, move to next
-				enemyLocs[currentSlot] = 0;
-				currentSlot++;
-				continue;
-			}
-
-			// for now just attack random character
-			slot[currentSlot].action = ATTACK;
-
-			// pick random player
-			int target = rand() % 4;
-
-			// while targeted player is dead, choose another
-			while (party->hasStatus(static_cast<Party::Characters>(target), 1)) {
-				target = rand() % 4;
-			}
-
-			printf("enemy %i decides to attack %i\n", currentSlot, target);
-
-			// target decided
-			slot[currentSlot].target = target + ENEMYSLOTS;
-
-			// enemy's turn over
-			currentSlot++;
-		}
-	}
-
-	if (currentSlot >= ENEMYSLOTS && currentSlot < SLOTCOUNT) {
-		// find first non dead character
-		int character = currentSlot - ENEMYSLOTS;
-
-		while (currentSlot < SLOTCOUNT && party->hasStatus(static_cast<Party::Characters>(character), 1)) {
-			currentSlot++;
-			character = currentSlot - ENEMYSLOTS;
-		}
-
-		Party::Characters c = static_cast<Party::Characters>(character);
-
-		// player turn
-		if (!party->charForward(c)) {
-			party->stepCharForward(c);
-		} else if (!menuState) {
-			// open menu for player
-			menuState = new MenuState();
-			menuState->init(party, stateManager);
-			menuState->pushMenu(new BattleMainMenu(c, enemyLocs));
+		// execute next turn
+		if (attackSequence[currentSlot] >= ENEMYSLOTS) {
+			characterAct();	// execute character turn
 		} else {
-			menuState->setInput(input);
-			menuState->updateState();
-
-			if (!menuState->getSize()) {
-				// player done deciding or wanting to go back
-				// TODO check if character turn decidided
-				delete menuState;
-				menuState = 0;
-
-				Character::Turn t = party->getTurn(c);
-				if (input.getCancel()) {
-					if (currentSlot != ENEMYSLOTS) {
-						currentSlot--;
-					}
-					party->stepCharBackward(c);
-					input.resetCancel();
-				} else if (t.action == Character::Actions::NONE) {
-					// player wants to go back a character
-					if (currentSlot > ENEMYSLOTS) {
-						currentSlot--;
-					}	// else already at first character
-				} else {
-					// TODO just setting actino to ATTACK
-					// need a way to convert better
-					// maybe just use characters public implementation
-					slot[currentSlot].action = ATTACK;
-					slot[currentSlot].actionID = t.actionID;
-					slot[currentSlot].target = t.target;
-					currentSlot++;
-
-					// player turn finished, step back
-					party->stepCharBackward(c);
-				}
-			}
-		}
-	}
-
-	if (currentSlot == SLOTCOUNT) {
-		printf("\n--EXECUTING--\n");
-		// all enemies and characters have chosen actions
-		int attackSequence[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
-
-		// randomize the attack sequence
-		int max = SLOTCOUNT - 1;
-		while (max) {
-			int r = rand() % SLOTCOUNT;
-			int temp = attackSequence[r];
-			attackSequence[r] = attackSequence[max];
-			attackSequence[max] = temp;
-			max--;
+			enemyAct();		// execute enemy turn
 		}
 
-		// now execute actions in randomized order
-		while (currentSlot) {
-			currentSlot--;
-			int attacker = attackSequence[currentSlot];
-			Turn curSlot = slot[attacker];
-			if (curSlot.action == NONE) {
-				continue;
-			}
-
-			if (attacker >= ENEMYSLOTS) {
-				int attackerHP = party->getAttribute(static_cast<Party::Characters>(attacker - ENEMYSLOTS), Character::HP);
-				if (attackerHP <= 0) {
-					// dead characters cant attack
-					continue;
-				}
-
-
-				// if enemy player wanted to attack already dead
-				// choose another enemy to attack at random
-				while (enemy[curSlot.target].name == "0" || enemy[curSlot.target].HP <= 0) {
-					curSlot.target = rand() % ENEMYSLOTS;
-				}
-
-				// just have character hit for rand num 1-10
-				int damage = rand() % 10 + 1;
-				printf("character %i hits %i for %i HP\n", attacker - ENEMYSLOTS, curSlot.target, damage);
-				enemy[curSlot.target].HP -= damage;
-				if (enemy[curSlot.target].HP <= 0) {
-					printf("ENEMY %i WAS KILLED\n", curSlot.target);
-				}
-
-				curSlot.action = NONE;
-			} else {
-				int attackerHP = enemy[attacker].HP;
-				if (attackerHP <= 0) {
-					// dead enemies cant attack
-					continue;
-				}
-
-				// if character enemy wanted to attack already dead
-				// choose another character to attack at random
-				while (party->getAttribute(static_cast<Party::Characters>(curSlot.target - ENEMYSLOTS), Character::HP) <= 0) {
-					curSlot.target = rand() % 4 + ENEMYSLOTS;
-				}
-
-				// just have enemy hit for 1
-				printf("enemy %i hits %i for 1 HP\n", attacker, curSlot.target - ENEMYSLOTS);
-				party->addHP(static_cast<Party::Characters>(curSlot.target - ENEMYSLOTS), -1);
-				if (party->getAttribute(static_cast<Party::Characters>(curSlot.target - ENEMYSLOTS), Character::HP) <= 0) {
-					printf("CHARACTER %i WAS KILLED\n", curSlot.target - ENEMYSLOTS);
-				}
-			}
-			curSlot.action = NONE;
-
+		if (currentSlot < slotToExecute) {
+			// turn was completed, check if battle over
 			if (battleOver()) {
 				return;
 			}
-		}
-		printf("\n--STATUS--\n");
-		for (int i = 0; i < ENEMYSLOTS; i++) {
-			if (enemy[i].name != "0") {
-				if (enemy[i].HP > 0) {
-					printf("enemy %i HP: %i\n", i, enemy[i].HP);
-				} else {
-					printf("enemy %i DEAD, HP: %i\n", i, enemy[i].HP);
-				}
+
+			// check if done executing turns
+			if (currentSlot < 0){
+				executingTurns = 0;
 			}
 		}
-		for (int i = ENEMYSLOTS; i < SLOTCOUNT; i++) {
-			int HP = party->getAttribute(static_cast<Party::Characters>(i - ENEMYSLOTS), Character::HP);
-			if (HP > 0) {
-				printf("character %i HP: %i\n", i - ENEMYSLOTS, HP);
-			} else {
-				printf("character %i DEAD, HP: %i\n", i - ENEMYSLOTS, HP);
+	} else {
+		// decide enemy actions for next turn
+		while (currentSlot < ENEMYSLOTS) {
+			enemyDecide();
+			currentSlot++;
+		}
+
+		// decide character's action for next turn
+		characterDecide();
+
+		if (currentSlot == SLOTCOUNT) {
+			// all turns decided, execute them
+			executingTurns = 1;
+		
+			// slot to execute first
+			currentSlot--;
+
+			// randomize the attack sequence
+			int max = currentSlot;
+			while (max) {
+				int r = rand() % SLOTCOUNT;
+				int temp = attackSequence[r];
+				attackSequence[r] = attackSequence[max];
+				attackSequence[max] = temp;
+				max--;
 			}
 		}
-		printf("\n\n--NEXTROUND--\n");
 	}
 
 	input.resetAll();
@@ -301,7 +132,7 @@ void BattleState::update() {
 
 void BattleState::render() {
 	// render battle background
-	glBindTexture(GL_TEXTURE_2D, textures.getTexture(backgroundTexID));
+	glBindTexture(GL_TEXTURE_2D, textures.getTexture(0));
 	glBegin(GL_QUADS);
 		glTexCoord2f(0, 0);
 		glVertex3f(-windowWidth, windowHeight, 0.0f);
@@ -313,38 +144,25 @@ void BattleState::render() {
 		glVertex3f(windowWidth, windowHeight, 0.0f);
 	glEnd();
 
-	// enemy sprite dimensions
-	const int SPRITEDIM = 192;
-
 	// while drawing, get count of each type of enemy
 	std::map<std::string, int> enemyTypes;
 
 	// draw each enemy
 	for (int i = 0; i < ENEMYSLOTS; i++) {
-		// if enemy exists and is alive
-		if (enemy[i].textureID >= 0 && enemy[i].HP > 0) {
-			int xPos = -windowWidth + SPRITEDIM * (i / 3) + 60;
-			int yPos = windowHeight - SPRITEDIM * (i % 3) - 120;
+		// if enemy exists at location
+		if (enemyLocs[i]) {
+			int xPos = -windowWidth + enemy[i].getSpriteDim() * (i / 3) + 60;
+			int yPos = windowHeight - enemy[i].getSpriteDim() * (i % 3) - 120;
 
-			// render enemy at correct position
-			glBindTexture(GL_TEXTURE_2D, textures.getTexture(enemy[i].textureID));
-			glBegin(GL_QUADS);
-				glTexCoord2f(0, 0);
-				glVertex3f(xPos, yPos, 0.0f);
-				glTexCoord2f(0, 1);
-				glVertex3f(xPos, yPos - SPRITEDIM, 0.0f);
-				glTexCoord2f(1, 1);
-				glVertex3f(xPos + SPRITEDIM, yPos - SPRITEDIM, 0.0f);
-				glTexCoord2f(1, 0);
-				glVertex3f(xPos + SPRITEDIM, yPos, 0.0f);
-			glEnd();
+			// render enemy at (xPos, yPos)
+			enemy[i].render(xPos, yPos);
 
-			if (enemyTypes.find(enemy[i].name) == enemyTypes.end()) {
+			if (enemyTypes.find(enemy[i].getName()) == enemyTypes.end()) {
 				// this enemy is not in map yet, add it
-				enemyTypes[enemy[i].name] = 1;
+				enemyTypes[enemy[i].getName()] = 1;
 			} else {
 				// enemy already in map, increment count
-				enemyTypes[enemy[i].name]++;
+				enemyTypes[enemy[i].getName()]++;
 			}
 		}
 	}
@@ -374,18 +192,155 @@ void BattleState::render() {
 	}
 }
 
+void BattleState::enemyDecide() {
+	if (enemy[currentSlot].getName() == "0" || 
+			enemy[currentSlot].getAttribute(Enemy::HP) <= 0) {
+		// empty slot or dead enemy, no action next turn
+		enemyLocs[currentSlot] = 0;
+		return;
+	}
+
+	// enemy exists and not dead at this location
+	enemyLocs[currentSlot] = 1;
+
+	// pick random player
+	int target = rand() % CHARACTERSLOTS;
+
+	// while targeted character is dead, choose another
+	while (party->hasStatus(static_cast<Party::Characters>(target), 1)) {
+		target = rand() % CHARACTERSLOTS;
+	}
+
+	// for now just attack randomly chosen character
+	enemy[currentSlot].attack(target + ENEMYSLOTS);
+}
+
+void BattleState::enemyAct() {
+	// enemy attacking
+	Enemy *curEnemy = &enemy[attackSequence[currentSlot]];
+
+	// get enemy turn
+	Entity::Turn turn = curEnemy->getTurn();
+	int attackerHP = curEnemy->HP;
+	if (turn.action == Entity::Actions::NONE || attackerHP <= 0) {
+		// enemy not taking action or dead
+		currentSlot--;
+		return;
+	}
+
+	curEnemy->blink();
+
+	// if target enemy wanted to attack already dead
+	// choose another character to attack at random
+	while (party->getAttribute(static_cast<Party::Characters>(turn.target - ENEMYSLOTS), Character::HP) <= 0) {
+		turn.target = (rand() % CHARACTERSLOTS) + ENEMYSLOTS;
+	}
+
+	// just have enemy hit for 1
+	party->addHP(static_cast<Party::Characters>(turn.target - ENEMYSLOTS), -1);
+
+	// turn executed, reset
+	curEnemy->resetTurn();
+	currentSlot--;
+}
+
+void BattleState::characterDecide() {
+	// character in current slot
+	Party::Characters c = static_cast<Party::Characters>(currentSlot - ENEMYSLOTS);
+
+	// if character dead, move to next slot
+	if (party->hasStatus(c, 1)) {
+		currentSlot++;
+		return;
+	}
+
+	// character turn to decide
+	if (!party->charForward(c)) {
+		party->stepCharForward(c);
+	} else if (!menuState) {
+		// open menu for player
+		menuState = new MenuState();
+		menuState->init(party, stateManager);
+		menuState->pushMenu(new BattleMainMenu(c, enemyLocs));
+	} else {
+		menuState->setInput(input);
+		menuState->updateState();
+
+		if (!menuState->getSize()) {
+			// player done deciding or wanting to go back
+			// TODO check if character turn decidided
+			delete menuState;
+			menuState = 0;
+
+			Character::Turn t = party->getTurn(c);
+			if (input.getCancel()) {
+				// if previous character, move back to it
+				if (currentSlot != ENEMYSLOTS) {
+					currentSlot--;
+				}
+
+				// step character back
+				party->stepCharBackward(c);
+
+				// cancel previous characters turn
+				c = static_cast<Party::Characters>(currentSlot - ENEMYSLOTS);
+				party->resetTurn(c);
+
+				input.resetCancel();
+			} else if (t.action == Character::Actions::NONE) {
+				// player wants to go back a character
+				if (currentSlot > ENEMYSLOTS) {
+					currentSlot--;
+				}	// else already at first character
+			} else {
+				// player turn finished, step back
+				party->stepCharBackward(c);
+				currentSlot++;
+			}
+		}
+	}
+}
+
+void BattleState::characterAct() {
+	// character attacking
+	Party::Characters c = static_cast<Party::Characters>(attackSequence[currentSlot] - ENEMYSLOTS);
+
+	// get characters turn
+	Entity::Turn turn = party->getTurn(c);
+	if (turn.action == Entity::Actions::NONE ||
+			party->getAttribute(c, Character::HP) <= 0) {
+		// character not taking action or dead
+		currentSlot--;
+		return;
+	}
+
+	// if the enemy the character chose to attack already dead
+	// choose another enemy to attack at random
+	while (enemy[turn.target].getName() == "0" || 
+			enemy[turn.target].getAttribute(Enemy::HP) <= 0) {
+		turn.target = rand() % ENEMYSLOTS;
+	}
+
+	// just have character hit for rand num 1-10
+	int damage = rand() % 10 + 1;
+	enemy[turn.target].addHP(-damage);
+
+	// turn executed, reset
+	party->resetTurn(c);
+	currentSlot--;
+}
+
 bool BattleState::battleOver() {
 	int totalExp = 0, totalGil = 0;
 	// check if all enemies dead
 	bool allDead = 1;
 	for (int i = 0; i < ENEMYSLOTS; i++) {
-		if (enemy[i].name != "0" && enemy[i].HP > 0) {
+		if (enemy[i].getName() != "0" && enemy[i].getAttribute(Enemy::HP) > 0) {
 			allDead = 0;
 			break;
-		} else {
-			totalExp += enemy[i].EXP;
-			totalGil += enemy[i].GIL;
 		}
+		totalExp += enemy[i].EXP;
+		totalGil += enemy[i].GIL;
 	}
 	if (allDead) {
 		printf("PARTY WINS\n");
@@ -395,6 +350,7 @@ bool BattleState::battleOver() {
 			if (!party->hasStatus(c, 1)) {
 				aliveCharacters++;
 			}
+			party->resetTurn(c);
 		}
 		totalExp /= aliveCharacters;
 		printf("exp: %d, gil: %d\n", totalExp, totalGil);

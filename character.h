@@ -1,9 +1,10 @@
 #ifndef CHARACTER_H
 #define CHARACTER_H
 
+#include "entity.h"
 #include "textures.h"
 
-class Character {
+class Character : public Entity {
 	public:
 		Character();
 		~Character();
@@ -16,10 +17,6 @@ class Character {
 		enum Jobs {WARRIOR, THIEF, WHITE, BLACK, MONK, RED, 
 				   KNIGHT, NINJA, WHITEW, BLACKW, MASTER, REDW, JOBSCOUNT};
 
-		// character stats
-		enum Stats {LEVEL, EXP, MAGLEVEL, HP, MP, HPMAX, MPMAX, 
-			STR, AGL, INT, STA, LCK, ATK, ACC, DEF, EVA, STATSCOUNT};
-
 		// render at (x, y)
 		void render(int x, int y);
 		void render(Jobs job, int x, int y);
@@ -28,8 +25,6 @@ class Character {
 		void initStats();
 
 		// character name
-		void setName(std::string newName);
-		std::string getName();
 		void setRandomName();
 
 		// character job
@@ -49,10 +44,6 @@ class Character {
 		// get character hp/mp fraction
 		std::string getHPFraction();
 		std::string getMPFraction();
-
-		// heal amount hp/mp, return amount healed
-		int addHP(int amount);
-		int addMP(int amount);
 
 		// check if character has status
 		bool hasStatus(unsigned int status);
@@ -86,25 +77,6 @@ class Character {
 		void setEquip(int slot, int id, int values[4]);
 		void removeEquip(int slot);
 
-		// TODO, enemies and characters both inherit
-		// from parent entity class?
-		// different types of actions entity can perform
-		enum Actions {NONE, ATTACK, SPELL, ITEM, FLEE, COUNT};
-		struct Turn {
-			// action to take
-			Actions action;
-
-			// id of action (spellID/itemID)
-			int actionID;
-
-			// action target
-			int target;
-		};
-	
-		// set/get entity turn	
-		void setTurn(Turn t) { turn = t; }
-		Turn getTurn() { return turn; }
-
 		// in battle step forward/backward
 		// for deciding action/spell casting/using items
 		void stepForward();
@@ -114,8 +86,7 @@ class Character {
 		bool forward();
 		bool stepping() { return step; }
 	private:
-		// character name and job
-		std::string name;
+		// character job
 		Jobs job;
 
 		// 10 random names available for each job
@@ -124,9 +95,6 @@ class Character {
 		// texture ids and count
 		enum TexInfo { CHARBATTLESPRITES, TEXTURECOUNT };
 		Textures textures;
-
-		// character attributes
-		int attributes[STATSCOUNT];
 
 		// increase characters level by one
 		void levelUp();
@@ -148,9 +116,6 @@ class Character {
 
 		// IDs of spells this character knows
 		int spells[8][3];
-
-		// entity's turn
-		Turn turn;
 
 		// ticks since character started taking a step
 		unsigned int step;		// 0 if not walking
