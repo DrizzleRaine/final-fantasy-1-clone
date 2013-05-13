@@ -90,11 +90,13 @@ void BattleState::update() {
 		if (currentSlot < slotToExecute) {
 			// turn was completed, check if battle over
 			if (battleOver()) {
+				stateManager->popState();
 				return;
 			}
 
 			// check if done executing turns
 			if (currentSlot < 0){
+				currentSlot = 0;
 				executingTurns = 0;
 			}
 		}
@@ -149,8 +151,8 @@ void BattleState::render() {
 
 	// draw each enemy
 	for (int i = 0; i < ENEMYSLOTS; i++) {
-		// if enemy exists at location
-		if (enemyLocs[i]) {
+		// if enemy exists at location and is not dead
+		if (enemyLocs[i] && !enemy[i].hasStatus(Entity::Status::KO)) {
 			int xPos = -windowWidth + enemy[i].getSpriteDim() * (i / 3) + 60;
 			int yPos = windowHeight - enemy[i].getSpriteDim() * (i % 3) - 120;
 
@@ -194,7 +196,7 @@ void BattleState::render() {
 
 void BattleState::enemyDecide() {
 	if (enemy[currentSlot].getName() == "0" || 
-			enemy[currentSlot].getAttribute(Enemy::HP) <= 0) {
+			enemy[currentSlot].hasStatus(Entity::Status::KO)) {
 		// empty slot or dead enemy, no action next turn
 		enemyLocs[currentSlot] = 0;
 		return;
@@ -207,7 +209,7 @@ void BattleState::enemyDecide() {
 	int target = rand() % CHARACTERSLOTS;
 
 	// while targeted character is dead, choose another
-	while (party->hasStatus(static_cast<Party::Characters>(target), 1)) {
+	while (party->hasStatus(static_cast<Party::Characters>(target), Entity::Status::KO)) {
 		target = rand() % CHARACTERSLOTS;
 	}
 
@@ -221,27 +223,40 @@ void BattleState::enemyAct() {
 
 	// get enemy turn
 	Entity::Turn turn = curEnemy->getTurn();
-	int attackerHP = curEnemy->HP;
-	if (turn.action == Entity::Actions::NONE || attackerHP <= 0) {
-		// enemy not taking action or dead
+	if (turn.action == Entity::Actions::NONE || 
+			curEnemy->hasStatus(Entity::Status::KO)) {
+		// enemy done taking action or dead
 		currentSlot--;
 		return;
 	}
 
-	curEnemy->blink();
+	// enemy attacks, get damage done
+	int damage = curEnemy->act();
 
-	// if target enemy wanted to attack already dead
-	// choose another character to attack at random
-	while (party->getAttribute(static_cast<Party::Characters>(turn.target - ENEMYSLOTS), Character::HP) <= 0) {
-		turn.target = (rand() % CHARACTERSLOTS) + ENEMYSLOTS;
+	// if attack executed and damage done
+	if (damage) {
+		// while target enemy wanted to attack is dead, choose another at random
+		while (party->hasStatus(static_cast<Party::Characters>(turn.target - ENEMYSLOTS), Entity::Status::KO)) {
+			turn.target = (rand() % CHARACTERSLOTS) + ENEMYSLOTS;
+		}
+
+		// get defending character
+		Party::Characters c = static_cast<Party::Characters>(turn.target - ENEMYSLOTS);
+
+		// subtract characters defense from damage dealt
+		damage -= party->getAttribute(c, Character::DEF);
+
+		// minimum of 1 damage for successful attacks
+		if (damage < 1) {
+			damage = 1;
+		}
+
+		// apply hp damage to player
+		party->addHP(c, -damage);
+
+		// turn executed, reset
+		curEnemy->resetTurn();
 	}
-
-	// just have enemy hit for 1
-	party->addHP(static_cast<Party::Characters>(turn.target - ENEMYSLOTS), -1);
-
-	// turn executed, reset
-	curEnemy->resetTurn();
-	currentSlot--;
 }
 
 void BattleState::characterDecide() {
@@ -249,7 +264,7 @@ void BattleState::characterDecide() {
 	Party::Characters c = static_cast<Party::Characters>(currentSlot - ENEMYSLOTS);
 
 	// if character dead, move to next slot
-	if (party->hasStatus(c, 1)) {
+	if (party->hasStatus(c, Entity::Status::KO)) {
 		currentSlot++;
 		return;
 	}
@@ -268,7 +283,6 @@ void BattleState::characterDecide() {
 
 		if (!menuState->getSize()) {
 			// player done deciding or wanting to go back
-			// TODO check if character turn decidided
 			delete menuState;
 			menuState = 0;
 
@@ -308,26 +322,40 @@ void BattleState::characterAct() {
 	// get characters turn
 	Entity::Turn turn = party->getTurn(c);
 	if (turn.action == Entity::Actions::NONE ||
-			party->getAttribute(c, Character::HP) <= 0) {
-		// character not taking action or dead
+			party->hasStatus(c, Entity::Status::KO)) {
+		// character done taking action or dead
 		currentSlot--;
 		return;
 	}
 
-	// if the enemy the character chose to attack already dead
-	// choose another enemy to attack at random
-	while (enemy[turn.target].getName() == "0" || 
-			enemy[turn.target].getAttribute(Enemy::HP) <= 0) {
-		turn.target = rand() % ENEMYSLOTS;
+	// character attacks, get damage done
+	int damage = party->act(c);
+
+	// if attack executed and damage done
+	if (damage) {
+		// while target character wanted to attack is dead, choose another
+		while (enemy[turn.target].getName() == "0" || 
+				enemy[turn.target].hasStatus(Entity::Status::KO)) {
+			turn.target = rand() % ENEMYSLOTS;
+		}
+
+		// subtract enemy's defense from damage dealt
+		damage -= enemy[turn.target].getAttribute(Enemy::DEF);
+
+		// minimum of 1 damage for successful attacks
+		if (damage < 1) {
+			damage = 1;
+		}
+
+		// apply hp damage to enemy
+		enemy[turn.target].addHP(-damage);
+
+		// step attacking character back
+		party->stepCharBackward(c);
+
+		// turn executed, reset
+		party->resetTurn(c);
 	}
-
-	// just have character hit for rand num 1-10
-	int damage = rand() % 10 + 1;
-	enemy[turn.target].addHP(-damage);
-
-	// turn executed, reset
-	party->resetTurn(c);
-	currentSlot--;
 }
 
 bool BattleState::battleOver() {
@@ -335,7 +363,7 @@ bool BattleState::battleOver() {
 	// check if all enemies dead
 	bool allDead = 1;
 	for (int i = 0; i < ENEMYSLOTS; i++) {
-		if (enemy[i].getName() != "0" && enemy[i].getAttribute(Enemy::HP) > 0) {
+		if (enemy[i].getName() != "0" && !enemy[i].hasStatus(Entity::Status::KO)) {
 			allDead = 0;
 			break;
 		}
@@ -347,7 +375,7 @@ bool BattleState::battleOver() {
 		int aliveCharacters = 0;
 		for (int i = Party::FIRST; i < Party::SIZE; i++) {
 			Party::Characters c = static_cast<Party::Characters>(i);
-			if (!party->hasStatus(c, 1)) {
+			if (!party->hasStatus(c, Entity::Status::KO)) {
 				aliveCharacters++;
 			}
 			party->resetTurn(c);
@@ -356,27 +384,26 @@ bool BattleState::battleOver() {
 		printf("exp: %d, gil: %d\n", totalExp, totalGil);
 		for (int i = Party::FIRST; i < Party::SIZE; i++) {
 			Party::Characters c = static_cast<Party::Characters>(i);
-			if (!party->hasStatus(c, 1)) {
+			if (!party->hasStatus(c, Entity::Status::KO)) {
 				party->addExp(c, totalExp);
 				aliveCharacters++;
 			}
 		}
 		party->addGil(totalGil);
-		stateManager->popState();
 		return 1;
 	}
 
 	// check if all players dead
+	allDead = 1;
 	for (int i = Party::FIRST; i < Party::SIZE; i++) {
 		Party::Characters c = static_cast<Party::Characters>(i);
-		if (!party->hasStatus(c, 1)) {
+		if (!party->hasStatus(c, Entity::Status::KO)) {
 			allDead = 0;
 			break;
 		}
 	}
 	if (allDead) {
 		printf("GAME OVER\n");
-		stateManager->popState();
 		return 1;
 	}
 

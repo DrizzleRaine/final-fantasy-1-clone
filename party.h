@@ -135,6 +135,9 @@ class Party {
 		// set target for character c's turn
 		void setTarget(Characters c, int target);
 
+		// act with character c
+		int act(Characters c);
+
 		// move character forward/backward
 		void stepCharForward(Characters c);
 		void stepCharBackward(Characters c);
@@ -158,7 +161,7 @@ class Party {
 		void swapItems(int pos1, int pos2);
 		void sortItems();
 
-		// get string representing game time, HH:MM
+		/// get string representing game time, HH:MM
 		std::string getTime();
 	private:
 		// characters in the party

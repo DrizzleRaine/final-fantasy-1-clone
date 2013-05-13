@@ -391,6 +391,13 @@ void Party::setTarget(Characters c, int target) {
 	}
 }
 
+int Party::act(Characters c) {
+	if (c >= FIRST && c < SIZE) {
+		return characters[c].act();
+	}
+	return 0;
+}
+
 void Party::stepCharForward(Characters c) {
 	if (c >= FIRST && c < SIZE) {
 		characters[c].stepForward();

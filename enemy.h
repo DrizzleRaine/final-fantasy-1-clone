@@ -17,8 +17,8 @@ class Enemy : public Entity {
 		// render enemy at (x, y)
 		void render(int x, int y);
 
-		// start blinking darker before executing turn
-		void blink();
+		// execute turn, return damage done
+		int act();
 
 		// get enemy attribute
 		int getAttribute(Stats s);
@@ -29,11 +29,8 @@ class Enemy : public Entity {
 		// enemy sprite dimensions
 		int spriteDim;
 
-		// ticks when started blinking
-		unsigned int blinkTicks;
-
-		// is enemy blinking
-		bool blinking();
+		// is enemy animating
+		bool animating();
 
 		// enemy sprite texture
 		Textures textures;

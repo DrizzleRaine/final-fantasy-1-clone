@@ -2,6 +2,7 @@
 #define ENTITY_H
 
 #include <string>
+#include <SDL/SDL.h>
 
 class Entity {
 	public:
@@ -15,6 +16,16 @@ class Entity {
 
 		// set entity attribute
 		void setAttribute(Stats s, int val);
+
+		// status effects
+		enum Status {KO = 1, POISON, DARKNESS, SILENCE, STONE};
+
+		// check if entity has status
+		bool hasStatus(unsigned int status);
+
+		// set/remove status, return true if successful
+		bool setStatus(unsigned int status);
+		bool removeStatus(unsigned int status);
 
 		// heal amount hp/mp , return amount healed
 		int addHP(int amount);
@@ -52,6 +63,12 @@ class Entity {
 	protected:
 		// every entity has attributes
 		int attributes[STATSCOUNT];
+
+		// status effect bits
+		int statusBits;
+
+		// ticks when entity began animating
+		unsigned int animateTicks;
 	private:
 		// entities name
 		std::string name;

@@ -2,7 +2,6 @@
 
 Enemy::Enemy() {
 	spriteDim = 192;
-	blinkTicks = 0;
 }
 
 Enemy::~Enemy() {
@@ -42,9 +41,9 @@ void Enemy::render(int x, int y) {
 		return;	// no enemy to draw
 	}
 
-	if (blinking()) {
+	if (animating()) {
 		// blink enemy darker before attacking
-		int ticksPassed = SDL_GetTicks() - blinkTicks;
+		int ticksPassed = SDL_GetTicks() - animateTicks;
 		if ((ticksPassed / 100) % 2) {
 			glColor3f(0.5f, 0.5f, 0.5f);
 		}
@@ -67,12 +66,22 @@ void Enemy::render(int x, int y) {
 	glColor3f(1.0f, 1.0f, 1.0f);
 }
 
-void Enemy::blink() {
-	blinkTicks = SDL_GetTicks();
+int Enemy::act() {
+	if (animateTicks == 0) {
+		// enemy blinks before attacking
+		animateTicks = SDL_GetTicks();
+	} else if (!animating()) {
+		// done animating
+		animateTicks = 0;
+
+		// return attack damage, rand num from ATK to 2*ATK
+		return (rand() % (attributes[ATK] + 1)) + attributes[ATK];
+	}
+	return 0;
 }
 
-bool Enemy::blinking() {
-	return (SDL_GetTicks() - blinkTicks) < 400;
+bool Enemy::animating() {
+	return (SDL_GetTicks() - animateTicks) < 400;
 }
 
 int Enemy::getAttribute(Stats s) {

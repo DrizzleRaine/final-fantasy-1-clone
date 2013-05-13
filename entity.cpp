@@ -6,7 +6,11 @@ Entity::Entity() {
 		attributes[i] = 0;
 	}
 
+	// no status effects
+	statusBits = 0;
+
 	resetTurn();
+	animateTicks = 0;
 }
 
 Entity::~Entity() {
@@ -16,6 +20,29 @@ void Entity::setAttribute(Stats s, int val) {
 	if (s >= LEVEL && s < STATSCOUNT) {
 		attributes[s] = val;
 	}
+}
+
+bool Entity::hasStatus(unsigned int status) {
+	return (statusBits & (1 << status));
+}
+
+bool Entity::setStatus(unsigned int status) {
+	if (hasStatus(status)) {
+		return 0;	// entity already has status
+	}
+
+	// set status bit
+	statusBits |= 1 << status;
+	return 1;	// status successfully set
+}
+
+bool Entity::removeStatus(unsigned int status) {
+	if (hasStatus(status)) {
+		// clear status bit
+		statusBits &= ~(1 << status);
+		return 1;	// status successfully removed
+	}
+	return 0;	// entity does not have status
 }
 
 int Entity::addHP(int amount) {
@@ -29,6 +56,13 @@ int Entity::addHP(int amount) {
 		// hp fell below 0
 		excess = attributes[HP];
 		attributes[HP] = 0;
+	}
+
+	// update KO status
+	if (attributes[HP] <= 0) {
+		setStatus(KO);
+	} else {
+		removeStatus(KO);
 	}
 
 	// calculate how much hp was added

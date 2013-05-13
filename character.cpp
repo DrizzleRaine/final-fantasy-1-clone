@@ -44,9 +44,6 @@ Character::Character() {
 		}
 	}
 
-	// no status effects
-	statusBits = 0;
-
 	// time to take a step in battle
 	stepDelay = 200.0;
 
@@ -197,13 +194,13 @@ void Character::render(Jobs job, int x, int y) {
 	if (step) {
 		const int stepTime = SDL_GetTicks() - step;
 
-		if (step && stepTime < stepDelay) {
+		if (stepTime < stepDelay) {
 			if (steppedForward) {
 				xStepDistance = -totalDistance + (stepTime / stepDelay) * totalDistance;
 			} else {
 				xStepDistance = -(stepTime / stepDelay) * totalDistance;
 			}
-		} else if (step) {
+		} else {
 			step = 0;
 			if (steppedForward) {
 				steppedForward = 0;
@@ -219,11 +216,15 @@ void Character::render(Jobs job, int x, int y) {
 	// sprite's (x, y) coordinates
 	int spriteX = 1, spriteY;
 
-	// if taking step, animate it
-	if (step && (SDL_GetTicks() - step) < (stepDelay * (1 / 3.0))) {
-		spriteX = 2;
-	} else if (step && (SDL_GetTicks() - step) < (stepDelay * (2 / 3.0))) {
-		spriteX = 3;
+	if (hasStatus(KO)) {
+		spriteX = 9;
+	} else if (step) {
+		// if taking step, animate it
+		if ((SDL_GetTicks() - step) < (stepDelay * (1 / 3.0))) {
+			spriteX = 2;
+		} else if ((SDL_GetTicks() - step) < (stepDelay * (2 / 3.0))) {
+			spriteX = 3;
+		}
 	} else if (getTurn().action != NONE) {
 		spriteX = 4;
 	}
@@ -405,29 +406,6 @@ std::string Character::getFraction(Stats num, Stats denom) {
 	return (cur + '/' + max);
 }
 
-bool Character::hasStatus(unsigned int status) {
-	return (statusBits & (1 << status));
-}
-
-bool Character::setStatus(unsigned int status) {
-	if (statusBits & (1 << status)) {
-		return 0;	// character already has status
-	}
-
-	// set status bit
-	statusBits |= 1 << status;
-	return 1;	// status successfully set
-}
-
-bool Character::removeStatus(unsigned int status) {
-	if (statusBits & (1 << status)) {
-		// clear status bit
-		statusBits &= ~(1 << status);
-		return 1;	// 	status successfully removed
-	}
-	return 0;	// character does not have status
-}
-
 int Character::expToNext() {
 	// experience needed for first 20 levels
 	int expNeeded[] = {0, 14, 42, 98, 196, 350, 574, 882, 1288, 1806, 2450, 3234, 4172, 5278, 6566, 8050, 9744, 11662, 13818, 16226};
@@ -538,4 +516,17 @@ void Character::stepBackward() {
 
 bool Character::forward() {
 	return steppedForward;
+}
+
+int Character::act() {
+	if (!step && !steppedForward) {
+		// step forward before attacking
+		stepForward();
+	} else if (!step) {
+		// TODO animate weapon
+
+		// return attack damage, rand num from ATK to 2*ATK
+		return (rand() % (attributes[ATK] + 1)) + attributes[ATK];
+	}
+	return 0;
 }
