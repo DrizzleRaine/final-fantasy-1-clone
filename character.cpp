@@ -188,6 +188,9 @@ void Character::render(int x, int y) {
 }
 
 void Character::render(Jobs job, int x, int y) {
+	renderx = x;
+	rendery = y;
+
 	// calculate step offset
 	float xStepDistance = 0.0;
 	float totalDistance = 150.0;
@@ -243,15 +246,15 @@ void Character::render(Jobs job, int x, int y) {
 	const float sheetWidth = 624.0;
 	const float sheetHeight = 624.0;
 
-	// width of character on sprite sheet
-	const float spriteWidth = 52;
+	// dimensions of character on sprite sheet
+	spriteDim = 52;
 
 	// find coordinates of desired sprite
 	GLfloat texCoords[4];
-	texCoords[2] = ((spriteX * spriteWidth) / sheetWidth);
-	texCoords[3] = ((spriteY * spriteWidth) / sheetHeight);
-	texCoords[0] = (((spriteX - 1) * spriteWidth) / sheetWidth);
-	texCoords[1] = (((spriteY - 1) * spriteWidth) / sheetHeight);
+	texCoords[2] = ((spriteX * spriteDim) / sheetWidth);
+	texCoords[3] = ((spriteY * spriteDim) / sheetHeight);
+	texCoords[0] = (((spriteX - 1) * spriteDim) / sheetWidth);
+	texCoords[1] = (((spriteY - 1) * spriteDim) / sheetHeight);
 	if (step && steppedForward) {	// reverse the sprite
 		GLfloat temp = texCoords[0];
 		texCoords[0] = texCoords[2];
@@ -259,19 +262,19 @@ void Character::render(Jobs job, int x, int y) {
 	}
 
 	// scaled dimensions char will be displayed as
-	float scaledWidth = 156;
-	float scaledHeight = 156;
+	spriteDim = 156;
 
+	// render character
 	glBindTexture(GL_TEXTURE_2D, textures.getTexture(CHARBATTLESPRITES));
 	glBegin(GL_QUADS);
 		glTexCoord2f(texCoords[0], texCoords[1]);
 		glVertex2f(x + xStepDistance, y);
 		glTexCoord2f(texCoords[0], texCoords[3]);
-		glVertex2f(x + xStepDistance, y - scaledHeight);
+		glVertex2f(x + xStepDistance, y - spriteDim);
 		glTexCoord2f(texCoords[2], texCoords[3]);
-		glVertex2f(x + xStepDistance + scaledWidth, y -scaledHeight);
+		glVertex2f(x + xStepDistance + spriteDim, y - spriteDim);
 		glTexCoord2f(texCoords[2], texCoords[1]);
-		glVertex2f(x + xStepDistance + scaledWidth, y);
+		glVertex2f(x + xStepDistance + spriteDim, y);
 	glEnd();
 }
 

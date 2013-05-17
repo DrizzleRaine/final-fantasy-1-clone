@@ -4,6 +4,8 @@
 #include <string>
 #include <SDL/SDL.h>
 
+#include "font.h"
+
 class Entity {
 	public:
 		Entity();
@@ -31,9 +33,16 @@ class Entity {
 		int addHP(int amount);
 		int addMP(int amount);
 
+		// render most recent hp/mp change
+		void renderHPMPChange();
+		bool renderingHPMPChange() { return textTicks; }
+
 		// set/get entity name
 		void setName(std::string n) { name = n; }
 		std::string getName() const { return name; }
+
+		// get entity sprite dimensions
+		int getSpriteDim() { return spriteDim; }
 
 		// actions entity can take in battle
 		enum Actions {NONE, ATTACK, SPELL, ITEM, FLEE, COUNT};
@@ -69,12 +78,31 @@ class Entity {
 
 		// ticks when entity began animating
 		unsigned int animateTicks;
+
+		// current rendered x, y position
+		int renderx, rendery;
+
+		// entity sprite dimensions
+		int spriteDim;
 	private:
 		// entities name
 		std::string name;
 
+		// twenty point font
+		Font twenty;
+
 		// the entities turn
 		Turn turn;
+
+		// ticks when text was displayed
+		unsigned int textTicks;
+
+		// change in HP/MP to display
+		int change;
+
+		// current color to display text in
+		enum textColors {WHITE, RED, GREEN, BLUE, YELLOW, PURPLE};
+		int textColor;
 };
 
 #endif

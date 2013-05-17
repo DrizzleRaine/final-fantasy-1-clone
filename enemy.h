@@ -22,13 +22,7 @@ class Enemy : public Entity {
 
 		// get enemy attribute
 		int getAttribute(Stats s);
-
-		// get sprite dimensions
-		int getSpriteDim() { return spriteDim; }
 	private:
-		// enemy sprite dimensions
-		int spriteDim;
-
 		// is enemy animating
 		bool animating();
 

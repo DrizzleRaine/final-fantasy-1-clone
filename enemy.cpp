@@ -1,7 +1,6 @@
 #include "enemy.h"
 
 Enemy::Enemy() {
-	spriteDim = 192;
 }
 
 Enemy::~Enemy() {
@@ -34,12 +33,18 @@ void Enemy::init(std::string name) {
 
 	std::string textureNames[] = {"battle_data/sprites/" + name + ".tga"};
 	textures.createTextures(1, textureNames);
+
+	// dimensions of enemy on sprite sheet
+	spriteDim = 192;
 }
 
 void Enemy::render(int x, int y) {
 	if (getName() == "0") {
 		return;	// no enemy to draw
 	}
+
+	renderx = x;
+	rendery = y;
 
 	if (animating()) {
 		// blink enemy darker before attacking

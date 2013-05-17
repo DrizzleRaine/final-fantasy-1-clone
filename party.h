@@ -94,6 +94,10 @@ class Party {
 		int addHP(Characters c, int amount);
 		int addMP(Characters c, int amount);
 
+		// render most recent hp/mp change
+		void renderHPMPChange(Characters c);
+		bool renderingHPMPChange(Characters c);
+
 		// check if character c has given status
 		bool hasStatus(Characters c, unsigned int status);
 

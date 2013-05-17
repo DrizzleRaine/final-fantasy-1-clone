@@ -87,8 +87,9 @@ void BattleState::update() {
 			enemyAct();		// execute enemy turn
 		}
 
+		// if the turn was completed
 		if (currentSlot < slotToExecute) {
-			// turn was completed, check if battle over
+			// check if battle over
 			if (battleOver()) {
 				stateManager->popState();
 				return;
@@ -186,6 +187,15 @@ void BattleState::render() {
 		enemyCounts.append(std::to_string(it->second) + '\n');
 	}
 
+	// render any mp/hp changes for entities
+	for (int i = 0; i < ENEMYSLOTS; i++) {
+		enemy[i].renderHPMPChange();
+	}
+	for (int i = Party::FIRST; i < Party::SIZE; i++) {
+		Party::Characters c = static_cast<Party::Characters>(i);
+		party->renderHPMPChange(c);
+	}
+
 	// render menu for enemy names/count and characters name/hp/mp
 	battleBGMenu->render(windowWidth, windowHeight, party, enemyNames, enemyCounts);
 
@@ -226,7 +236,10 @@ void BattleState::enemyAct() {
 	if (turn.action == Entity::Actions::NONE || 
 			curEnemy->hasStatus(Entity::Status::KO)) {
 		// enemy done taking action or dead
-		currentSlot--;
+		if (!party->renderingHPMPChange(static_cast<Party::Characters>(turn.target - ENEMYSLOTS))) {
+			// if damage has been displayed move to next slot
+			currentSlot--;
+		}
 		return;
 	}
 
@@ -324,7 +337,10 @@ void BattleState::characterAct() {
 	if (turn.action == Entity::Actions::NONE ||
 			party->hasStatus(c, Entity::Status::KO)) {
 		// character done taking action or dead
-		currentSlot--;
+		if (!enemy[turn.target].renderingHPMPChange()) {
+			// if damage has been displayed move to next slot
+			currentSlot--;
+		}
 		return;
 	}
 

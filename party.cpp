@@ -280,6 +280,19 @@ int Party::addMP(Characters c, int amount) {
 	return 0;
 }
 
+void Party::renderHPMPChange(Characters c) {
+	if (c >= FIRST && c < SIZE) {
+		characters[c].renderHPMPChange();
+	}
+}
+
+bool Party::renderingHPMPChange(Characters c) {
+	if (c >= FIRST && c < SIZE) {
+		return characters[c].renderingHPMPChange();
+	}
+	return false;
+}
+
 bool Party::hasStatus(Characters c, unsigned int status) {
 	if (c >= FIRST && c < SIZE) {
 		return characters[c].hasStatus(status);
